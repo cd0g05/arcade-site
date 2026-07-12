@@ -8,5 +8,22 @@
       "created_at": "2026-07-12T22:23:07.577483+00:00"
     }
   },
-  "branches": {}
+  "branches": {
+    "feat/foundation": {
+      "intent": "Scaffold, shared runtime (hub/cartridge, storage, audio, input, loop, screen), styles, sprite pipeline, card/cabinet scaffolds, Vercel deploy config",
+      "modules": [
+        "vercel.json",
+        "src/styles",
+        "scripts",
+        "vite.config.ts",
+        "src/lib",
+        "src/ui",
+        "src/sprites"
+      ],
+      "owner": "unknown",
+      "created_at": "2026-07-12T22:25:45.021746+00:00",
+      "worktree_path": "/Users/cartercripe/dev/code/projects/personal-site/arcade-feat-foundation",
+      "initiative": "arcade-buildout"
+    }
+  }
 }
