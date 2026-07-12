@@ -1,0 +1,8 @@
+/* ============================================================
+   fonts.css — self-hosted woff2 via Fontsource (no Google Fonts
+   request, no base64). Press Start 2P replaces Druk on this
+   subpage (open license); JetBrains Mono carries the UI tier.
+   ============================================================ */
+@import "@fontsource/press-start-2p/400.css";
+@import "@fontsource/jetbrains-mono/400.css";
+@import "@fontsource/jetbrains-mono/700.css";
