@@ -48,7 +48,7 @@ next_section: "## Partition: feat/foundation"
   - [ ] MANUAL (Builder): create/link the Vercel project (static Vite preset) — e.g. `vercel link` + `vercel deploy` from the repo, or import cd0g05/arcade-site in the dashboard
   - [ ] MANUAL (Builder): verify a preview deploy URL serves all 9 pages
   - [ ] MANUAL (Builder): enable Web Analytics on the project in the Vercel dashboard (the script tag is already in place)
-- [ ] Reflect: update specs to match implementation reality; confirm foundation acceptance criteria; request Builder approval to merge feat/foundation → initiative/arcade-buildout <!-- id: 12 -->
+- [x] Reflect: update specs to match implementation reality; confirm foundation acceptance criteria; request Builder approval to merge feat/foundation → initiative/arcade-buildout <!-- id: 12 --> <!-- done: tech-design gained "Foundation Reflect Notes" (toolchain versions, storage validator param, arcade:sound key, .gcard--always-on, touch-action swipe mechanism, recovered sprite maps, additive Hub extras); approach.md partition-1 acceptance criteria annotated (4 verified headlessly, browser/touch/Vercel-preview items await Builder); code review run (1 fix applied: removed passWithNoTests). AWAITING BUILDER: manual browser+touch checklist, Vercel project link/deploy, and approval to merge feat/foundation → initiative/arcade-buildout -->
 
 ## Partition: feat/hub-games
 

@@ -49,11 +49,11 @@ web-ui
 - teardown: `Ctrl+C`
 
 #### Acceptance Criteria
-- [ ] `npm run build` emits a static `dist/` with the hub shell + demo cartridge; `npm run preview` serves it
-- [ ] `tsc --noEmit` and `npm test` pass; storage tests cover fallback-on-corrupt-JSON and `clearAll` scoping to `arcade:*`
-- [ ] Demo cartridge proves the contract: click wakes (LED on, veil off); click-away pauses under veil; Esc pauses; `F`/⛶ toggles CSS fullscreen; arrow keys scroll the page whenever no game is awake
-- [ ] `npm run sprites` regenerates `src/sprites/generated.ts` from an ASCII map; output SVG uses only palette colors and `shape-rendering="crispEdges"`
-- [ ] A Vercel preview URL serves the built site <!-- NEEDS MANUAL REVIEW -->
+- [x] `npm run build` emits a static `dist/` with the hub shell + demo cartridge; `npm run preview` serves it <!-- verified: all 9 pages return 200 via preview + curl; demo JS 5.9 KB gz -->
+- [x] `tsc --noEmit` and `npm test` pass; storage tests cover fallback-on-corrupt-JSON and `clearAll` scoping to `arcade:*` <!-- verified: 21 tests green across storage/loop/input/sprites -->
+- [ ] Demo cartridge proves the contract: click wakes (LED on, veil off); click-away pauses under veil; Esc pauses; `F`/⛶ toggles CSS fullscreen; arrow keys scroll the page whenever no game is awake <!-- implemented as a faithful typed port of the mockup Hub; NEEDS a real-browser pass by the Builder — no browser automation was available to the implementation agent -->
+- [x] `npm run sprites` regenerates `src/sprites/generated.ts` from an ASCII map; output SVG uses only palette colors and `shape-rendering="crispEdges"` <!-- verified: regeneration idempotent; specs assert palette-only fills + crispEdges + generated-in-sync -->
+- [ ] A Vercel preview URL serves the built site <!-- NEEDS MANUAL REVIEW — vercel.json + insights tags committed; CLI unauthenticated, Builder must link/deploy the project -->
 - [ ] Touch smoke test on a real device: tap wakes the demo cartridge, swipe on an awake game does not scroll the page, swipe elsewhere does <!-- NEEDS MANUAL REVIEW -->
 
 #### Implementation Steps

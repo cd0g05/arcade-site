@@ -388,3 +388,19 @@ Beyond that: `console.warn` on storage-shape rejections (helps debugging saves) 
 - Setrit is the largest single game (rotation system, kicks, scoring) — timebox to "standard-feeling," not guideline-perfect; logic.ts tests keep it honest.
 - Touch + `mousedown`-based pause interplay (ghost clicks, scroll-vs-swipe) needs early real-device testing in foundation, not discovered in partition 5.
 - Water Sort solvable-level generation can rabbit-hole; generate-by-reverse-pouring from a solved state is the required approach (guaranteed solvable by construction).
+
+---
+
+## Foundation Reflect Notes (feat/foundation, 2026-07-12)
+
+Implementation reality vs. this design — recorded at partition completion:
+
+- **Toolchain versions**: resolved to Vite 8.x / TypeScript 7.x (native tsc) / Vitest 4.x (doc said "Vite 7.x"; semantics unchanged). `npm run sprites` runs via plain `node` — Node 24's native type stripping — so no ts-runner dependency was added.
+- **No @types/node**: build-time scripts + vite.config type against a minimal ambient shim (`scripts/node-shim.d.ts`) to keep the dev-dependency list exactly vite/typescript/vitest/fontsource.
+- **storage.ts API extension**: `get<T>(key, fallback, validate?)` — optional type-guard third parameter; rejection warns and returns the fallback (implements the "validate shape before adopting" rule centrally). `remove(key)` also exposed.
+- **Sound pref key**: `arcade:sound` per this doc's table; the mockup used `arcade:snd`, so mockup-era sound prefs don't carry (scores/state keys are unaffected).
+- **`.gcard--always-on`**: replaces the mockup's `.gcard[data-game="clicker"]` selector; card.ts/hub.ts apply the class for any `alwaysOn` cartridge (miner in partition 2 gets it for free).
+- **Scroll-vs-swipe mechanism**: decided by CSS `touch-action` (`.gcard.active .screen { touch-action: none }` in arcade.css), not preventDefault — input.ts classifies gestures via a pure, unit-tested `classifySwipe`. Veiled cards scroll naturally because the veil overlays the surface.
+- **Sprite maps**: `build.py` is not in the repo; 4 maps (joystick, token, snake, target) were recovered by decoding the mockup's inline SVG rects — generated output is rect-identical to the mockup. Partitions add sprites by extending `maps.ts` + `npm run sprites`.
+- **Hub extras vs. mockup** (all additive): Enter/Space wakes a focused veiled card, aria-live `[data-status]` announcements on wake/sleep/fullscreen, `Hub.fullscreen` getter, listeners attach lazily on first `register()` (keeps hub.ts importable under node/vitest).
+- **Demo cartridge**: throwaway `/demo/` page (DEMO ROVER) on the cabinet scaffold — slated for removal when a later partition needs the slot; its vite input lives in `vite.config.ts` under `demo`.
