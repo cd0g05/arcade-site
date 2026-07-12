@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Light Film Room — Design System Mockup</title>
+  <style>
+    /* Fonts */
+    @font-face {
+      font-family: "Druk";
+      font-weight: 400;
+      src: url("./fonts/Druk-Medium-Trial.otf") format("opentype");
+    }
+
+    @font-face {
+      font-family: "Druk";
+      font-weight: 700;
+      src: url("./fonts/Druk-Bold-Trial.otf") format("opentype");
+    }
+
+    @font-face {
+      font-family: "Druk";
+      font-weight: 900;
+      src: url("./fonts/Druk-Super-Trial.otf") format("opentype");
+    }
+
+    /* CSS Reset */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    /* Root Styles */
+    html {
+      font-size: 16px;
+    }
+
+    body {
+      font-family: "Helvetica Neue", Arial, sans-serif;
+      color: #18181b;
+      background-color: #ffffff;
+      line-height: 1.6;
+    }
+
+    /* Apply hard corners globally */
+    * {
+      border-radius: 0;
+    }
+
+    /* Utility Classes */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 32px;
+    }
+
+    .grid {
+      display: grid;
+      gap: 24px;
+    }
+
+    .grid-2 {
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    }
+
+    .grid-3 {
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    }
+
+    /* Typography */
+    h1 {
+      font-family: "Druk", "Oswald", sans-serif;
+      font-size: 3rem;
+      font-weight: 900;
+      line-height: 1.1;
+      margin-bottom: 16px;
+      letter-spacing: -0.02em;
+    }
+
+    h2 {
+      font-family: "Druk", "Oswald", sans-serif;
+      font-size: 2rem;
+      font-weight: 700;
+      margin-top: 32px;
+      margin-bottom: 16px;
+      line-height: 1.2;
+    }
+
+    h3 {
+      font-family: "Druk", "Oswald", sans-serif;
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-top: 24px;
+      margin-bottom: 12px;
+    }
+
+    p {
+      margin-bottom: 16px;
+      font-size: 1rem;
+    }
+
+    p.small {
+      font-size: 0.875rem;
+      color: #a1a1aa;
+    }
+
+    a {
+      color: #be185d;
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    a:hover {
+      color: #9d174d;
+      text-decoration: underline;
+    }
+
+    /* Header */
+    header {
+      background-color: #f4f4f5;
+      border-bottom: 1px solid #d4d4d8;
+      padding: 24px 0;
+      margin-bottom: 48px;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 2rem;
+    }
+
+    nav {
+      display: flex;
+      gap: 32px;
+      margin-top: 16px;
+    }
+
+    nav a {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 0.875rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #18181b;
+    }
+
+    nav a:hover {
+      color: #be185d;
+      text-decoration: none;
+    }
+
+    /* Buttons */
+    .button {
+      display: inline-block;
+      padding: 12px 24px;
+      font-family: "JetBrains Mono", monospace;
+      font-size: 0.875rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-decoration: none;
+    }
+
+    .button:focus {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(190, 24, 93, 0.2);
+    }
+
+    .button-primary {
+      background-color: #be185d;
+      color: white;
+    }
+
+    .button-primary:hover {
+      background-color: #9d174d;
+    }
+
+    .button-secondary {
+      background-color: #ffffff;
+      color: #18181b;
+      border: 1px solid #d4d4d8;
+    }
+
+    .button-secondary:hover {
+      background-color: #f4f4f5;
+    }
+
+    .button-small {
+      padding: 8px 16px;
+      font-size: 0.75rem;
+    }
+
+    /* Form Elements */
+    input[type="text"],
+    input[type="email"],
+    input[type="search"],
+    textarea,
+    select {
+      width: 100%;
+      max-width: 100%;
+      padding: 12px 16px;
+      font-family: "Helvetica Neue", Arial, sans-serif;
+      font-size: 1rem;
+      border: 1px solid #d4d4d8;
+      background-color: #ffffff;
+      color: #18181b;
+      transition: all 0.2s;
+    }
+
+    input::placeholder,
+    textarea::placeholder {
+      color: #a1a1aa;
+    }
+
+    input:focus,
+    textarea:focus,
+    select:focus {
+      outline: none;
+      border-color: #be185d;
+      box-shadow: 0 0 0 2px rgba(190, 24, 93, 0.1);
+    }
+
+    /* Pills / Badges */
+    .pill {
+      display: inline-block;
+      padding: 6px 14px;
+      background-color: #f4f4f5;
+      border: 1px solid #d4d4d8;
+      font-family: "JetBrains Mono", monospace;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #18181b;
+      margin-right: 8px;
+      margin-bottom: 8px;
+    }
+
+    .pill-primary {
+      background-color: #be185d;
+      color: white;
+      border-color: #be185d;
+    }
+
+    /* Cards / Panels */
+    .card {
+      background-color: #ffffff;
+      border: 1px solid #d4d4d8;
+      padding: 24px;
+      transition: all 0.2s;
+    }
+
+    .card:hover {
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    .panel {
+      background-color: #f4f4f5;
+      border: none;
+      padding: 24px;
+    }
+
+    .card h3,
+    .panel h3 {
+      margin-top: 0;
+    }
+
+    /* Layout */
+    .sidebar-layout {
+      display: grid;
+      grid-template-columns: 1fr 300px;
+      gap: 32px;
+    }
+
+    @media (max-width: 768px) {
+      .sidebar-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Graph Paper Background */
+    .graph-paper {
+      background-image:
+        linear-gradient(to right, #e4e4e7 1px, transparent 1px),
+        linear-gradient(to bottom, #e4e4e7 1px, transparent 1px);
+      background-size: 2rem 2rem;
+      padding: 32px;
+      min-height: 200px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #a1a1aa;
+    }
+
+    /* Demo Section */
+    .demo-section {
+      margin-bottom: 48px;
+    }
+
+    .demo-row {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    /* Color Swatches */
+    .color-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+    }
+
+    .color-swatch {
+      border: 1px solid #d4d4d8;
+      overflow: hidden;
+    }
+
+    .color-sample {
+      width: 100%;
+      height: 100px;
+    }
+
+    .color-info {
+      padding: 12px;
+      font-family: "JetBrains Mono", monospace;
+      font-size: 0.75rem;
+      background-color: #f4f4f5;
+    }
+
+    .color-name {
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .color-value {
+      color: #a1a1aa;
+    }
+
+    /* Footer */
+    footer {
+      border-top: 1px solid #d4d4d8;
+      margin-top: 64px;
+      padding: 32px 0;
+      background-color: #f4f4f5;
+    }
+
+    footer p {
+      margin: 0;
+      font-size: 0.875rem;
+      color: #a1a1aa;
+    }
+
+    /* Sections */
+    section {
+      margin-bottom: 48px;
+    }
+
+    hr {
+      border: none;
+      border-top: 1px solid #d4d4d8;
+      margin: 48px 0;
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header>
+    <div class="container">
+      <h1>Light Film Room</h1>
+      <p class="small">A clean, grid-based design system for reference materials and knowledge bases.</p>
+      <nav>
+        <a href="#colors">Colors</a>
+        <a href="#typography">Typography</a>
+        <a href="#components">Components</a>
+        <a href="#layouts">Layouts</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="container">
+    <!-- Colors Section -->
+    <section id="colors">
+      <h2>Colors</h2>
+      <p>A minimal palette emphasizing clarity. Strategic accent colors for hierarchy and interaction.</p>
+
+      <h3>Primary Colors</h3>
+      <div class="color-grid">
+        <div class="color-swatch">
+          <div class="color-sample" style="background-color: #ffffff; border: 1px solid #d4d4d8;"></div>
+          <div class="color-info">
+            <div class="color-name">Base</div>
+            <div class="color-value">#ffffff</div>
+          </div>
+        </div>
+        <div class="color-swatch">
+          <div class="color-sample" style="background-color: #f4f4f5;"></div>
+          <div class="color-info">
+            <div class="color-name">Panel</div>
+            <div class="color-value">#f4f4f5</div>
+          </div>
+        </div>
+        <div class="color-swatch">
+          <div class="color-sample" style="background-color: #d4d4d8;"></div>
+          <div class="color-info">
+            <div class="color-name">Border</div>
+            <div class="color-value">#d4d4d8</div>
+          </div>
+        </div>
+      </div>
+
+      <h3>Accent Colors</h3>
+      <div class="color-grid">
+        <div class="color-swatch">
+          <div class="color-sample" style="background-color: #be185d;"></div>
+          <div class="color-info">
+            <div class="color-name">Accent Pink</div>
+            <div class="color-value">#be185d</div>
+          </div>
+        </div>
+        <div class="color-swatch">
+          <div class="color-sample" style="background-color: #9d174d;"></div>
+          <div class="color-info">
+            <div class="color-name">Accent Pink Dark</div>
+            <div class="color-value">#9d174d</div>
+          </div>
+        </div>
+        <div class="color-swatch">
+          <div class="color-sample" style="background-color: #047857;"></div>
+          <div class="color-info">
+            <div class="color-name">Accent Green</div>
+            <div class="color-value">#047857</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <hr>
+
+    <!-- Typography Section -->
+    <section id="typography">
+      <h2>Typography</h2>
+      <p>Three-tier font system: display headings, UI text, and body prose.</p>
+
+      <h3>Heading Font (Druk)</h3>
+      <div class="card">
+        <h1 style="margin: 0;">DRUK DISPLAY</h1>
+        <p class="small">Geometric, bold, commanding presence. Used for page titles and section headers.</p>
+      </div>
+
+      <h3>Monospace Font (JetBrains Mono)</h3>
+      <div class="card">
+        <p style="font-family: 'JetBrains Mono', monospace; font-size: 1.25rem; margin: 0;">NAVIGATION PILLS BUTTONS BADGES</p>
+        <p class="small">Fixed-width technical typeface for UI elements, ensuring perfect alignment.</p>
+      </div>
+
+      <h3>Body Font (Helvetica Neue)</h3>
+      <div class="card">
+        <p>This is body text in Helvetica Neue. A clean, neutral, professional typeface ideal for longer-form content, descriptions, and prose. It maintains excellent readability at all sizes and works beautifully at both display and caption scales.</p>
+      </div>
+
+      <h3>Font Sizes & Weights</h3>
+      <div class="card">
+        <div style="margin-bottom: 16px;">
+          <p style="font-family: 'Druk', sans-serif; font-size: 2.5rem; font-weight: 900; margin: 0;">Display (2.5rem)</p>
+        </div>
+        <div style="margin-bottom: 16px;">
+          <p style="font-family: 'Druk', sans-serif; font-size: 2rem; font-weight: 700; margin: 0;">Heading Large (2rem)</p>
+        </div>
+        <div style="margin-bottom: 16px;">
+          <p style="font-family: 'Druk', sans-serif; font-size: 1.5rem; font-weight: 700; margin: 0;">Heading Medium (1.5rem)</p>
+        </div>
+        <div style="margin-bottom: 16px;">
+          <p style="font-size: 1rem; margin: 0;">Body Large (1rem) — default reading size for all prose</p>
+        </div>
+        <div style="margin-bottom: 16px;">
+          <p style="font-size: 0.875rem; color: #a1a1aa; margin: 0;">Body Small (0.875rem) — captions and secondary info</p>
+        </div>
+        <div>
+          <p style="font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin: 0;">UI LABEL (0.75rem, UPPERCASE)</p>
+        </div>
+      </div>
+    </section>
+
+    <hr>
+
+    <!-- Components Section -->
+    <section id="components">
+      <h2>Components</h2>
+
+      <h3>Buttons</h3>
+      <div class="demo-row">
+        <button class="button button-primary">Primary Button</button>
+        <button class="button button-secondary">Secondary Button</button>
+        <button class="button button-primary button-small">Small Primary</button>
+        <button class="button button-secondary button-small">Small Secondary</button>
+      </div>
+
+      <h3>Form Elements</h3>
+      <div class="card">
+        <form style="max-width: 400px;">
+          <div style="margin-bottom: 24px;">
+            <label for="search" style="display: block; font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px;">Search</label>
+            <input type="search" id="search" placeholder="Enter a search term">
+          </div>
+          <div style="margin-bottom: 24px;">
+            <label for="name" style="display: block; font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px;">Name</label>
+            <input type="text" id="name" placeholder="Your name">
+          </div>
+          <div style="margin-bottom: 24px;">
+            <label for="message" style="display: block; font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px;">Message</label>
+            <textarea id="message" placeholder="Your message" rows="4"></textarea>
+          </div>
+          <button type="submit" class="button button-primary">Submit</button>
+        </form>
+      </div>
+
+      <h3>Pills & Badges</h3>
+      <div class="card">
+        <p>
+          <span class="pill">filter</span>
+          <span class="pill">category</span>
+          <span class="pill">tag</span>
+          <span class="pill-primary">active</span>
+          <span class="pill-primary">selected</span>
+        </p>
+      </div>
+
+      <h3>Cards</h3>
+      <div class="grid grid-3">
+        <div class="card">
+          <h3>Card Title</h3>
+          <p>A standard card with border, padding, and subtle hover effect. Use for grouping related content.</p>
+          <a href="#">Read more →</a>
+        </div>
+        <div class="card">
+          <h3>Another Card</h3>
+          <p>Cards stack nicely in grids and respond to hover with a soft shadow.</p>
+          <a href="#">Learn more →</a>
+        </div>
+        <div class="card">
+          <h3>Card Example</h3>
+          <p>The grid automatically adapts to mobile, stacking cards vertically.</p>
+          <a href="#">View details →</a>
+        </div>
+      </div>
+
+      <h3>Panels</h3>
+      <div class="panel">
+        <h3>Sidebar / Secondary Panel</h3>
+        <p>Panels use a light gray background (#f4f4f5) instead of a border. Great for sidebars, filter regions, and secondary content areas.</p>
+        <ul style="font-size: 0.95rem;">
+          <li><a href="#">Navigation link one</a></li>
+          <li><a href="#">Navigation link two</a></li>
+          <li><a href="#">Navigation link three</a></li>
+        </ul>
+      </div>
+
+      <h3>Graph Paper Background</h3>
+      <div class="graph-paper">
+        Empty State / Placeholder
+      </div>
+    </section>
+
+    <hr>
+
+    <!-- Layouts Section -->
+    <section id="layouts">
+      <h2>Layouts</h2>
+
+      <h3>Sidebar Layout (Content + Navigation)</h3>
+      <div class="sidebar-layout">
+        <div>
+          <h3>Main Content Area</h3>
+          <p>This is the primary content area (left column). It takes up most of the width and contains the main information. The layout uses CSS Grid and automatically stacks on mobile devices below 768px.</p>
+          <p>Here's a second paragraph. On mobile, the sidebar moves below the main content, maintaining readability on all screen sizes.</p>
+        </div>
+        <aside class="panel">
+          <h3>Sidebar</h3>
+          <p style="font-size: 0.9rem;">Secondary navigation, filters, or related links go here.</p>
+          <ul style="font-size: 0.9rem; padding-left: 20px;">
+            <li>Item one</li>
+            <li>Item two</li>
+            <li>Item three</li>
+          </ul>
+        </aside>
+      </div>
+
+      <hr>
+
+      <h3>Two-Column Grid</h3>
+      <div class="grid grid-2">
+        <div class="card">
+          <h3>Left Column</h3>
+          <p>Content goes here. This grid adapts to single column on mobile.</p>
+        </div>
+        <div class="card">
+          <h3>Right Column</h3>
+          <p>More content in a responsive grid layout.</p>
+        </div>
+      </div>
+
+      <hr>
+
+      <h3>Three-Column Grid</h3>
+      <div class="grid grid-3">
+        <div class="card">
+          <h3>Column One</h3>
+          <p>The grid-3 class creates three equal columns that collapse on smaller screens.</p>
+        </div>
+        <div class="card">
+          <h3>Column Two</h3>
+          <p>Perfect for showcasing related items or feature cards.</p>
+        </div>
+        <div class="card">
+          <h3>Column Three</h3>
+          <p>Uses auto-fit to maintain even spacing and responsiveness.</p>
+        </div>
+      </div>
+    </section>
+
+    <hr>
+
+    <!-- Interactive Demo -->
+    <section>
+      <h2>Interactive Elements</h2>
+      <p>Try hovering over and focusing on the elements below to see the interactive states.</p>
+
+      <div class="demo-row">
+        <a href="#" class="button button-primary">Hover me (Link Button)</a>
+        <a href="#" style="color: #be185d;">Hover me (Link)</a>
+      </div>
+
+      <div class="card">
+        <p>Hover over this card to see the subtle shadow effect.</p>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    <div class="container">
+      <p>Light Film Room Design System © 2024. Designed for clarity, precision, and authority.</p>
+      <p style="margin-top: 8px;">Uses Druk (display), JetBrains Mono (UI), and Helvetica Neue (body).</p>
+    </div>
+  </footer>
+
+  <script>
+    // Smooth scrolling for navigation links
+    document.querySelectorAll('a[href^="#"]').forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const target = document.querySelector(link.getAttribute('href'));
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth' });
+        }
+      });
+    });
+
+    // Form demo
+    document.querySelector('form')?.addEventListener('submit', (e) => {
+      e.preventDefault();
+      alert('Form submitted! In a real app, this would send data to a server.');
+    });
+  </script>
+</body>
+</html>
