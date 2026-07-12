@@ -1,0 +1,189 @@
+/* ============================================================
+   arcade.css — the pixel layer: sprites, ticker, game cards,
+   LEDs, veils, scanlines, CSS-takeover fullscreen, cabinets grid,
+   game-surface CSS (dino / 2048 / clicker), cabinet page scaffold.
+   Ported faithfully from the mockup; additions are marked NEW.
+   ============================================================ */
+
+/* ---------- sprites ---------- */
+.spr { image-rendering: pixelated; display: block; }
+
+/* ---------- ticker ---------- */
+.ticker { border-bottom: 1px solid var(--border); background: var(--base); overflow: hidden; }
+.ticker-track {
+  display: inline-flex; white-space: nowrap; padding: 6px 0; will-change: transform;
+  animation: tick 40s linear infinite;
+}
+.half { display: inline-flex; }
+.half span { font-family: var(--font-ui); font-size: .68rem; letter-spacing: .06em; margin-right: 48px; color: var(--ink); }
+.half span i { font-style: normal; color: var(--pink); }
+@keyframes tick { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+
+/* ---------- live game cards ---------- */
+.live-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+.gcard--wide { grid-column: span 2; }
+@media (max-width: 1023px) { .live-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 639px) { .live-grid { grid-template-columns: 1fr; } .gcard--wide { grid-column: span 1; } }
+
+.gcard {
+  background: var(--base); border: 1px solid var(--border); display: flex; flex-direction: column; cursor: pointer;
+  transition: box-shadow .1s steps(2, end), border-color .1s;
+}
+.gcard:hover { border-color: var(--ink); }
+.gcard.active { border-color: var(--ink); box-shadow: var(--shadow-px) var(--ink); cursor: default; }
+.gcard:focus-visible { outline: 2px solid var(--pink); outline-offset: 2px; }
+.gcard--always-on { cursor: default; }
+
+.gcard-head { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-bottom: 1px solid var(--border); }
+.gcard-title { font-family: var(--font-display); font-size: .6rem; margin-right: auto; line-height: 1.6; }
+.led { width: 8px; height: 8px; background: var(--border); flex: none; }
+.gcard.active .led, .gcard--always-on .led { background: var(--green); }
+.gcard.active .led { animation: led 1s steps(2, end) infinite; }
+@keyframes led { 50% { opacity: .35; } }
+.icon-btn {
+  width: 24px; height: 24px; display: grid; place-items: center; background: var(--base);
+  border: 1px solid var(--border); cursor: pointer; color: var(--ink); padding: 0;
+}
+.icon-btn:hover { background: var(--panel); border-color: var(--ink); }
+.icon-btn:focus-visible { outline: 2px solid var(--pink); outline-offset: 1px; }
+
+.gcard-body { position: relative; padding: 12px; flex: 1; display: flex; flex-direction: column; gap: 10px; }
+.gcard-body--center { align-items: center; justify-content: center; }
+.screen { position: relative; border: 1px solid var(--border); background: var(--base); }
+/* scanlines live on game screens ONLY — never on the page shell */
+.screen::after {
+  content: ''; position: absolute; inset: 0; pointer-events: none;
+  background: repeating-linear-gradient(0deg, rgba(24, 24, 27, .055) 0 1px, transparent 1px 3px);
+}
+/* NEW: an awake game's surface owns its touches (swipes must not scroll) */
+.gcard.active .screen { touch-action: none; }
+
+.veil {
+  position: absolute; inset: 0; z-index: 3; background: rgba(244, 244, 245, .9);
+  display: flex; flex-direction: column; gap: 10px; align-items: center; justify-content: center; text-align: center;
+}
+.veil.hidden { display: none; }
+.veil-msg {
+  font-family: var(--font-display); font-size: .6rem; color: var(--ink); line-height: 1.9; padding: 0 12px;
+  animation: blink 1.2s steps(2, end) infinite;
+}
+.veil-sub { font-family: var(--font-ui); font-size: .62rem; color: var(--sub); letter-spacing: .06em; }
+@keyframes blink { 50% { opacity: .25; } }
+
+.gcard-foot {
+  display: flex; align-items: center; gap: 12px; padding: 8px 12px; border-top: 1px solid var(--border);
+  font-family: var(--font-ui); font-size: .7rem; letter-spacing: .05em; flex-wrap: wrap;
+}
+.stat b { color: var(--pink); font-weight: 700; }
+.flash { animation: flashk .6s steps(3, end); }
+@keyframes flashk { 50% { color: var(--green); } }
+
+/* ---------- fullscreen (CSS takeover — NOT the Fullscreen API) ---------- */
+.gcard.fs { position: fixed; inset: 0; z-index: 100; border: none; box-shadow: none; background: var(--base); cursor: default; }
+.gcard.fs .gcard-head { padding: 14px 24px; }
+.gcard.fs .gcard-title { font-size: .85rem; }
+.gcard.fs .gcard-body { align-items: center; justify-content: center; padding: 24px; }
+.gcard.fs .gcard-foot { padding: 14px 24px; font-size: .85rem; }
+body.has-fs { overflow: hidden; }
+.fs-hint { display: none; }
+.gcard.fs .fs-hint {
+  display: block; position: fixed; bottom: 14px; left: 50%; transform: translateX(-50%);
+  font-family: var(--font-ui); font-size: .7rem; color: var(--sub); letter-spacing: .06em;
+}
+
+/* ---------- dino ---------- */
+.dino-screen { width: 100%; }
+#dino-cv { display: block; width: 100%; height: auto; aspect-ratio: 3/1; image-rendering: pixelated; background: var(--base); }
+.gcard.fs .dino-screen { width: min(92vw, 960px); }
+
+/* ---------- 2048 ---------- */
+.b2048-wrap { --cell: 56px; margin: 0 auto; position: relative; }
+.b2048 {
+  display: grid; grid-template-columns: repeat(4, var(--cell)); grid-auto-rows: var(--cell); gap: 6px;
+  padding: 6px; background: var(--panel); border: 1px solid var(--border);
+}
+.gcard.fs .b2048-wrap { --cell: min(18vmin, 104px); }
+.tile {
+  display: grid; place-items: center; background: var(--base); border: 1px solid var(--grid);
+  font-family: var(--font-ui); font-weight: 700; font-size: 1.25rem; color: var(--ink);
+}
+.gcard.fs .tile { font-size: 2rem; }
+.tile[data-l="3"] { font-size: 1rem; }
+.tile[data-l="4"], .tile[data-l="5"] { font-size: .8rem; }
+.gcard.fs .tile[data-l="3"] { font-size: 1.6rem; }
+.gcard.fs .tile[data-l="4"], .gcard.fs .tile[data-l="5"] { font-size: 1.25rem; }
+.tile[data-v="2"] { background: var(--ramp-2); border-color: var(--ramp-4); }
+.tile[data-v="4"] { background: var(--ramp-4); border-color: var(--ramp-8); }
+.tile[data-v="8"] { background: var(--ramp-8); border-color: var(--ramp-16); }
+.tile[data-v="16"] { background: var(--ramp-16); border-color: var(--ramp-32); }
+.tile[data-v="32"] { background: var(--ramp-32); color: #fff; border-color: var(--ramp-32); }
+.tile[data-v="64"] { background: var(--ramp-64); color: #fff; border-color: var(--ramp-64); }
+.tile[data-v="128"] { background: var(--ramp-128); color: #fff; border-color: var(--ramp-128); }
+.tile[data-v="256"] { background: var(--ramp-256); color: #fff; border-color: var(--ramp-256); }
+.tile[data-v="512"] { background: var(--ramp-512); color: #fff; border-color: var(--ramp-512); }
+.tile[data-v="1024"] { background: var(--ramp-1024); color: #fff; border-color: var(--ramp-1024); }
+.tile[data-v="2048"], .tile[data-v="max"] { background: var(--ramp-2048); color: #fff; border-color: var(--ramp-2048); }
+.tile.pop { animation: pop .18s steps(3, end); }
+@keyframes pop { 0% { transform: scale(.6); } 100% { transform: scale(1); } }
+.over {
+  position: absolute; inset: 0; z-index: 2; display: none; background: rgba(255, 255, 255, .9);
+  align-items: center; justify-content: center; flex-direction: column; gap: 12px; cursor: pointer; text-align: center;
+}
+.over.show { display: flex; }
+.over b { font-family: var(--font-display); font-size: .68rem; color: var(--pink); }
+
+/* ---------- clicker (token miner) ---------- */
+.ck { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 4px 0; }
+.ck-count { font-family: var(--font-display); font-size: 1.05rem; }
+.gcard.fs .ck-count { font-size: 2.2rem; }
+.ck-rate { font-family: var(--font-ui); font-size: .62rem; color: var(--sub); letter-spacing: .08em; }
+.ck-token {
+  background: var(--base); border: 1px solid var(--border); box-shadow: 3px 3px 0 var(--ink);
+  cursor: pointer; padding: 12px; transition: transform .05s steps(2, end), box-shadow .05s steps(2, end);
+}
+.ck-token:active { transform: translate(3px, 3px); box-shadow: 0 0 0 var(--ink); }
+.ck-token:focus-visible { outline: 2px solid var(--pink); outline-offset: 2px; }
+.ck-token .spr { width: 56px; height: auto; }
+.gcard.fs .ck-token .spr { width: 120px; }
+.ck-shop { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: center; }
+.ck-toast {
+  font-family: var(--font-ui); font-size: .62rem; color: var(--green); letter-spacing: .05em;
+  opacity: 0; transition: opacity .4s; min-height: 1em;
+}
+.ck-toast.show { opacity: 1; }
+
+/* ---------- cabinets grid ---------- */
+.cab-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(165px, 1fr)); gap: 16px; }
+.cab {
+  display: flex; flex-direction: column; background: var(--base); border: 1px solid var(--border);
+  padding: 16px 14px 12px; text-decoration: none; color: var(--ink);
+  transition: transform .08s steps(2, end), box-shadow .08s steps(2, end), border-color .08s;
+}
+.cab .spr { width: 44px; height: auto; margin-bottom: 12px; }
+.cab-name { font-family: var(--font-display); font-size: .6rem; line-height: 1.8; min-height: 2.2em; margin-bottom: 10px; }
+.cab-meta { display: flex; gap: 6px; flex-wrap: wrap; margin-top: auto; }
+.cab .go {
+  font-family: var(--font-ui); font-size: .65rem; color: var(--pink); font-weight: 700; letter-spacing: .05em;
+  opacity: 0; margin-top: 10px;
+}
+a.cab:hover {
+  transform: translate(-2px, -2px); box-shadow: var(--shadow-px) var(--ink); border-color: var(--ink);
+  text-decoration: none; color: var(--ink);
+}
+a.cab:hover .go { opacity: 1; }
+a.cab:active { transform: translate(0, 0); box-shadow: 2px 2px 0 var(--ink); }
+a.cab:focus-visible { outline: 2px solid var(--pink); outline-offset: 2px; }
+.cab--soon { opacity: .55; cursor: not-allowed; }
+
+/* ---------- cabinet page scaffold (NEW — consumed by src/ui/cabinet.ts) ---------- */
+.cabinet-main { max-width: 900px; margin: 0 auto; }
+.cabinet-main .gcard { cursor: pointer; }
+.cabinet-main .gcard.active { cursor: default; }
+.cabinet-screen-wrap { width: 100%; display: flex; justify-content: center; }
+.back-hub { font-family: var(--font-ui); font-size: .7rem; font-weight: 700; letter-spacing: .06em; }
+.back-hub:focus-visible { outline: 2px solid var(--pink); outline-offset: 2px; }
+
+/* ---------- reduced motion: decorative animation off, game loops exempt ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .ticker-track, .veil-msg, .gcard.active .led, .tile.pop, .flash { animation: none !important; }
+}

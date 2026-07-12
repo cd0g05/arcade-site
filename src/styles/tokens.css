@@ -1,0 +1,41 @@
+/* ============================================================
+   tokens.css — Light Film Room palette + pixel-layer tokens
+   Ported from Arcade Mockup Claude.html / style-guide design.md.
+   Palette hexes are canonical — do not restyle.
+   ============================================================ */
+:root {
+  /* palette — unchanged Light Film Room */
+  --base: #ffffff;
+  --panel: #f4f4f5;
+  --border: #d4d4d8;
+  --grid: #e4e4e7;
+  --ink: #18181b;
+  --sub: #a1a1aa;
+  --pink: #be185d;
+  --pink-dark: #9d174d;
+  --green: #047857;
+
+  /* type tiers — display swapped Druk → Press Start 2P for this subpage */
+  --font-display: 'Press Start 2P', 'Courier New', monospace;
+  --font-ui: 'JetBrains Mono', ui-monospace, Consolas, monospace;
+  --font-body: 'Helvetica Neue', Arial, sans-serif;
+
+  /* pixel moves */
+  --shadow-px: 4px 4px 0;
+
+  /* graph-paper grid cell */
+  --grid-size: 2rem;
+
+  /* 2048 tile ramp — pink 50 → 900, green reserved for the 2048 tile */
+  --ramp-2: #fdf2f8;
+  --ramp-4: #fce7f3;
+  --ramp-8: #fbcfe8;
+  --ramp-16: #f9a8d4;
+  --ramp-32: #f472b6;
+  --ramp-64: #ec4899;
+  --ramp-128: #db2777;
+  --ramp-256: #be185d;
+  --ramp-512: #9d174d;
+  --ramp-1024: #831843;
+  --ramp-2048: #047857;
+}
