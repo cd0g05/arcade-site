@@ -1,0 +1,12 @@
+{
+  "schema_version": "2.0",
+  "initiatives": {
+    "arcade-buildout": {
+      "intent": "Turn the Arcade mockup into the real Carter's Arcade: Vite + vanilla TS static MPA with 12 playable games (6 hub cartridges, 6 cabinets) on the click-to-wake cartridge model, deployed on Vercel at arcade.cartercripe.com",
+      "owner": "unknown",
+      "signals": [],
+      "created_at": "2026-07-12T22:23:07.577483+00:00"
+    }
+  },
+  "branches": {}
+}
