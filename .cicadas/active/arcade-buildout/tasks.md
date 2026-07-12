@@ -32,7 +32,7 @@ next_section: "## Partition: feat/foundation"
 
 ## Partition: feat/foundation
 
-- [ ] Scaffold Vite MPA project: `package.json`, `vite.config.ts` (rollup inputs for hub + 6 cabinet pages + style-guide), strict `tsconfig.json`, Vitest config; remove vestigial `pyproject.toml`; commit lockfile <!-- id: 1 -->
+- [x] Scaffold Vite MPA project: `package.json`, `vite.config.ts` (rollup inputs for hub + 6 cabinet pages + style-guide), strict `tsconfig.json`, Vitest config; remove vestigial `pyproject.toml`; commit lockfile <!-- id: 1 --> <!-- done: also removed vestigial .python-version and replaced the Python-era .gitignore (its `lib/` rule would have ignored src/lib); added demo/index.html MPA input for the task-10 demo cartridge; toolchain resolved to vite 8 / typescript 7 (native tsc) / vitest 4 -->
 - [ ] Port CSS system from mockup + `style-guide copy/design.md`: `tokens.css` (palette, type tiers, graph-paper grid), `base.css` (shell, panels, buttons, pills), `arcade.css` (offset shadows, steps() timing, scanlines, LEDs, veils, .fs takeover), `fonts.css` via Fontsource <!-- id: 2 -->
 - [ ] Build `storage.ts` (arcade: prefix, tolerant get/set/clearAll) with Vitest specs for corrupt-JSON fallback and clearAll scoping <!-- id: 3 -->
 - [ ] Build `audio.ts` (lazy AudioContext, beep(), persisted sound toggle) and `screen.ts` (low-res pixelated canvas setup with DPR handling) <!-- id: 4 -->
