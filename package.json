@@ -1,0 +1,22 @@
+{
+  "name": "arcade",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Carter's Arcade — static multi-page arcade site (Vite + vanilla TypeScript, zero runtime deps)",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "sprites": "node scripts/gen-sprites.ts"
+  },
+  "devDependencies": {
+    "@fontsource/jetbrains-mono": "^5.2.8",
+    "@fontsource/press-start-2p": "^5.2.7",
+    "typescript": "^7.0.2",
+    "vite": "^8.1.4",
+    "vitest": "^4.1.10"
+  }
+}
