@@ -129,10 +129,10 @@ web-ui
 - teardown: `Ctrl+C`
 
 #### Acceptance Criteria
-- [ ] Three cabinet pages at `/games/{minesweeper,water-sort,setrit}/` on the shared scaffold with the standard cabinet behaviors
-- [ ] Logic tests green: Minesweeper (first click never a mine; flood reveal; counts correct), Water Sort (only legal pours; undo restores; generated levels solvable by construction), Setrit (rotation/collision/line-clear/scoring)
-- [ ] Minesweeper: long-press flags on touch; timer runs only while awake; best times per difficulty persist
-- [ ] Setrit: soft + hard drop, next-piece preview, level speed ramp; best persists
+- [x] Three cabinet pages at `/games/{minesweeper,water-sort,setrit}/` on the shared scaffold with the standard cabinet behaviors <!-- verified: preview 200; same cabinet-entry scaffold as P3; LH a11y 100 on minesweeper + water-sort -->
+- [x] Logic tests green: Minesweeper (first click never a mine; flood reveal; counts correct), Water Sort (only legal pours; undo restores; generated levels solvable by construction), Setrit (rotation/collision/line-clear/scoring) <!-- 26 new specs (8 ms incl. 50-seed safety sweep, 8 ws incl. 25-seed replay-solvability, 10 setrit); 85 total green -->
+- [x] Minesweeper: long-press flags on touch; timer runs only while awake; best times per difficulty persist <!-- verified in code (timer interval only lives between start()/stop()); long-press on-device check -> Builder -->
+- [x] Setrit: soft + hard drop, next-piece preview, level speed ramp; best persists <!-- verified in code + gravity/level specs -->
 - [ ] Rotation and clearing feel standard to a Tetris player <!-- NEEDS MANUAL REVIEW -->
 
 #### Implementation Steps
@@ -152,8 +152,8 @@ web-ui
 - teardown: `Ctrl+C`
 
 #### Acceptance Criteria
-- [ ] All six cabinet cards LIVE and linking correctly; zero SOON cards among the six; remaining mockup cards still SOON <!-- DEFERRED: launch ran before the cabinet partitions (Builder-directed, signal 2026-07-12); revisit when cabinets land -->
-- [ ] Scoreboard + ticker include cabinet stats and update from localStorage <!-- DEFERRED with the cabinets; hub stats already live-update (hub-games task 27) -->
+- [x] All six cabinet cards LIVE and linking correctly; zero SOON cards among the six; remaining mockup cards still SOON <!-- completed across the cabinet partitions, finished 2026-07-13 (launch task 70 closed on feat/cabinets-puzzle) -->
+- [x] Scoreboard + ticker include cabinet stats and update from localStorage <!-- SNAKE / MINESWEEPER BEG / SETRIT scoreboard rows (2s refresh) + SNAKE/SETRIT ticker stats; done with the cabinets 2026-07-13 -->
 - [x] `npm run build` output meets the <100 KB gz hub JS budget (documented in the task) <!-- verified: 11.1 kB gz total hub JS (task 73) -->
 - [x] Lighthouse Accessibility ≥ 95 on hub and one cabinet <!-- verified headless: 100 hub, 100 /demo/ (cabinet scaffold — no real cabinet yet), 100 style-guide; re-run on real cabinets when they land -->
 - [ ] Key-routing checklist signed off on 3 desktop browsers + 1 touch device <!-- NEEDS MANUAL REVIEW -->
