@@ -298,3 +298,9 @@ Copy/IA reality vs. this spec — recorded at partition completion:
 - **Simon is now ECHO** everywhere in copy: card title `ECHO`, pill `MEMORY`, scoreboard row `ECHO STREAK`, ticker `ECHO STREAK {n}`, controls legend "Echo pads, Memory cards, Lights Out grid…".
 - **Contrast**: supporting text tone darkened (`--sub` #52525b) and SOON cabinet cards dim their sprite rather than all their text — same visual hierarchy, WCAG AA at small sizes.
 - **Links in fine print are underlined** (reset link, footer) — color alone no longer carries them.
+
+## Cabinets-Action Reflect Notes (feat/cabinets-action, 2026-07-13)
+
+- Cabinet game-over is a veil state: the card sleeps and the veil reads `GAME OVER · SCORE n` / `▶ CLICK TO PLAY AGAIN` (aim: `TIME! n HITS · x% ACC` / `▶ CLICK TO GO AGAIN`); clicking re-wakes into a fresh run. Pause mid-run still reads `PAUSED · CLICK TO RESUME` and preserves state.
+- Snake/Bricks/Aim hub cards are LIVE links (`PLAY ▸` on hover); scoreboard gained a SNAKE row and the ticker a SNAKE BEST stat. Minesweeper stays the lone SOON among rows until the puzzle partition.
+- Bricks shows lives as ■■■ in the stat row; serve is stuck-to-paddle until space/click.

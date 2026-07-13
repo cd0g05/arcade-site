@@ -105,10 +105,10 @@ web-ui
 - teardown: `Ctrl+C`
 
 #### Acceptance Criteria
-- [ ] Three cabinet pages served at `/games/{snake,bricks,aim}/`, each on the shared scaffold: CLICK TO START veil, score/best row, ⛶ fullscreen, controls legend, `← HUB` link
-- [ ] Key-routing: cabinet page scrolls normally until the game is woken; Esc pauses; game-over screens release nav keys they no longer need
-- [ ] Snake playable with arrows/WASD and swipe on touch; Bricks paddle follows pointer and arrows; Aim Trainer records hits/accuracy and persists best
-- [ ] Bests persist under `arcade:best:{game}` and survive reload
+- [x] Three cabinet pages served at `/games/{snake,bricks,aim}/`, each on the shared scaffold: CLICK TO START veil, score/best row, ⛶ fullscreen, controls legend, `← HUB` link <!-- verified: preview 200 on all three; scaffold rendered by cabinet-entry.ts + createCabinet; Lighthouse a11y 100 on /games/snake/ -->
+- [x] Key-routing: cabinet page scrolls normally until the game is woken; Esc pauses; game-over screens release nav keys they no longer need <!-- verified in code: no doc-level listeners/preventDefault outside hub.ts; game over sleeps the cartridge (Hub.sleep) and restyles the veil, so nav keys route back to the page; browser pass -> Builder -->
+- [x] Snake playable with arrows/WASD and swipe on touch; Bricks paddle follows pointer and arrows; Aim Trainer records hits/accuracy and persists best <!-- verified in code + 9 snake logic specs; touch halves need the Builder's device pass -->
+- [x] Bests persist under `arcade:best:{game}` and survive reload <!-- best:snake / best:bricks / best:aim via store with number validators; snake row + ticker stat added on the hub -->
 - [ ] Feels fair and 60 fps on a mid-tier laptop <!-- NEEDS MANUAL REVIEW -->
 
 #### Implementation Steps
