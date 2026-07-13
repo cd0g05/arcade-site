@@ -15,6 +15,7 @@ import type { CabinetDef } from "../games/types";
 const LOADERS: Record<string, () => Promise<{ def: CabinetDef }>> = {
   snake: () => import("../games/snake/snake"),
   bricks: () => import("../games/bricks/bricks"),
+  aim: () => import("../games/aim/aim"),
 };
 
 const root = document.getElementById("app");
