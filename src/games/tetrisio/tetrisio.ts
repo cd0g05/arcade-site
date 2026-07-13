@@ -1,9 +1,9 @@
 /**
- * setrit/setrit.ts — Setrit cabinet cartridge. 10×20 well with ghost
+ * tetrisio/tetrisio.ts — Tetrisio cabinet cartridge. 10×20 well with ghost
  * piece and next preview, soft/hard drop, level speed ramp, 7-bag, touch
  * controls (tap rotate, swipe move/drop), best persisted.
  */
-import "./setrit.css";
+import "./tetrisio.css";
 import type { Cartridge } from "../../lib/cartridge";
 import { Hub } from "../../lib/hub";
 import { createLoop } from "../../lib/loop";
@@ -52,12 +52,9 @@ function mount(card: GameCard): Cartridge {
   const well = document.createElement("div");
   well.className = "st-well";
   const canvas = document.createElement("canvas");
-  canvas.style.width = `${W * 1.4}px`;
-  canvas.style.maxWidth = "48vw";
-  canvas.style.height = "auto";
   canvas.style.aspectRatio = `${W}/${H}`;
   canvas.setAttribute("role", "img");
-  canvas.setAttribute("aria-label", "Setrit well");
+  canvas.setAttribute("aria-label", "Tetrisio well");
   well.appendChild(canvas);
 
   const side = document.createElement("div");
@@ -67,8 +64,6 @@ function mount(card: GameCard): Cartridge {
   const nextBox = document.createElement("div");
   nextBox.className = "st-next";
   const nextCanvas = document.createElement("canvas");
-  nextCanvas.style.width = `${NW * 1.4}px`;
-  nextCanvas.style.height = "auto";
   nextCanvas.style.aspectRatio = "1";
   nextCanvas.setAttribute("aria-hidden", "true");
   nextBox.appendChild(nextCanvas);
@@ -90,7 +85,7 @@ function mount(card: GameCard): Cartridge {
   let nextType: PieceType = bag();
   let score = 0;
   let lines = 0;
-  let best = store.get<number>("best:setrit", 0, isNum);
+  let best = store.get<number>("best:tetrisio", store.get<number>("best:setrit", 0, isNum), isNum);
   let gravAcc = 0;
   let over = false;
   let overTimer: ReturnType<typeof setTimeout> | null = null;
@@ -107,7 +102,7 @@ function mount(card: GameCard): Cartridge {
   function bumpBest(): void {
     if (score > best) {
       best = score;
-      store.set("best:setrit", best);
+      store.set("best:tetrisio", best);
       card.flashStat("BEST");
     }
   }
@@ -119,7 +114,7 @@ function mount(card: GameCard): Cartridge {
     syncStats();
     overTimer = setTimeout(() => {
       overTimer = null;
-      if (Hub.current === "setrit") Hub.sleep();
+      if (Hub.current === "tetrisio") Hub.sleep();
       card.setVeil(`GAME OVER · SCORE ${score}`, "▶ CLICK TO PLAY AGAIN");
     }, 1000);
   }
@@ -255,10 +250,10 @@ function mount(card: GameCard): Cartridge {
 
   gestures(wrap, {
     tap() {
-      if (Hub.current === "setrit" && !over) rotate(1);
+      if (Hub.current === "tetrisio" && !over) rotate(1);
     },
     swipe(dir) {
-      if (Hub.current !== "setrit" || over) return;
+      if (Hub.current !== "tetrisio" || over) return;
       if (dir === "left") shift(-1);
       else if (dir === "right") shift(1);
       else if (dir === "down") hardDrop();
@@ -299,8 +294,8 @@ function mount(card: GameCard): Cartridge {
 
 export const def: CabinetDef = {
   options: {
-    id: "setrit",
-    title: "SETRIT",
+    id: "tetrisio",
+    title: "TETRISIO",
     veilMsg: "▶ CLICK TO START",
     veilSub: "[ARROWS] MOVE · [SPACE] DROP",
     stats: [

@@ -16,7 +16,7 @@ export default defineConfig({
         bricks: page("games/bricks/index.html"),
         aim: page("games/aim/index.html"),
         "water-sort": page("games/water-sort/index.html"),
-        setrit: page("games/setrit/index.html"),
+        tetrisio: page("games/tetrisio/index.html"),
       },
     },
   },
