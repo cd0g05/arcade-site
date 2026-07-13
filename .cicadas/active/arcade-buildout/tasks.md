@@ -88,7 +88,7 @@ next_section: "## Partition: feat/foundation"
 
 ## Partition: feat/cabinets-puzzle
 
-- [ ] Build Minesweeper `logic.ts` (board gen, first-click-safe relocation, flood reveal, win/lose detection) with unit tests <!-- id: 50 -->
+- [x] Build Minesweeper `logic.ts` (board gen, first-click-safe relocation, flood reveal, win/lose detection) with unit tests <!-- id: 50 --> <!-- done: mines placed lazily on FIRST reveal excluding the clicked cell + neighbor halo (falls back to cell-only on dense boards), so relocation is never needed and the opener always floods; iterative BFS flood stopping at numbers and flags; lose reveals all mines, win auto-flags them; toggleFlag with counter; DIFFICULTIES = classic beginner 9x9/10, intermediate 16x16/40, expert 30x16/99. 8 specs (50-seed first-click-safety sweep, adjacency consistency, flood/win/lose/flag) -->
 - [ ] Build Minesweeper cabinet UI (3 difficulties, flags incl. long-press, timer gated on awake state, best times per difficulty) <!-- id: 51 -->
 - [ ] Build Water Sort `logic.ts` (reverse-pour solvable generation, legal-pour validation, undo stack) with unit tests <!-- id: 52 -->
 - [ ] Build Water Sort cabinet UI (tube rendering, pour animation within steps() idiom, level counter) <!-- id: 53 -->

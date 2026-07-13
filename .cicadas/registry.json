@@ -79,6 +79,20 @@
       "owner": "unknown",
       "created_at": "2026-07-13T07:05:16.894350+00:00",
       "initiative": "arcade-buildout"
+    },
+    "feat/cabinets-puzzle": {
+      "intent": "Puzzle cabinets: Minesweeper, Water Sort, Setrit on the shared scaffold (tested logic.ts each); flips their hub cards LIVE (stacked on feat/cabinets-action)",
+      "modules": [
+        "src/games/setrit",
+        "src/games/watersort",
+        "games/setrit",
+        "games/minesweeper",
+        "games/water-sort",
+        "src/games/minesweeper"
+      ],
+      "owner": "unknown",
+      "created_at": "2026-07-13T07:18:09.053829+00:00",
+      "initiative": "arcade-buildout"
     }
   }
 }
