@@ -181,7 +181,8 @@ fillTicker([
   `TOKENS MINED ${fmt(minerTokens())}`,
   `ECHO STREAK ${store.get("best:echo", 0, isNum)}`,
   `SNAKE BEST ${store.get("best:snake", 0, isNum)}`,
-  "13 CABINETS INSTALLED",
+  `SETRIT BEST ${store.get("best:setrit", 0, isNum)}`,
+  "6 CABINETS LIVE · 7 POWERING ON",
   "INSERT COIN FOR GOOD LUCK",
 ]);
 
