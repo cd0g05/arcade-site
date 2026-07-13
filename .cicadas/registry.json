@@ -4,7 +4,18 @@
     "arcade-buildout": {
       "intent": "Turn the Arcade mockup into the real Carter's Arcade: Vite + vanilla TS static MPA with 12 playable games (6 hub cartridges, 6 cabinets) on the click-to-wake cartridge model, deployed on Vercel at arcade.cartercripe.com",
       "owner": "unknown",
-      "signals": [],
+      "signals": [
+        {
+          "timestamp": "2026-07-13T02:22:05.376542+00:00",
+          "message": "SEQUENCING DEVIATION (Builder-directed): feat/launch starts BEFORE the cabinet partitions, branched from feat/hub-games (unmerged). Launch tasks 70 (LIVE flips, cabinet bests) and the cabinet halves of 71 are deferred until feat/cabinets-action + feat/cabinets-puzzle land; a11y/payload/naming/README proceed now. Cabinet partitions must re-run the launch checklist items on their surfaces when they start.",
+          "from_branch": "main"
+        },
+        {
+          "timestamp": "2026-07-13T02:29:45.557072+00:00",
+          "message": "FROZEN-LAYER CHANGES on feat/launch (a11y pass, task 72): tokens.css --sub darkened #a1a1aa \u2192 #52525b (WCAG AA small-text contrast); arcade.css .cab--soon now dims sprite only (was whole-card opacity \u2014 killed pill contrast); base.css underlines links inside .tiny/footer + .panel h2.panel-heading joins the h3 rule; src/ui/cabinet.ts legend heading h3 \u2192 h2.panel-heading, sound button aria-label dropped (visible text is the name). Cabinet partitions inherit these \u2014 no action needed, but re-run Lighthouse on new cabinet pages.",
+          "from_branch": "main"
+        }
+      ],
       "created_at": "2026-07-12T22:23:07.577483+00:00"
     }
   },
@@ -23,6 +34,50 @@
       "owner": "unknown",
       "created_at": "2026-07-12T22:25:45.021746+00:00",
       "worktree_path": "/Users/cartercripe/dev/code/projects/personal-site/arcade-feat-foundation",
+      "initiative": "arcade-buildout"
+    },
+    "feat/hub-games": {
+      "intent": "Full hub page (header, ticker, grids, scoreboard, legend) + six hub cartridges: port Dino Run, 2048, Token Miner; build Simon, Memory, Lights Out; style-guide page",
+      "modules": [
+        "index.html",
+        "src/ui/ticker.ts",
+        "src/ui/scoreboard.ts",
+        "src/games",
+        "src/pages/hub.ts",
+        "style-guide"
+      ],
+      "owner": "unknown",
+      "created_at": "2026-07-13T01:54:58.396875+00:00",
+      "worktree_path": "/Users/cartercripe/dev/code/projects/personal-site/arcade-feat-hub-games",
+      "initiative": "arcade-buildout"
+    },
+    "feat/launch": {
+      "intent": "Launch partition (Builder-rescoped: runs BEFORE cabinets): a11y pass + fixes, payload audit, naming double-check (Simon), README game guide; cabinet-dependent items (LIVE flips, cabinet bests) deferred to post-cabinets; domain cutover + analytics verify remain Builder-manual",
+      "modules": [
+        "index.html",
+        "docs",
+        "README.md",
+        "src/pages",
+        "src/ui"
+      ],
+      "owner": "unknown",
+      "created_at": "2026-07-13T02:21:45.986200+00:00",
+      "worktree_path": "/Users/cartercripe/dev/code/projects/personal-site/arcade-feat-launch",
+      "initiative": "arcade-buildout"
+    },
+    "feat/cabinets-action": {
+      "intent": "Action cabinets: Snake, Bricks, Aim Trainer on the shared cabinet scaffold; owns cabinet-entry.ts; flips their hub cards LIVE (stacked on feat/launch per Builder-directed sequencing)",
+      "modules": [
+        "games/bricks",
+        "src/games/aim",
+        "src/games/snake",
+        "games/snake",
+        "games/aim",
+        "src/pages/cabinet-entry.ts",
+        "src/games/bricks"
+      ],
+      "owner": "unknown",
+      "created_at": "2026-07-13T07:05:16.894350+00:00",
       "initiative": "arcade-buildout"
     }
   }

@@ -196,6 +196,7 @@ const scoreboard = createScoreboard({
   "sb-echo": () => String(store.get("best:echo", 0, isNum)),
   "sb-memory": lowIsBest("best:memory"),
   "sb-lightsout": lowIsBest("best:lightsout"),
+  "sb-snake": lowIsBest("best:snake"),
 });
 scoreboard.refresh();
 setInterval(() => scoreboard.refresh(), 2000);

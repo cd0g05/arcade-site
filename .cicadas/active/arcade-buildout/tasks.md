@@ -78,7 +78,7 @@ next_section: "## Partition: feat/foundation"
 
 ## Partition: feat/cabinets-action
 
-- [ ] Build `cabinet-entry.ts` bootstrapper + Snake cabinet end-to-end (grid movement, arrows/WASD + swipe, speed ramp, best persisted) proving the scaffold <!-- id: 40 -->
+- [x] Build `cabinet-entry.ts` bootstrapper + Snake cabinet end-to-end (grid movement, arrows/WASD + swipe, speed ramp, best persisted) proving the scaffold <!-- id: 40 --> <!-- done: cabinet-entry.ts reads <body data-game>, dynamic-imports the game module (per-game chunk), renders createCabinet + Hub.register — cabinet shells are now 3-line bodies; CabinetDef added to src/games/types.ts. Snake: pure logic.ts (mutating step, injectable rand, tail-vacate rule, GROW_PER_FOOD=2) with 9 specs; 24x16 grid on createLoop, move interval 140ms→70ms ramp per food, arrows/WASD + swipe (gated on Hub.current), best:snake persisted; GAME OVER sleeps the cartridge (releases nav keys) and restyles the veil to '▶ CLICK TO PLAY AGAIN'. Hub card flipped LIVE + sb-snake scoreboard row added -->
 - [ ] Build Bricks cabinet (paddle via pointer + arrows, ball physics, lives, brick layouts, speed-up, best) <!-- id: 41 -->
 - [ ] Build Aim Trainer cabinet (timed target mode, hits/accuracy/best persisted, pointer + touch) <!-- id: 42 -->
 - [ ] Touch + key-routing pass on all three cabinets (veil states, Esc, fullscreen, scroll never stolen while asleep) <!-- id: 43 -->
