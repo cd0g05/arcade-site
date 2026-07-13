@@ -78,11 +78,11 @@ web-ui
 - teardown: `Ctrl+C`
 
 #### Acceptance Criteria
-- [ ] All six hub games playable end-to-end with wake/sleep/veil/fullscreen behavior identical across them; Miner is `alwaysOn` (never veiled, ticks while other games run)
-- [ ] Ported games match mockup behavior: 2048 restores a saved board on reload; Dino best persists; Miner grants capped (≤4 h) offline earnings with a toast
-- [ ] `logic.ts` tests green: 2048 slide/merge/game-over, miner offline math (incl. negative clock delta), Lights Out generated boards always solvable
-- [ ] Key-routing checklist passes on the hub: fresh load scrolls; awake game plays; click-away restores scroll; Simon/Memory/Lights Out (mouse games) never capture arrows
-- [ ] Reset flow clears only `arcade:*` keys after inline YES confirmation; scoreboard zeroes; toast shown
+- [ ] All six hub games playable end-to-end with wake/sleep/veil/fullscreen behavior identical across them; Miner is `alwaysOn` (never veiled, ticks while other games run) <!-- implemented: all six registered through the same card.ts/Hub path; miner alwaysOn (started at registration, no veil); NEEDS a real-browser pass by the Builder -->
+- [x] Ported games match mockup behavior: 2048 restores a saved board on reload; Dino best persists; Miner grants capped (≤4 h) offline earnings with a toast <!-- verified in code + tests: 2048:state restored w/ over-state re-shown; best:dino persisted; applyOffline capped/clamped with 9 specs; toast copy per ux.md -->
+- [x] `logic.ts` tests green: 2048 slide/merge/game-over, miner offline math (incl. negative clock delta), Lights Out generated boards always solvable <!-- verified: 50 tests green (12 g2048, 9 miner, 8 lightsout + foundation 21) -->
+- [ ] Key-routing checklist passes on the hub: fresh load scrolls; awake game plays; click-away restores scroll; Simon/Memory/Lights Out (mouse games) never capture arrows <!-- static audit clean (hub.ts sole document listener/preventDefault owner; mouse games claim zero keys); NEEDS a real-browser pass by the Builder -->
+- [x] Reset flow clears only `arcade:*` keys after inline YES confirmation; scoreboard zeroes; toast shown <!-- verified in code: store.clearAll scoping unit-tested in foundation; inline SURE?/YES/NO per ux; per-game onReset hooks zero cards; SAVE DATA CLEARED note -->
 - [ ] Hub visually matches the mockup side-by-side (spacing, pills, LEDs, veils, ticker) <!-- NEEDS MANUAL REVIEW -->
 
 #### Implementation Steps

@@ -1,0 +1,42 @@
+/* simon.css — pad grid for the Simon cartridge (game-owned styles). */
+.simon {
+  display: grid;
+  grid-template-columns: repeat(2, 72px);
+  grid-auto-rows: 72px;
+  gap: 8px;
+  padding: 8px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+}
+.gcard.fs .simon {
+  grid-template-columns: repeat(2, min(24vmin, 160px));
+  grid-auto-rows: min(24vmin, 160px);
+}
+.simon-pad {
+  border: 1px solid var(--grid);
+  padding: 0;
+  cursor: pointer;
+  opacity: 0.4;
+  transition: opacity 0.08s steps(2, end), box-shadow 0.08s steps(2, end);
+}
+.simon-pad.lit {
+  opacity: 1;
+  box-shadow: 3px 3px 0 var(--ink);
+}
+.simon-pad:focus-visible {
+  outline: 2px solid var(--pink);
+  outline-offset: 2px;
+}
+.simon-status {
+  font-family: var(--font-ui);
+  font-size: 0.62rem;
+  color: var(--sub);
+  letter-spacing: 0.06em;
+  text-align: center;
+  min-height: 1em;
+}
+@media (prefers-reduced-motion: reduce) {
+  .simon-pad {
+    transition: none;
+  }
+}

@@ -404,3 +404,20 @@ Implementation reality vs. this design — recorded at partition completion:
 - **Sprite maps**: `build.py` is not in the repo; 4 maps (joystick, token, snake, target) were recovered by decoding the mockup's inline SVG rects — generated output is rect-identical to the mockup. Partitions add sprites by extending `maps.ts` + `npm run sprites`.
 - **Hub extras vs. mockup** (all additive): Enter/Space wakes a focused veiled card, aria-live `[data-status]` announcements on wake/sleep/fullscreen, `Hub.fullscreen` getter, listeners attach lazily on first `register()` (keeps hub.ts importable under node/vitest).
 - **Demo cartridge**: throwaway `/demo/` page (DEMO ROVER) on the cabinet scaffold — slated for removal when a later partition needs the slot; its vite input lives in `vite.config.ts` under `demo`.
+
+---
+
+## Hub-Games Reflect Notes (feat/hub-games, 2026-07-12)
+
+Implementation reality vs. this design — recorded at partition completion:
+
+- **New storage keys** (all tolerant reads with validators): `arcade:best:simon` (streak, higher wins), `arcade:best:memory` and `arcade:best:lightsout` (fewest moves, lower wins — `0` is the "unset" sentinel, rendered as `—`). `arcade:miner:state {tokens, miners, last}` adopted exactly per this doc; the mockup's `arcade:clicker {c,m,t}` shape is rejected by the validator and falls back fresh (no migration, per the no-legacy-data call in Foundation notes).
+- **Game-owned CSS**: `src/styles` is frozen, so the three new games ship their own scoped stylesheets (`src/games/{simon,memory,lightsout}/*.css`, imported by their modules). Palette/token usage only — no new global classes.
+- **New shared modules in owned dirs**: `src/ui/ticker.ts` (fills the two ticker halves), `src/ui/scoreboard.ts` (generic `{cellId → reader}` refresher; hub page supplies readers and a 2 s interval), `src/games/format.ts` (`pad`/`fmt` readouts), `src/games/types.ts` (`MountedGame = { api: Cartridge; onReset() }` — the reset-flow hook every hub game implements).
+- **Sprite pipeline additions** (additive to `src/sprites/maps.ts`): `tube`, `bricks`, `invader` decoded from the mockup's inline SVGs; `setrit` drawn fresh (mockup had no Setrit icon). Memory uses all 8 sprites as its pair faces; the hub's cabinet grid and `/style-guide` sprite sheet render from `generated.ts`.
+- **Hub page architecture**: static structure (header, ticker shell, cabinets grid, panels, footer) lives in `index.html` for mockup parity; the six game cards are built at runtime by `card.ts` into `#live-grid` (single source of card DOM). Cabinet cards: 13 total, ALL `SOON` until the launch partition flips the roster six (mockup's Sudoku card kept as flavor with its DAILY pill).
+- **Wake-click gating**: mouse games (Simon, Memory, Lights Out) ignore pointer input until `start()` has run, so the click that wakes a card never counts as a move. Dino gates its canvas-jump on `Hub.current === "dino"`; 2048 gates swipes the same way.
+- **Turn-based games skip the loop** as designed — only Dino uses `createLoop` (fixed 60 Hz; mockup's per-frame speeds now correct on 120 Hz displays).
+- **Simon resume semantics**: `stop()` clears playback timers and keeps the sequence; `start()` re-shows the in-progress round from the top (state-preserving, no lost streak).
+- **Known deferral to launch a11y pass (task 72)**: interactive elements behind a veil (pads/cells/NEW GAME) remain keyboard-focusable while the card is asleep; input is gated but focus order should skip veiled controls — fix belongs to the launch partition.
+- **Payload**: hub entry 17.5 kB JS (6.6 kB gz) — well under the 100 kB gz budget.
