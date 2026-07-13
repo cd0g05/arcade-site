@@ -137,6 +137,7 @@ export function mountEcho(card: GameCard): MountedGame {
   }
 
   padEls.forEach((el, i) => el.addEventListener("click", () => onPad(i)));
+  grid.inert = true; // asleep: pads unfocusable behind the veil
   refreshStats();
   status.textContent = "CLICK A PAD TO START";
 
@@ -145,6 +146,7 @@ export function mountEcho(card: GameCard): MountedGame {
       // no keys — mouse/touch game; arrows keep scrolling the page
       start() {
         awake = true;
+        grid.inert = false;
         if (seq.length) {
           playback(); // resume: re-show the current round
         } else {
@@ -154,6 +156,7 @@ export function mountEcho(card: GameCard): MountedGame {
       },
       stop() {
         awake = false;
+        grid.inert = true;
         clearTimers();
         padEls.forEach((el) => el.classList.remove("lit"));
         if (phase === "show" || phase === "await") phase = "await"; // sequence kept for resume

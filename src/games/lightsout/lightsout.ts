@@ -82,15 +82,18 @@ export function mountLightsOut(card: GameCard): MountedGame {
   }
 
   deal();
+  grid.inert = true; // asleep: cells unfocusable behind the veil
 
   return {
     api: {
       // no keys — mouse/touch game
       start() {
         awake = true;
+        grid.inert = false;
       },
       stop() {
-        awake = false; // board + moves persist in memory for resume
+        awake = false;
+        grid.inert = true; // board + moves persist in memory for resume
       },
     },
     onReset() {

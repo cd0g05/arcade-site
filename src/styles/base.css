@@ -75,7 +75,7 @@ h1.site { font-family: var(--font-display); font-size: 1.35rem; line-height: 1.2
 .split { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 @media (max-width: 767px) { .split { grid-template-columns: 1fr; } }
 .panel { background: var(--panel); padding: 20px 24px; border: none; }
-.panel h3, .card h3 { font-family: var(--font-display); font-size: .62rem; font-weight: 400; margin-bottom: 14px; line-height: 1.8; }
+.panel h2.panel-heading, .panel h3, .card h3 { font-family: var(--font-display); font-size: .62rem; font-weight: 400; margin-bottom: 14px; line-height: 1.8; }
 table.scores { width: 100%; border-collapse: collapse; font-family: var(--font-ui); font-size: .72rem; }
 .scores td, .scores th { padding: 7px 4px; border-bottom: 1px solid var(--border); text-align: left; letter-spacing: .04em; }
 .scores th { font-size: .62rem; color: var(--sub); text-transform: uppercase; }
@@ -100,6 +100,7 @@ kbd {
 .spr-sheet { display: flex; gap: 14px; flex-wrap: wrap; align-items: flex-end; }
 .spr-sheet .spr { width: 32px; height: auto; }
 .tiny { font-family: var(--font-ui); font-size: .65rem; color: var(--sub); margin-top: 10px; line-height: 1.9; letter-spacing: .03em; }
+.tiny a, footer a { text-decoration: underline; } /* a11y: links in text blocks can't rely on color alone */
 
 /* ---------- footer ---------- */
 footer {
