@@ -1,13 +1,13 @@
 /**
- * simon.ts — Simon cartridge (new build; no mockup counterpart).
+ * echo.ts — ECHO cartridge (pattern-echo pads) (new build; no mockup counterpart).
  *
  * Pattern-echo memory game: a growing pad sequence plays back with a
  * distinct tone + flash per pad; the player echoes it by clicking/tapping.
  * Mouse-only — claims no keys, so arrows always scroll while it's awake.
- * Best streak persists (`arcade:best:simon`). stop() freezes playback
+ * Best streak persists (`arcade:best:echo`). stop() freezes playback
  * timers; start() re-shows the in-progress sequence from the top.
  */
-import "./simon.css";
+import "./echo.css";
 import type { GameCard } from "../../ui/card";
 import type { MountedGame } from "../types";
 import { store } from "../../lib/storage";
@@ -26,25 +26,25 @@ const ROUND_PAUSE_MS = 650;
 
 type Phase = "idle" | "show" | "await" | "over";
 
-export function mountSimon(card: GameCard): MountedGame {
+export function mountEcho(card: GameCard): MountedGame {
   const grid = document.createElement("div");
-  grid.className = "simon";
+  grid.className = "echo";
   const padEls: HTMLButtonElement[] = [];
   PADS.forEach((pad, i) => {
     const b = document.createElement("button");
-    b.className = "simon-pad";
+    b.className = "echo-pad";
     b.type = "button";
     b.style.background = pad.color;
-    b.setAttribute("aria-label", `Simon pad ${i + 1}`);
+    b.setAttribute("aria-label", `Echo pad ${i + 1}`);
     grid.appendChild(b);
     padEls.push(b);
   });
   const status = document.createElement("div");
-  status.className = "simon-status";
+  status.className = "echo-status";
   card.body.insertBefore(grid, card.veil);
   card.body.insertBefore(status, card.veil);
 
-  let best = store.get<number>("best:simon", 0, (v): v is number => typeof v === "number");
+  let best = store.get<number>("best:echo", 0, (v): v is number => typeof v === "number");
   let seq: number[] = [];
   let pos = 0; // input progress within seq
   let streak = 0; // completed rounds this game
@@ -102,7 +102,7 @@ export function mountSimon(card: GameCard): MountedGame {
     later(() => padEls.forEach((el) => el.classList.remove("lit")), 420);
     if (streak > best) {
       best = streak;
-      store.set("best:simon", best);
+      store.set("best:echo", best);
       card.flashStat("BEST");
     }
     status.textContent = `WRONG! STREAK ${streak} · CLICK A PAD TO RETRY`;

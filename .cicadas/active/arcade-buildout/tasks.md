@@ -101,7 +101,8 @@ next_section: "## Partition: feat/foundation"
 - [ ] Full key-routing checklist on Chrome, Firefox, Safari + one touch device; fix findings <!-- id: 71 -->
 - [ ] Accessibility pass: focus order, Enter/Space wake on focused cards, aria-labels, aria-live veil announcements, reduced-motion audit; Lighthouse a11y ≥ 95 on hub + one cabinet <!-- id: 72 -->
 - [ ] Payload audit: hub JS < 100 KB gz (record numbers in this task); font preload check <!-- id: 73 -->
-- [ ] Naming double-check per resolved PRD policy (normal names unless protected — verify Simon; Setrit/Bricks stay renamed); README game-addition guide <!-- id: 74 -->
+- [x] Naming double-check per resolved PRD policy (normal names unless protected — verify Simon; Setrit/Bricks stay renamed); README game-addition guide <!-- id: 74 --> <!-- done: SIMON verified as a LIVE Hasbro mark (US Reg. 1211692, electronic memory game — exactly our category) → renamed to ECHO per the Setrit doctrine (module src/games/echo, id "echo", storage key best:echo, scoreboard/ticker/legend copy; no save migration — nothing deployed yet). Other roster names stay per policy. README.md written: commands, cartridge contract + key-routing invariant, 7-step add-a-game guide, naming doctrine, style system -->
+
 - [ ] Point `arcade.cartercripe.com` at the Vercel project, production smoke test, confirm Vercel Web Analytics records page views <!-- id: 75 -->
 - [ ] Reflect: update specs; confirm launch acceptance criteria; request Builder approval to merge feat/launch → initiative/arcade-buildout <!-- id: 76 -->
 
