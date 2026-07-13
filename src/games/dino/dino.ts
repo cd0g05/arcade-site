@@ -30,6 +30,8 @@ export function mountDino(card: GameCard): MountedGame {
   wrap.className = "screen dino-screen";
   const canvas = document.createElement("canvas");
   canvas.id = "dino-cv";
+  canvas.setAttribute("role", "img");
+  canvas.setAttribute("aria-label", "Dino Run game screen");
   wrap.appendChild(canvas);
   card.body.insertBefore(wrap, card.veil);
 

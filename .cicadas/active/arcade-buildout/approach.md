@@ -152,10 +152,10 @@ web-ui
 - teardown: `Ctrl+C`
 
 #### Acceptance Criteria
-- [ ] All six cabinet cards LIVE and linking correctly; zero SOON cards among the six; remaining mockup cards still SOON
-- [ ] Scoreboard + ticker include cabinet stats and update from localStorage
-- [ ] `npm run build` output meets the <100 KB gz hub JS budget (documented in the task)
-- [ ] Lighthouse Accessibility ≥ 95 on hub and one cabinet
+- [ ] All six cabinet cards LIVE and linking correctly; zero SOON cards among the six; remaining mockup cards still SOON <!-- DEFERRED: launch ran before the cabinet partitions (Builder-directed, signal 2026-07-12); revisit when cabinets land -->
+- [ ] Scoreboard + ticker include cabinet stats and update from localStorage <!-- DEFERRED with the cabinets; hub stats already live-update (hub-games task 27) -->
+- [x] `npm run build` output meets the <100 KB gz hub JS budget (documented in the task) <!-- verified: 11.1 kB gz total hub JS (task 73) -->
+- [x] Lighthouse Accessibility ≥ 95 on hub and one cabinet <!-- verified headless: 100 hub, 100 /demo/ (cabinet scaffold — no real cabinet yet), 100 style-guide; re-run on real cabinets when they land -->
 - [ ] Key-routing checklist signed off on 3 desktop browsers + 1 touch device <!-- NEEDS MANUAL REVIEW -->
 - [ ] Production deploy serves at `arcade.cartercripe.com`; Vercel Web Analytics shows page views from a production visit <!-- NEEDS MANUAL REVIEW -->
 

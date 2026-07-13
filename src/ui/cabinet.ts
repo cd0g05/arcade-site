@@ -61,7 +61,6 @@ export function createCabinet(root: HTMLElement, opts: CabinetOptions): CabinetP
   const renderSnd = (): void => {
     sndBtn.textContent = `SND:${soundEnabled() ? "ON" : "OFF"}`;
   };
-  sndBtn.setAttribute("aria-label", "Toggle sound");
   sndBtn.addEventListener("click", () => {
     if (toggleSound()) beep(880, 0.06);
     renderSnd();
@@ -98,9 +97,10 @@ export function createCabinet(root: HTMLElement, opts: CabinetOptions): CabinetP
     legendSec.className = "sec";
     const panel = document.createElement("div");
     panel.className = "panel";
-    const h3 = document.createElement("h3");
-    h3.textContent = "CONTROLS";
-    panel.appendChild(h3);
+    const h2 = document.createElement("h2");
+    h2.className = "panel-heading";
+    h2.textContent = "CONTROLS";
+    panel.appendChild(h2);
     for (const row of opts.legend) {
       const div = document.createElement("div");
       div.className = "help-row";

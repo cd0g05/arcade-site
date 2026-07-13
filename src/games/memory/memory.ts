@@ -138,15 +138,18 @@ export function mountMemory(card: GameCard): MountedGame {
   }
 
   deal();
+  grid.inert = true; // asleep: cards unfocusable behind the veil
 
   return {
     api: {
       // no keys — mouse/touch game
       start() {
         awake = true;
+        grid.inert = false;
       },
       stop() {
         awake = false;
+        grid.inert = true;
         settleMismatch(); // no timers may outlive sleep; board stays as-is
       },
     },

@@ -19,7 +19,7 @@ import { mountDino } from "../games/dino/dino";
 import { mountG2048 } from "../games/g2048/g2048";
 import { mountMiner } from "../games/miner/miner";
 import { freshState, isMinerState } from "../games/miner/logic";
-import { mountSimon } from "../games/simon/simon";
+import { mountEcho } from "../games/echo/echo";
 import { mountMemory } from "../games/memory/memory";
 import { mountLightsOut } from "../games/lightsout/lightsout";
 
@@ -123,8 +123,8 @@ addGame(
 
 addGame(
   {
-    id: "simon",
-    title: "SIMON",
+    id: "echo",
+    title: "ECHO",
     centerBody: true,
     veilMsg: "▶ CLICK TO WAKE",
     veilSub: "ECHO THE PATTERN · CLICK OR TAP",
@@ -133,9 +133,9 @@ addGame(
       { label: "BEST", value: "0" },
     ],
     pill: "MEMORY",
-    ariaLabel: "Simon — click to play",
+    ariaLabel: "Echo — click to play",
   },
-  mountSimon,
+  mountEcho,
 );
 
 addGame(
@@ -179,7 +179,7 @@ fillTicker([
   `DINO BEST ${pad(store.get("best:dino", 0, isNum))}`,
   `2048 BEST ${store.get("best:2048", 0, isNum)}`,
   `TOKENS MINED ${fmt(minerTokens())}`,
-  `SIMON STREAK ${store.get("best:simon", 0, isNum)}`,
+  `ECHO STREAK ${store.get("best:echo", 0, isNum)}`,
   "13 CABINETS INSTALLED",
   "INSERT COIN FOR GOOD LUCK",
 ]);
@@ -193,7 +193,7 @@ const scoreboard = createScoreboard({
   "sb-dino": () => pad(store.get("best:dino", 0, isNum)),
   "sb-2048": () => String(store.get("best:2048", 0, isNum)),
   "sb-tokens": () => fmt(minerTokens()),
-  "sb-simon": () => String(store.get("best:simon", 0, isNum)),
+  "sb-echo": () => String(store.get("best:echo", 0, isNum)),
   "sb-memory": lowIsBest("best:memory"),
   "sb-lightsout": lowIsBest("best:lightsout"),
 });
