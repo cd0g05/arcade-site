@@ -181,7 +181,8 @@ fillTicker([
   `TOKENS MINED ${fmt(minerTokens())}`,
   `ECHO STREAK ${store.get("best:echo", 0, isNum)}`,
   `SNAKE BEST ${store.get("best:snake", 0, isNum)}`,
-  "13 CABINETS INSTALLED",
+  `SETRIT BEST ${store.get("best:setrit", 0, isNum)}`,
+  "6 CABINETS LIVE · 7 POWERING ON",
   "INSERT COIN FOR GOOD LUCK",
 ]);
 
@@ -198,6 +199,12 @@ const scoreboard = createScoreboard({
   "sb-memory": lowIsBest("best:memory"),
   "sb-lightsout": lowIsBest("best:lightsout"),
   "sb-snake": lowIsBest("best:snake"),
+  "sb-setrit": lowIsBest("best:setrit"),
+  "sb-mines": () => {
+    const t = store.get<Record<string, unknown>>("minesweeper:times", {}, (v): v is Record<string, unknown> => typeof v === "object" && v !== null);
+    const b = t["beginner"];
+    return typeof b === "number" ? `${b}s` : "—";
+  },
 });
 scoreboard.refresh();
 setInterval(() => scoreboard.refresh(), 2000);

@@ -304,3 +304,10 @@ Copy/IA reality vs. this spec — recorded at partition completion:
 - Cabinet game-over is a veil state: the card sleeps and the veil reads `GAME OVER · SCORE n` / `▶ CLICK TO PLAY AGAIN` (aim: `TIME! n HITS · x% ACC` / `▶ CLICK TO GO AGAIN`); clicking re-wakes into a fresh run. Pause mid-run still reads `PAUSED · CLICK TO RESUME` and preserves state.
 - Snake/Bricks/Aim hub cards are LIVE links (`PLAY ▸` on hover); scoreboard gained a SNAKE row and the ticker a SNAKE BEST stat. Minesweeper stays the lone SOON among rows until the puzzle partition.
 - Bricks shows lives as ■■■ in the stat row; serve is stuck-to-paddle until space/click.
+
+## Cabinets-Puzzle Reflect Notes (feat/cabinets-puzzle, 2026-07-13)
+
+- All six roster cabinet cards are now LIVE links; the cabinets sec-label reads "SIX LIVE, MORE SOON"; ticker says "6 CABINETS LIVE · 7 POWERING ON" with SNAKE/SETRIT best stats; scoreboard gained SNAKE, MINESWEEPER BEG (best beginner seconds), SETRIT rows.
+- Minesweeper difficulty pills (BEG/INT/EXP) live in the card foot; expert scrolls horizontally inside the card. Flags: right-click on desktop, long-press on touch (trailing tap suppressed).
+- Water Sort selection = tube lift (translate + offset shadow, steps() easing); UNDO counts as a move; RESTART re-deals the same level; level counter survives everything (localStorage).
+- Puzzle cabinets sleep into result veils like the action ones ("CLEARED IN 34s" / "BOOM" / "LEVEL n SORTED" / "GAME OVER · SCORE n").
