@@ -5,21 +5,166 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>CARTER'S ARCADE</title>
 <meta name="description" content="Carter's Arcade — handmade pixel games. No engines.">
-<script type="module" src="/src/pages/placeholder.ts"></script>
+<script type="module" src="/src/pages/hub.ts"></script>
 <script defer src="/_vercel/insights/script.js"></script>
 </head>
 <body>
+
+<header class="top" id="top">
+  <div class="container top-inner">
+    <div class="logo">
+      <svg class="spr" viewBox="0 0 10 11" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges" aria-hidden="true"><rect x="3" y="0" width="2" height="1" fill="#be185d"/><rect x="2" y="1" width="4" height="1" fill="#be185d"/><rect x="2" y="2" width="4" height="1" fill="#be185d"/><rect x="3" y="3" width="2" height="1" fill="#be185d"/><rect x="4" y="4" width="1" height="1" fill="#18181b"/><rect x="4" y="5" width="1" height="1" fill="#18181b"/><rect x="4" y="6" width="1" height="1" fill="#18181b"/><rect x="2" y="7" width="5" height="1" fill="#18181b"/><rect x="1" y="8" width="7" height="1" fill="#18181b"/><rect x="0" y="9" width="9" height="1" fill="#18181b"/><rect x="0" y="10" width="9" height="1" fill="#18181b"/></svg>
+      <div>
+        <h1 class="site">CARTER'S ARCADE</h1>
+        <div class="site-sub">arcade.cartercripe.com · est. 2026 · no engines</div>
+      </div>
+    </div>
+    <div class="top-ctrl">
+      <button class="button button-secondary" id="snd-btn" type="button">SND:ON</button>
+      <span class="pill" id="cr-pill">CREDITS <b id="credits">00</b></span>
+      <button class="button button-primary" id="coin-btn" type="button">◉ INSERT COIN</button>
+    </div>
+  </div>
+</header>
+
+<div class="ticker" aria-hidden="true">
+  <div class="ticker-track">
+    <span class="half" id="tick-a"></span>
+    <span class="half" id="tick-b"></span>
+  </div>
+</div>
+
 <main class="container">
+
+  <!-- ============ LIVE HUB GAMES ============ -->
   <section class="sec">
-    <h2 class="sec-label">CARTER'S ARCADE <small>// HUB UNDER CONSTRUCTION — FOUNDATION BUILD</small></h2>
-    <div class="panel">
-      <p class="tiny">THE HUB PAGE LANDS IN feat/hub-games. FOUNDATION SHIPS THE RUNTIME + A DEMO CARTRIDGE.</p>
-      <p class="tiny">
-        <a href="/demo/">DEMO CARTRIDGE ▸</a> ·
-        <a href="/style-guide/">STYLE GUIDE ▸</a>
-      </p>
+    <h2 class="sec-label">NOW PLAYING <small>// LIVE IN THE HUB — CLICK A CARD TO WAKE IT</small></h2>
+    <div class="live-grid" id="live-grid"></div>
+  </section>
+
+  <!-- ============ CABINETS ============ -->
+  <section class="sec">
+    <h2 class="sec-label">CABINETS <small>// BIGGER GAMES OPEN THEIR OWN SCREEN — POWERING ON SOON</small></h2>
+    <div class="cab-grid">
+
+      <div class="cab cab--soon" aria-label="Snake — coming soon">
+        <svg class="spr" viewBox="0 0 10 10" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges" aria-hidden="true"><rect x="2" y="0" width="6" height="1" fill="#047857"/><rect x="2" y="1" width="6" height="1" fill="#047857"/><rect x="2" y="2" width="2" height="1" fill="#047857"/><rect x="2" y="3" width="2" height="1" fill="#047857"/><rect x="2" y="4" width="6" height="1" fill="#047857"/><rect x="2" y="5" width="6" height="1" fill="#047857"/><rect x="6" y="6" width="2" height="1" fill="#047857"/><rect x="6" y="7" width="2" height="1" fill="#047857"/><rect x="2" y="8" width="1" height="1" fill="#18181b"/><rect x="3" y="8" width="5" height="1" fill="#047857"/><rect x="1" y="9" width="1" height="1" fill="#be185d"/><rect x="2" y="9" width="6" height="1" fill="#047857"/></svg>
+        <span class="cab-name">SNAKE</span>
+        <span class="cab-meta"><span class="pill">ACTION</span><span class="pill pill--soon">SOON</span></span>
+      </div>
+
+      <div class="cab cab--soon" aria-label="Minesweeper — coming soon">
+        <svg class="spr" viewBox="0 0 10 8" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges" aria-hidden="true"><rect x="2" y="0" width="1" height="1" fill="#18181b"/><rect x="3" y="0" width="5" height="1" fill="#be185d"/><rect x="2" y="1" width="1" height="1" fill="#18181b"/><rect x="3" y="1" width="4" height="1" fill="#be185d"/><rect x="2" y="2" width="1" height="1" fill="#18181b"/><rect x="3" y="2" width="3" height="1" fill="#be185d"/><rect x="2" y="3" width="1" height="1" fill="#18181b"/><rect x="2" y="4" width="1" height="1" fill="#18181b"/><rect x="2" y="5" width="1" height="1" fill="#18181b"/><rect x="1" y="6" width="3" height="1" fill="#18181b"/><rect x="0" y="7" width="5" height="1" fill="#18181b"/></svg>
+        <span class="cab-name">MINESWEEPER</span>
+        <span class="cab-meta"><span class="pill">PUZZLE</span><span class="pill pill--soon">SOON</span></span>
+      </div>
+
+      <div class="cab cab--soon" aria-label="Bricks — coming soon">
+        <svg class="spr" viewBox="0 0 12 9" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges" aria-hidden="true"><rect x="0" y="0" width="4" height="1" fill="#be185d"/><rect x="5" y="0" width="4" height="1" fill="#be185d"/><rect x="10" y="0" width="2" height="1" fill="#be185d"/><rect x="0" y="1" width="4" height="1" fill="#be185d"/><rect x="5" y="1" width="4" height="1" fill="#be185d"/><rect x="10" y="1" width="2" height="1" fill="#be185d"/><rect x="0" y="3" width="2" height="1" fill="#be185d"/><rect x="3" y="3" width="4" height="1" fill="#be185d"/><rect x="8" y="3" width="4" height="1" fill="#be185d"/><rect x="0" y="4" width="2" height="1" fill="#be185d"/><rect x="3" y="4" width="4" height="1" fill="#be185d"/><rect x="8" y="4" width="4" height="1" fill="#be185d"/><rect x="5" y="6" width="2" height="1" fill="#18181b"/><rect x="3" y="8" width="6" height="1" fill="#18181b"/></svg>
+        <span class="cab-name">BRICKS</span>
+        <span class="cab-meta"><span class="pill">ACTION</span><span class="pill pill--soon">SOON</span></span>
+      </div>
+
+      <div class="cab cab--soon" aria-label="Aim Trainer — coming soon">
+        <svg class="spr" viewBox="0 0 11 11" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges" aria-hidden="true"><rect x="3" y="0" width="5" height="1" fill="#18181b"/><rect x="2" y="1" width="1" height="1" fill="#18181b"/><rect x="8" y="1" width="1" height="1" fill="#18181b"/><rect x="1" y="2" width="1" height="1" fill="#18181b"/><rect x="9" y="2" width="1" height="1" fill="#18181b"/><rect x="1" y="3" width="1" height="1" fill="#18181b"/><rect x="9" y="3" width="1" height="1" fill="#18181b"/><rect x="1" y="4" width="1" height="1" fill="#18181b"/><rect x="5" y="4" width="1" height="1" fill="#be185d"/><rect x="9" y="4" width="1" height="1" fill="#18181b"/><rect x="1" y="5" width="1" height="1" fill="#18181b"/><rect x="4" y="5" width="3" height="1" fill="#be185d"/><rect x="9" y="5" width="1" height="1" fill="#18181b"/><rect x="1" y="6" width="1" height="1" fill="#18181b"/><rect x="5" y="6" width="1" height="1" fill="#be185d"/><rect x="9" y="6" width="1" height="1" fill="#18181b"/><rect x="1" y="7" width="1" height="1" fill="#18181b"/><rect x="9" y="7" width="1" height="1" fill="#18181b"/><rect x="1" y="8" width="1" height="1" fill="#18181b"/><rect x="9" y="8" width="1" height="1" fill="#18181b"/><rect x="2" y="9" width="1" height="1" fill="#18181b"/><rect x="8" y="9" width="1" height="1" fill="#18181b"/><rect x="3" y="10" width="5" height="1" fill="#18181b"/></svg>
+        <span class="cab-name">AIM TRAINER</span>
+        <span class="cab-meta"><span class="pill">SKILL</span><span class="pill pill--soon">SOON</span></span>
+      </div>
+
+      <div class="cab cab--soon" aria-label="Water Sort — coming soon">
+        <svg class="spr" viewBox="0 0 8 9" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges" aria-hidden="true"><rect x="0" y="0" width="2" height="1" fill="#18181b"/><rect x="6" y="0" width="2" height="1" fill="#18181b"/><rect x="1" y="1" width="1" height="1" fill="#18181b"/><rect x="6" y="1" width="1" height="1" fill="#18181b"/><rect x="1" y="2" width="1" height="1" fill="#18181b"/><rect x="6" y="2" width="1" height="1" fill="#18181b"/><rect x="1" y="3" width="1" height="1" fill="#18181b"/><rect x="2" y="3" width="4" height="1" fill="#be185d"/><rect x="6" y="3" width="1" height="1" fill="#18181b"/><rect x="1" y="4" width="1" height="1" fill="#18181b"/><rect x="2" y="4" width="4" height="1" fill="#be185d"/><rect x="6" y="4" width="1" height="1" fill="#18181b"/><rect x="1" y="5" width="1" height="1" fill="#18181b"/><rect x="2" y="5" width="4" height="1" fill="#047857"/><rect x="6" y="5" width="1" height="1" fill="#18181b"/><rect x="1" y="6" width="1" height="1" fill="#18181b"/><rect x="2" y="6" width="4" height="1" fill="#047857"/><rect x="6" y="6" width="1" height="1" fill="#18181b"/><rect x="1" y="7" width="1" height="1" fill="#18181b"/><rect x="2" y="7" width="4" height="1" fill="#047857"/><rect x="6" y="7" width="1" height="1" fill="#18181b"/><rect x="1" y="8" width="6" height="1" fill="#18181b"/></svg>
+        <span class="cab-name">WATER SORT</span>
+        <span class="cab-meta"><span class="pill">PUZZLE</span><span class="pill pill--soon">SOON</span></span>
+      </div>
+
+      <div class="cab cab--soon" aria-label="Setrit — coming soon">
+        <svg class="spr" viewBox="0 0 10 8" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges" aria-hidden="true"><rect x="3" y="0" width="3" height="1" fill="#be185d"/><rect x="1" y="1" width="5" height="1" fill="#be185d"/><rect x="1" y="2" width="3" height="1" fill="#be185d"/><rect x="8" y="4" width="2" height="1" fill="#047857"/><rect x="0" y="5" width="2" height="1" fill="#047857"/><rect x="3" y="5" width="3" height="1" fill="#047857"/><rect x="8" y="5" width="2" height="1" fill="#047857"/><rect x="0" y="6" width="10" height="1" fill="#047857"/><rect x="0" y="7" width="10" height="1" fill="#047857"/></svg>
+        <span class="cab-name">SETRIT</span>
+        <span class="cab-meta"><span class="pill">PUZZLE</span><span class="pill pill--soon">SOON</span></span>
+      </div>
+
+      <div class="cab cab--soon" aria-label="Daily Sudoku — coming soon">
+        <svg class="spr" viewBox="0 0 10 10" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges" aria-hidden="true"><rect x="0" y="0" width="10" height="1" fill="#18181b"/><rect x="0" y="1" width="1" height="1" fill="#18181b"/><rect x="1" y="1" width="2" height="1" fill="#be185d"/><rect x="3" y="1" width="1" height="1" fill="#18181b"/><rect x="6" y="1" width="1" height="1" fill="#18181b"/><rect x="9" y="1" width="1" height="1" fill="#18181b"/><rect x="0" y="2" width="1" height="1" fill="#18181b"/><rect x="1" y="2" width="2" height="1" fill="#be185d"/><rect x="3" y="2" width="1" height="1" fill="#18181b"/><rect x="6" y="2" width="1" height="1" fill="#18181b"/><rect x="9" y="2" width="1" height="1" fill="#18181b"/><rect x="0" y="3" width="10" height="1" fill="#18181b"/><rect x="0" y="4" width="1" height="1" fill="#18181b"/><rect x="3" y="4" width="1" height="1" fill="#18181b"/><rect x="4" y="4" width="2" height="1" fill="#047857"/><rect x="6" y="4" width="1" height="1" fill="#18181b"/><rect x="9" y="4" width="1" height="1" fill="#18181b"/><rect x="0" y="5" width="1" height="1" fill="#18181b"/><rect x="3" y="5" width="1" height="1" fill="#18181b"/><rect x="4" y="5" width="2" height="1" fill="#047857"/><rect x="6" y="5" width="1" height="1" fill="#18181b"/><rect x="9" y="5" width="1" height="1" fill="#18181b"/><rect x="0" y="6" width="10" height="1" fill="#18181b"/><rect x="0" y="7" width="1" height="1" fill="#18181b"/><rect x="3" y="7" width="1" height="1" fill="#18181b"/><rect x="6" y="7" width="1" height="1" fill="#18181b"/><rect x="9" y="7" width="1" height="1" fill="#18181b"/><rect x="0" y="8" width="1" height="1" fill="#18181b"/><rect x="3" y="8" width="1" height="1" fill="#18181b"/><rect x="6" y="8" width="1" height="1" fill="#18181b"/><rect x="9" y="8" width="1" height="1" fill="#18181b"/><rect x="0" y="9" width="10" height="1" fill="#18181b"/></svg>
+        <span class="cab-name">SUDOKU</span>
+        <span class="cab-meta"><span class="pill">PUZZLE</span><span class="pill pill--daily">DAILY <b class="daily-num">#0</b></span></span>
+      </div>
+
+      <div class="cab cab--soon" aria-label="Merge Jar — coming soon">
+        <svg class="spr" viewBox="0 0 10 8" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges" aria-hidden="true"><rect x="0" y="0" width="2" height="1" fill="#18181b"/><rect x="8" y="0" width="2" height="1" fill="#18181b"/><rect x="1" y="1" width="1" height="1" fill="#18181b"/><rect x="8" y="1" width="1" height="1" fill="#18181b"/><rect x="1" y="2" width="1" height="1" fill="#18181b"/><rect x="8" y="2" width="1" height="1" fill="#18181b"/><rect x="1" y="3" width="1" height="1" fill="#18181b"/><rect x="3" y="3" width="4" height="1" fill="#be185d"/><rect x="8" y="3" width="1" height="1" fill="#18181b"/><rect x="1" y="4" width="1" height="1" fill="#18181b"/><rect x="3" y="4" width="4" height="1" fill="#be185d"/><rect x="8" y="4" width="1" height="1" fill="#18181b"/><rect x="1" y="5" width="1" height="1" fill="#18181b"/><rect x="2" y="5" width="2" height="1" fill="#047857"/><rect x="8" y="5" width="1" height="1" fill="#18181b"/><rect x="1" y="6" width="1" height="1" fill="#18181b"/><rect x="2" y="6" width="2" height="1" fill="#047857"/><rect x="8" y="6" width="1" height="1" fill="#18181b"/><rect x="1" y="7" width="8" height="1" fill="#18181b"/></svg>
+        <span class="cab-name">MERGE JAR</span>
+        <span class="cab-meta"><span class="pill">PHYSICS</span><span class="pill pill--soon">SOON</span></span>
+      </div>
+
+      <div class="cab cab--soon" aria-label="Invaders — coming soon">
+        <svg class="spr" viewBox="0 0 11 8" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges" aria-hidden="true"><rect x="2" y="0" width="1" height="1" fill="#18181b"/><rect x="8" y="0" width="1" height="1" fill="#18181b"/><rect x="3" y="1" width="1" height="1" fill="#18181b"/><rect x="7" y="1" width="1" height="1" fill="#18181b"/><rect x="2" y="2" width="7" height="1" fill="#18181b"/><rect x="1" y="3" width="2" height="1" fill="#18181b"/><rect x="4" y="3" width="3" height="1" fill="#18181b"/><rect x="8" y="3" width="2" height="1" fill="#18181b"/><rect x="0" y="4" width="11" height="1" fill="#18181b"/><rect x="0" y="5" width="1" height="1" fill="#18181b"/><rect x="2" y="5" width="7" height="1" fill="#18181b"/><rect x="10" y="5" width="1" height="1" fill="#18181b"/><rect x="0" y="6" width="1" height="1" fill="#18181b"/><rect x="2" y="6" width="1" height="1" fill="#18181b"/><rect x="8" y="6" width="1" height="1" fill="#18181b"/><rect x="10" y="6" width="1" height="1" fill="#18181b"/><rect x="3" y="7" width="2" height="1" fill="#18181b"/><rect x="6" y="7" width="2" height="1" fill="#18181b"/></svg>
+        <span class="cab-name">INVADERS</span>
+        <span class="cab-meta"><span class="pill">ACTION</span><span class="pill pill--soon">SOON</span></span>
+      </div>
+
+      <div class="cab cab--soon" aria-label="Tower Defense — coming soon">
+        <svg class="spr" viewBox="0 0 9 9" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges" aria-hidden="true"><rect x="0" y="0" width="1" height="1" fill="#18181b"/><rect x="2" y="0" width="1" height="1" fill="#18181b"/><rect x="4" y="0" width="1" height="1" fill="#18181b"/><rect x="6" y="0" width="1" height="1" fill="#18181b"/><rect x="0" y="1" width="7" height="1" fill="#18181b"/><rect x="1" y="2" width="5" height="1" fill="#18181b"/><rect x="1" y="3" width="5" height="1" fill="#18181b"/><rect x="1" y="4" width="2" height="1" fill="#18181b"/><rect x="3" y="4" width="1" height="1" fill="#be185d"/><rect x="4" y="4" width="2" height="1" fill="#18181b"/><rect x="1" y="5" width="5" height="1" fill="#18181b"/><rect x="1" y="6" width="5" height="1" fill="#18181b"/><rect x="0" y="7" width="7" height="1" fill="#18181b"/><rect x="0" y="8" width="7" height="1" fill="#18181b"/></svg>
+        <span class="cab-name">TOWER DEFENSE</span>
+        <span class="cab-meta"><span class="pill">STRATEGY</span><span class="pill pill--soon">SOON</span></span>
+      </div>
+
+      <div class="cab cab--soon" aria-label="Pull the Pin — coming soon">
+        <svg class="spr" viewBox="0 0 11 11" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges" aria-hidden="true"><rect x="1" y="0" width="3" height="1" fill="#18181b"/><rect x="1" y="1" width="1" height="1" fill="#18181b"/><rect x="3" y="1" width="1" height="1" fill="#18181b"/><rect x="1" y="2" width="3" height="1" fill="#18181b"/><rect x="2" y="3" width="1" height="1" fill="#18181b"/><rect x="2" y="4" width="1" height="1" fill="#18181b"/><rect x="2" y="5" width="1" height="1" fill="#18181b"/><rect x="2" y="6" width="1" height="1" fill="#18181b"/><rect x="2" y="7" width="1" height="1" fill="#18181b"/><rect x="7" y="7" width="2" height="1" fill="#be185d"/><rect x="7" y="8" width="4" height="1" fill="#be185d"/><rect x="7" y="9" width="4" height="1" fill="#be185d"/><rect x="8" y="10" width="2" height="1" fill="#be185d"/></svg>
+        <span class="cab-name">PULL THE PIN</span>
+        <span class="cab-meta"><span class="pill">PHYSICS</span><span class="pill pill--soon">SOON</span></span>
+      </div>
+
+      <div class="cab cab--soon" aria-label="Blackjack — coming soon">
+        <svg class="spr" viewBox="0 0 11 9" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges" aria-hidden="true"><rect x="0" y="0" width="7" height="1" fill="#18181b"/><rect x="0" y="1" width="1" height="1" fill="#18181b"/><rect x="6" y="1" width="1" height="1" fill="#18181b"/><rect x="0" y="2" width="1" height="1" fill="#18181b"/><rect x="2" y="2" width="2" height="1" fill="#be185d"/><rect x="6" y="2" width="5" height="1" fill="#18181b"/><rect x="0" y="3" width="1" height="1" fill="#18181b"/><rect x="2" y="3" width="2" height="1" fill="#be185d"/><rect x="6" y="3" width="1" height="1" fill="#18181b"/><rect x="10" y="3" width="1" height="1" fill="#18181b"/><rect x="0" y="4" width="1" height="1" fill="#18181b"/><rect x="6" y="4" width="1" height="1" fill="#18181b"/><rect x="8" y="4" width="1" height="1" fill="#047857"/><rect x="10" y="4" width="1" height="1" fill="#18181b"/><rect x="0" y="5" width="1" height="1" fill="#18181b"/><rect x="6" y="5" width="1" height="1" fill="#18181b"/><rect x="8" y="5" width="1" height="1" fill="#047857"/><rect x="10" y="5" width="1" height="1" fill="#18181b"/><rect x="0" y="6" width="7" height="1" fill="#18181b"/><rect x="10" y="6" width="1" height="1" fill="#18181b"/><rect x="6" y="7" width="1" height="1" fill="#18181b"/><rect x="10" y="7" width="1" height="1" fill="#18181b"/><rect x="6" y="8" width="5" height="1" fill="#18181b"/></svg>
+        <span class="cab-name">BLACKJACK</span>
+        <span class="cab-meta"><span class="pill">CARDS</span><span class="pill pill--soon">SOON</span></span>
+      </div>
+
+      <div class="cab cab--soon" aria-label="Duck Gallery — coming soon">
+        <svg class="spr" viewBox="0 0 12 9" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges" aria-hidden="true"><rect x="7" y="0" width="3" height="1" fill="#047857"/><rect x="6" y="1" width="5" height="1" fill="#047857"/><rect x="6" y="2" width="1" height="1" fill="#047857"/><rect x="7" y="2" width="1" height="1" fill="#18181b"/><rect x="8" y="2" width="2" height="1" fill="#047857"/><rect x="10" y="2" width="2" height="1" fill="#be185d"/><rect x="1" y="3" width="9" height="1" fill="#047857"/><rect x="0" y="4" width="10" height="1" fill="#047857"/><rect x="0" y="5" width="10" height="1" fill="#047857"/><rect x="1" y="6" width="8" height="1" fill="#047857"/><rect x="2" y="7" width="6" height="1" fill="#047857"/><rect x="4" y="8" width="1" height="1" fill="#be185d"/><rect x="7" y="8" width="1" height="1" fill="#be185d"/></svg>
+        <span class="cab-name">DUCK GALLERY</span>
+        <span class="cab-meta"><span class="pill">SHOOTER</span><span class="pill pill--soon">SOON</span></span>
+      </div>
+
     </div>
   </section>
+
+  <!-- ============ SCORES + CONTROLS ============ -->
+  <section class="sec split">
+    <div class="panel">
+      <h3>HIGH SCORES</h3>
+      <table class="scores">
+        <tr><th>GAME</th><th>BEST</th></tr>
+        <tr><td>DINO RUN</td><td id="sb-dino">0000</td></tr>
+        <tr><td>2048</td><td id="sb-2048">0</td></tr>
+        <tr><td>TOKENS MINED</td><td id="sb-tokens">0</td></tr>
+        <tr><td>SIMON STREAK</td><td id="sb-simon">0</td></tr>
+        <tr><td>MEMORY MOVES</td><td id="sb-memory">—</td></tr>
+        <tr><td>LIGHTS OUT MOVES</td><td id="sb-lightsout">—</td></tr>
+        <tr><td>SNAKE</td><td>—</td></tr>
+        <tr><td>MINESWEEPER</td><td>—</td></tr>
+      </table>
+      <p class="tiny"><span id="reset-slot"><a href="#" id="reset-data">RESET SAVE DATA</a></span> · STORED LOCALLY IN YOUR BROWSER</p>
+    </div>
+    <div class="panel">
+      <h3>CONTROLS</h3>
+      <div class="help-row"><span class="k"><kbd>CLICK</kbd> / <kbd>TAP</kbd></span><span>Wake a game. Click anywhere else to pause it.</span></div>
+      <div class="help-row"><span class="k"><kbd>ESC</kbd></span><span>Pause the active game, or exit fullscreen.</span></div>
+      <div class="help-row"><span class="k"><kbd>F</kbd></span><span>Fullscreen the active game (or use the corner button).</span></div>
+      <div class="help-row"><span class="k"><kbd>SPACE</kbd> / <kbd>↑</kbd> / <kbd>TAP</kbd></span><span>Jump (Dino Run).</span></div>
+      <div class="help-row"><span class="k"><kbd>ARROWS</kbd> / <kbd>WASD</kbd> / <kbd>SWIPE</kbd></span><span>Slide tiles (2048).</span></div>
+      <div class="help-row"><span class="k"><kbd>CLICK</kbd> / <kbd>TAP</kbd></span><span>Simon pads, Memory cards, Lights Out grid — mouse games never capture your arrow keys.</span></div>
+      <p class="tiny">TOKEN MINER NEVER SLEEPS — IT'S AN IDLE GAME. ARROW KEYS ONLY GET CAPTURED WHILE A GAME IS AWAKE, SO THE PAGE ALWAYS SCROLLS NORMALLY.</p>
+    </div>
+  </section>
+
 </main>
+
+<footer>
+  <div class="container">
+    <p>HUB GAMES ARE LIVE · CABINETS ARE POWERING ON SOON · HANDMADE PIXELS, NO ENGINES.</p>
+    <p style="margin-top:6px">NAMES FOLLOW THE SETRIT DOCTRINE: RENAME ANYTHING A LAWYER MIGHT RECOGNIZE. · <a href="#top">BACK TO TOP</a></p>
+  </div>
+</footer>
+
 </body>
 </html>
