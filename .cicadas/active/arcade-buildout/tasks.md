@@ -60,7 +60,8 @@ next_section: "## Partition: feat/foundation"
 
 - [x] Port Token Miner as alwaysOn cartridge: `logic.ts` (rates, costs, offline earnings with 4h cap and negative-delta clamp) with tests + UI (mine button, BUY MINER, toast) <!-- id: 23 --> <!-- done: pure logic (cost curve, offlineGain w/ 4h cap + backwards-clock clamp, buyMiner, isMinerState validator) with 9 specs; UI on tech-design key arcade:miner:state {tokens,miners,last} (NOT mockup's arcade:clicker — validator rejects old shape → fresh fallback); alwaysOn card, token sprite from pipeline, 250ms tick / 5s save / beforeunload save, toast "WHILE YOU WERE GONE: +{n}" per ux copy -->
 
-- [ ] Build Simon (sequence playback with per-pad tone+flash, click/tap input, best streak) <!-- id: 24 -->
+- [x] Build Simon (sequence playback with per-pad tone+flash, click/tap input, best streak) <!-- id: 24 --> <!-- done: 2×2 palette pads (game-owned simon.css — src/styles stays frozen), distinct square-wave tone per pad, steps() flash; claims NO keys (mouse game — arrows never captured); stop() clears playback timers + keeps sequence, start() re-shows the round; best:simon persisted; input gated on awake+phase so the waking click can't count as an answer -->
+
 - [ ] Build Memory (card-flip pairs with pipeline sprites, move counter, best) <!-- id: 25 -->
 - [ ] Build Lights Out: `logic.ts` (solvable-board generation via random press sequence) with tests + 5×5 UI <!-- id: 26 -->
 - [ ] Wire scoreboard live updates + reset-save-data inline confirm flow + toasts; build `/style-guide` page from mockup's design-tokens section <!-- id: 27 -->

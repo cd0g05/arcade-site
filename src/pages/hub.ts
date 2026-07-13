@@ -18,6 +18,7 @@ import { mountDino } from "../games/dino/dino";
 import { mountG2048 } from "../games/g2048/g2048";
 import { mountMiner } from "../games/miner/miner";
 import { freshState, isMinerState } from "../games/miner/logic";
+import { mountSimon } from "../games/simon/simon";
 
 function $<T extends HTMLElement>(sel: string): T {
   const el = document.querySelector<T>(sel);
@@ -115,6 +116,23 @@ addGame(
     ariaLabel: "Token Miner — always running",
   },
   mountMiner,
+);
+
+addGame(
+  {
+    id: "simon",
+    title: "SIMON",
+    centerBody: true,
+    veilMsg: "▶ CLICK TO WAKE",
+    veilSub: "ECHO THE PATTERN · CLICK OR TAP",
+    stats: [
+      { label: "STREAK", value: "0" },
+      { label: "BEST", value: "0" },
+    ],
+    pill: "MEMORY",
+    ariaLabel: "Simon — click to play",
+  },
+  mountSimon,
 );
 
 /* ---------- ticker ---------- */
