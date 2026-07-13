@@ -56,7 +56,8 @@ next_section: "## Partition: feat/foundation"
 
 - [x] Port Dino Run to a cartridge (canvas, procedural obstacles, jump physics, speed ramp, best persisted; click/tap/space/↑/W) <!-- id: 21 --> <!-- done: faithful port of mockup step/draw onto createLoop (fixed 60Hz update — correct speed on 120Hz displays); setupScreen dprCap 1 (mockup-exact backing store); jump via claimed keys + canvas pointerdown gated on Hub.current; best:dino via store with validator; stats through card.setStat/flashStat; stop() preserves scene for PAUSED veil -->
 
-- [ ] Port 2048: `logic.ts` (slide/merge/spawn/game-over) with unit tests + cartridge UI (arrows/WASD/swipe, board persistence, NEW GAME, NO MOVES LEFT overlay) <!-- id: 22 -->
+- [x] Port 2048: `logic.ts` (slide/merge/spawn/game-over) with unit tests + cartridge UI (arrows/WASD/swipe, board persistence, NEW GAME, NO MOVES LEFT overlay) <!-- id: 22 --> <!-- done: pure logic module (immutable boards, injectable rand, isSavedState validator) with 12 specs incl. no-double-merge + non-mutation; UI restores saved board on load (over-state re-shown), swipe via gestures() gated on Hub.current, NEW GAME in card foot, merged-tile pop animation, best:2048 + 2048:state persisted -->
+
 - [ ] Port Token Miner as alwaysOn cartridge: `logic.ts` (rates, costs, offline earnings with 4h cap and negative-delta clamp) with tests + UI (mine button, BUY MINER, toast) <!-- id: 23 -->
 - [ ] Build Simon (sequence playback with per-pad tone+flash, click/tap input, best streak) <!-- id: 24 -->
 - [ ] Build Memory (card-flip pairs with pipeline sprites, move counter, best) <!-- id: 25 -->

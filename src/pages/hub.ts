@@ -15,6 +15,7 @@ import { fillTicker } from "../ui/ticker";
 import { pad, fmt } from "../games/format";
 import type { MountedGame } from "../games/types";
 import { mountDino } from "../games/dino/dino";
+import { mountG2048 } from "../games/g2048/g2048";
 
 function $<T extends HTMLElement>(sel: string): T {
   const el = document.querySelector<T>(sel);
@@ -85,6 +86,22 @@ addGame(
     ariaLabel: "Dino Run — click to play",
   },
   mountDino,
+);
+
+addGame(
+  {
+    id: "g2048",
+    title: "2048",
+    centerBody: true,
+    veilMsg: "▶ CLICK TO WAKE",
+    veilSub: "[ARROWS] [WASD] · OR SWIPE",
+    stats: [
+      { label: "SCORE", value: "0" },
+      { label: "BEST", value: "0" },
+    ],
+    ariaLabel: "2048 — click to play",
+  },
+  mountG2048,
 );
 
 /* ---------- ticker ---------- */
