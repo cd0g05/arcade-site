@@ -1,0 +1,82 @@
+/* watersort.css — game-owned styles (src/styles is frozen). */
+
+.ws-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 14px;
+  padding: 16px 4px 6px;
+}
+
+.ws-tube {
+  width: 34px;
+  height: 118px;
+  padding: 0;
+  border: 2px solid var(--ink);
+  border-top-color: var(--border);
+  background: var(--base);
+  cursor: pointer;
+  border-radius: 0;
+  display: flex;
+  flex-direction: column-reverse;
+  transition: transform 0.12s steps(2, end), box-shadow 0.12s steps(2, end);
+}
+
+.ws-tube:hover {
+  border-color: var(--pink);
+}
+
+.ws-tube--sel {
+  transform: translateY(-8px);
+  box-shadow: var(--shadow-px) var(--grid);
+  border-color: var(--pink);
+}
+
+.ws-seg {
+  height: 25%;
+  flex: 0 0 25%;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .ws-seg--new {
+    animation: ws-drop 0.16s steps(3, end);
+  }
+  @keyframes ws-drop {
+    from { transform: translateY(-140%); }
+    to { transform: translateY(0); }
+  }
+}
+
+.ws-c-pink { background: var(--pink); }
+.ws-c-green { background: var(--green); }
+.ws-c-ink { background: var(--ink); }
+.ws-c-rose { background: #f9a8d4; }
+.ws-c-wine { background: #831843; }
+.ws-c-slate { background: #52525b; }
+.ws-c-sage { background: #d4d4d8; }
+
+.ws-btn {
+  font-family: var(--font-ui);
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+  padding: 3px 8px;
+  border: 1px solid var(--border);
+  background: var(--base);
+  color: var(--ink);
+  cursor: pointer;
+  border-radius: 0;
+}
+
+.ws-btn:hover {
+  border-color: var(--ink);
+}
+
+.ws-btn:disabled {
+  color: var(--sub);
+  cursor: not-allowed;
+}
+
+.ws-btns {
+  display: flex;
+  gap: 6px;
+}
