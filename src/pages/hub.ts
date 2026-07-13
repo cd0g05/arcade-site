@@ -198,6 +198,11 @@ const scoreboard = createScoreboard({
   "sb-memory": lowIsBest("best:memory"),
   "sb-lightsout": lowIsBest("best:lightsout"),
   "sb-snake": lowIsBest("best:snake"),
+  "sb-mines": () => {
+    const t = store.get<Record<string, unknown>>("minesweeper:times", {}, (v): v is Record<string, unknown> => typeof v === "object" && v !== null);
+    const b = t["beginner"];
+    return typeof b === "number" ? `${b}s` : "—";
+  },
 });
 scoreboard.refresh();
 setInterval(() => scoreboard.refresh(), 2000);

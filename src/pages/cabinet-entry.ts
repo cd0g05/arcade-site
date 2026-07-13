@@ -16,6 +16,7 @@ const LOADERS: Record<string, () => Promise<{ def: CabinetDef }>> = {
   snake: () => import("../games/snake/snake"),
   bricks: () => import("../games/bricks/bricks"),
   aim: () => import("../games/aim/aim"),
+  minesweeper: () => import("../games/minesweeper/minesweeper"),
 };
 
 const root = document.getElementById("app");
