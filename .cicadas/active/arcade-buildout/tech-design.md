@@ -439,3 +439,12 @@ Builder-directed sequencing deviation: launch ran immediately after hub-games, b
 - **README.md**: commands, the key-routing invariant, 7-step add-a-game guide, naming doctrine, style-system summary.
 - **Still Builder-manual**: browser/touch checklists (tasks 28/71 lists), Vercel project link + Web Analytics enable + `arcade.cartercripe.com` cutover (task 75).
 - **/demo/ page**: kept for now — it's the only cabinet-scaffold exercise page until real cabinets land; remove in the cabinets or post-cabinets launch wrap-up.
+
+## Cabinets-Action Reflect Notes (feat/cabinets-action, 2026-07-13)
+
+- **cabinet-entry.ts** (new, src/pages): reads `<body data-game>`, dynamic-imports the game from a `LOADERS` map (each game its own chunk), renders `createCabinet`, registers with the Hub. Cabinet HTML shells are now 3-line bodies. New shared type `CabinetDef { options, mount }` in src/games/types.ts. Puzzle partition extends `LOADERS` with its three ids.
+- **Game-over key release**: the Hub reads `api.keys` per keydown but swallows unclaimed nav keys while any game is awake, so "release nav keys on game over" is implemented as: the cartridge sleeps itself (`Hub.sleep()`) ~1s after death and restyles the veil (`GAME OVER · SCORE n` / `▶ CLICK TO PLAY AGAIN`); next wake resets. This is the standard cabinet game-over pattern.
+- **Awake-gating on cabinets**: surface `pointerdown` fires before the Hub's wake `mousedown`, so gating on `Hub.current === id` makes the waking click a no-op for game input (bricks serve, aim shots) for free.
+- **Aim claims no keys** (pure pointer game) — arrows/space always scroll its page; snake claims arrows+WASD, bricks claims space/arrows/A-D.
+- **LIVE cabinet cards** carry no aria-label (the visible link text is the accessible name — a label duplicating it tripped Lighthouse label-content-name-mismatch).
+- Storage: `best:snake` (foods), `best:bricks` (score), `best:aim` (hits in a 30s round), all number-validated.
