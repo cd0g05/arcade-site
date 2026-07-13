@@ -24,6 +24,21 @@
       "created_at": "2026-07-12T22:25:45.021746+00:00",
       "worktree_path": "/Users/cartercripe/dev/code/projects/personal-site/arcade-feat-foundation",
       "initiative": "arcade-buildout"
+    },
+    "feat/hub-games": {
+      "intent": "Full hub page (header, ticker, grids, scoreboard, legend) + six hub cartridges: port Dino Run, 2048, Token Miner; build Simon, Memory, Lights Out; style-guide page",
+      "modules": [
+        "index.html",
+        "src/ui/ticker.ts",
+        "src/ui/scoreboard.ts",
+        "src/games",
+        "src/pages/hub.ts",
+        "style-guide"
+      ],
+      "owner": "unknown",
+      "created_at": "2026-07-13T01:54:58.396875+00:00",
+      "worktree_path": "/Users/cartercripe/dev/code/projects/personal-site/arcade-feat-hub-games",
+      "initiative": "arcade-buildout"
     }
   }
 }
