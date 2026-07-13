@@ -8,6 +8,7 @@
  */
 import "../styles/main.css";
 import { Hub } from "../lib/hub";
+import { coverScreen } from "../lib/wipe";
 import { beep, soundEnabled, toggleSound } from "../lib/audio";
 import { store } from "../lib/storage";
 import { createCard, type CardOptions, type GameCard } from "../ui/card";
@@ -181,7 +182,7 @@ fillTicker([
   `TOKENS MINED ${fmt(minerTokens())}`,
   `ECHO STREAK ${store.get("best:echo", 0, isNum)}`,
   `SNAKE BEST ${store.get("best:snake", 0, isNum)}`,
-  `SETRIT BEST ${store.get("best:setrit", 0, isNum)}`,
+  `TETRISIO BEST ${store.get("best:tetrisio", 0, isNum)}`,
   "6 CABINETS LIVE · 7 POWERING ON",
   "INSERT COIN FOR GOOD LUCK",
 ]);
@@ -199,7 +200,7 @@ const scoreboard = createScoreboard({
   "sb-memory": lowIsBest("best:memory"),
   "sb-lightsout": lowIsBest("best:lightsout"),
   "sb-snake": lowIsBest("best:snake"),
-  "sb-setrit": lowIsBest("best:setrit"),
+  "sb-tetrisio": lowIsBest("best:tetrisio"),
   "sb-mines": () => {
     const t = store.get<Record<string, unknown>>("minesweeper:times", {}, (v): v is Record<string, unknown> => typeof v === "object" && v !== null);
     const b = t["beginner"];
@@ -251,4 +252,15 @@ function doReset(): void {
 resetLink.addEventListener("click", (e) => {
   e.preventDefault();
   armReset();
+});
+
+/* ---------- cabinet nav pixel wipe ---------- */
+document.querySelectorAll<HTMLAnchorElement>("a.cab").forEach((a) => {
+  a.addEventListener("click", (e) => {
+    e.preventDefault();
+    const href = a.href;
+    void coverScreen().then(() => {
+      window.location.href = href;
+    });
+  });
 });

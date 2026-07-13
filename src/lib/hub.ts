@@ -16,6 +16,7 @@
 
 import type { Cartridge } from "./cartridge";
 import { beep } from "./audio";
+import { coverScreen, revealScreen } from "./wipe";
 
 const NAV_KEYS = ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", " "];
 
@@ -158,24 +159,35 @@ export const Hub = {
       Hub.exitFs();
       return;
     }
-    if (fsId) Hub.exitFs();
     const g = games.get(id);
     if (!g) return;
-    if (!g.api.alwaysOn) Hub.wake(id);
-    g.card.classList.add("fs");
-    document.body.classList.add("has-fs");
-    fsId = id;
-    announce(g, "Fullscreen. Press Escape to exit.");
+    void coverScreen().then(() => {
+      if (fsId) {
+        const prev = games.get(fsId);
+        prev?.card.classList.remove("fs");
+        document.body.classList.remove("has-fs");
+        fsId = null;
+      }
+      if (!g.api.alwaysOn) Hub.wake(id);
+      g.card.classList.add("fs");
+      document.body.classList.add("has-fs");
+      fsId = id;
+      announce(g, "Fullscreen. Press Escape to exit.");
+      void revealScreen();
+    });
   },
 
   exitFs(): void {
     if (!fsId) return;
     const g = games.get(fsId);
-    fsId = null;
-    if (!g) return;
-    g.card.classList.remove("fs");
-    document.body.classList.remove("has-fs");
-    announce(g, "Left fullscreen.");
+    void coverScreen().then(() => {
+      fsId = null;
+      if (!g) return;
+      g.card.classList.remove("fs");
+      document.body.classList.remove("has-fs");
+      announce(g, "Left fullscreen.");
+      void revealScreen();
+    });
   },
 
   /** Id of the awake game, or null. alwaysOn games are never "current". */
