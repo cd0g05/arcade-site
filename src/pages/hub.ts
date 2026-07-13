@@ -12,6 +12,7 @@ import { beep, soundEnabled, toggleSound } from "../lib/audio";
 import { store } from "../lib/storage";
 import { createCard, type CardOptions, type GameCard } from "../ui/card";
 import { fillTicker } from "../ui/ticker";
+import { createScoreboard } from "../ui/scoreboard";
 import { pad, fmt } from "../games/format";
 import type { MountedGame } from "../games/types";
 import { mountDino } from "../games/dino/dino";
@@ -172,12 +173,73 @@ addGame(
 );
 
 /* ---------- ticker ---------- */
-const minerTokens = store.get("miner:state", freshState(0), isMinerState).tokens;
+const isNum = (v: unknown): v is number => typeof v === "number";
+const minerTokens = (): number => store.get("miner:state", freshState(0), isMinerState).tokens;
 fillTicker([
-  `DINO BEST ${pad(store.get<number>("best:dino", 0))}`,
-  `2048 BEST ${store.get<number>("best:2048", 0)}`,
-  `TOKENS MINED ${fmt(minerTokens)}`,
-  `SIMON STREAK ${store.get<number>("best:simon", 0)}`,
+  `DINO BEST ${pad(store.get("best:dino", 0, isNum))}`,
+  `2048 BEST ${store.get("best:2048", 0, isNum)}`,
+  `TOKENS MINED ${fmt(minerTokens())}`,
+  `SIMON STREAK ${store.get("best:simon", 0, isNum)}`,
   "13 CABINETS INSTALLED",
   "INSERT COIN FOR GOOD LUCK",
 ]);
+
+/* ---------- live scoreboard ---------- */
+const lowIsBest = (key: string) => (): string => {
+  const v = store.get(key, 0, isNum);
+  return v ? String(v) : "—";
+};
+const scoreboard = createScoreboard({
+  "sb-dino": () => pad(store.get("best:dino", 0, isNum)),
+  "sb-2048": () => String(store.get("best:2048", 0, isNum)),
+  "sb-tokens": () => fmt(minerTokens()),
+  "sb-simon": () => String(store.get("best:simon", 0, isNum)),
+  "sb-memory": lowIsBest("best:memory"),
+  "sb-lightsout": lowIsBest("best:lightsout"),
+});
+scoreboard.refresh();
+setInterval(() => scoreboard.refresh(), 2000);
+
+/* ---------- reset save data (inline confirm — no browser dialog) ---------- */
+const resetSlot = $("#reset-slot");
+const resetLink = $("#reset-data");
+
+function buildLink(text: string, onClick: () => void): HTMLAnchorElement {
+  const a = document.createElement("a");
+  a.href = "#";
+  a.textContent = text;
+  a.addEventListener("click", (e) => {
+    e.preventDefault();
+    onClick();
+  });
+  return a;
+}
+
+function armReset(): void {
+  const yes = buildLink("YES", doReset);
+  const no = buildLink("NO", disarmReset);
+  resetSlot.replaceChildren("SURE? THIS WIPES ALL SCORES · ", yes, " / ", no);
+}
+
+function disarmReset(): void {
+  resetSlot.replaceChildren(resetLink);
+}
+
+function doReset(): void {
+  store.clearAll();
+  for (const hook of resetHooks) hook();
+  credits = 0;
+  renderCr();
+  scoreboard.refresh();
+  beep(392, 0.08);
+  const done = document.createElement("span");
+  done.textContent = "SAVE DATA CLEARED";
+  done.style.color = "var(--green)";
+  resetSlot.replaceChildren(done);
+  setTimeout(disarmReset, 3000);
+}
+
+resetLink.addEventListener("click", (e) => {
+  e.preventDefault();
+  armReset();
+});

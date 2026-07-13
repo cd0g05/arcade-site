@@ -66,7 +66,8 @@ next_section: "## Partition: feat/foundation"
 
 - [x] Build Lights Out: `logic.ts` (solvable-board generation via random press sequence) with tests + 5×5 UI <!-- id: 26 --> <!-- done: pure logic (press plus-shape w/ edge clipping, self-inverse, generate() returns board+presses so solvability is provable by replay) with 8 specs; UI: 5×5 grid, fewest-presses best (0-sentinel "—"), redeal on click after win, no key claims, game-owned lightsout.css -->
 
-- [ ] Wire scoreboard live updates + reset-save-data inline confirm flow + toasts; build `/style-guide` page from mockup's design-tokens section <!-- id: 27 -->
+- [x] Wire scoreboard live updates + reset-save-data inline confirm flow + toasts; build `/style-guide` page from mockup's design-tokens section <!-- id: 27 --> <!-- done: src/ui/scoreboard.ts is generic (cellId→reader rows from hub.ts; 2s refresh interval + on-load + post-reset); reset flow per ux — inline SURE? … YES / NO (no browser confirm), YES → store.clearAll() + per-game onReset hooks + credits zeroed + green SAVE DATA CLEARED note (3s); /style-guide ported from mockup tokens section, sprite sheet rendered live from generated.ts so it tracks maps.ts -->
+
 - [ ] Run hub key-routing checklist (per approach.md acceptance criteria) and mockup side-by-side visual pass <!-- id: 28 -->
 - [ ] Reflect: update specs; confirm partition acceptance criteria; request Builder approval to merge feat/hub-games → initiative/arcade-buildout <!-- id: 29 -->
 

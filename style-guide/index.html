@@ -5,17 +5,91 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>DESIGN TOKENS — CARTER'S ARCADE</title>
 <meta name="description" content="Design tokens for Carter's Arcade — pixel layer on top of Light Film Room.">
-<script type="module" src="/src/pages/placeholder.ts"></script>
+<script type="module" src="/src/pages/style-guide.ts"></script>
 <script defer src="/_vercel/insights/script.js"></script>
 </head>
 <body>
+
+<header class="top" id="top">
+  <div class="container top-inner">
+    <div class="logo">
+      <div>
+        <h1 class="site">DESIGN TOKENS</h1>
+        <div class="site-sub">pixel layer on top of light film room · living reference</div>
+      </div>
+    </div>
+    <div class="top-ctrl">
+      <a class="button button-secondary back-hub" href="/">← HUB</a>
+    </div>
+  </div>
+</header>
+
 <main class="container">
   <section class="sec">
-    <h2 class="sec-label">DESIGN TOKENS <small>// FULL PAGE LANDS IN feat/hub-games</small></h2>
-    <div class="panel">
-      <p class="tiny"><a href="/">← HUB</a></p>
+    <h2 class="sec-label">DESIGN TOKENS <small>// PIXEL LAYER ON TOP OF LIGHT FILM ROOM</small></h2>
+    <div class="tok-grid">
+
+      <div class="card">
+        <h3>PALETTE — UNCHANGED</h3>
+        <div class="swatches">
+          <div class="sw"><i style="background:#ffffff"></i><span>BASE #FFFFFF</span></div>
+          <div class="sw"><i style="background:#f4f4f5"></i><span>PANEL #F4F4F5</span></div>
+          <div class="sw"><i style="background:#d4d4d8"></i><span>BORDER #D4D4D8</span></div>
+          <div class="sw"><i style="background:#18181b"></i><span>INK #18181B</span></div>
+          <div class="sw"><i style="background:#be185d"></i><span>PINK #BE185D</span></div>
+          <div class="sw"><i style="background:#9d174d"></i><span>PINK-D #9D174D</span></div>
+          <div class="sw"><i style="background:#047857"></i><span>GREEN #047857</span></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>TILE RAMP — 2048</h3>
+        <div class="ramp">
+          <i style="background:#fdf2f8"></i><i style="background:#fce7f3"></i><i style="background:#fbcfe8"></i>
+          <i style="background:#f9a8d4"></i><i style="background:#f472b6"></i><i style="background:#ec4899"></i>
+          <i style="background:#db2777"></i><i style="background:#be185d"></i><i style="background:#9d174d"></i>
+          <i style="background:#831843"></i><i style="background:#047857"></i>
+        </div>
+        <p class="tiny">PINK 50 → 900 · GREEN RESERVED FOR THE 2048 TILE ITSELF</p>
+      </div>
+
+      <div class="card">
+        <h3>TYPE TIERS</h3>
+        <p style="font-family:var(--font-display);font-size:.78rem;margin-bottom:10px;line-height:1.8">DISPLAY: PRESS START 2P</p>
+        <p style="font-family:var(--font-ui);font-size:.82rem;margin-bottom:10px"><b>UI: JetBrains Mono</b> 0123456789</p>
+        <p style="font-size:.92rem">Body: Helvetica Neue — prose stays quiet so the pixels can be loud.</p>
+        <p class="tiny">PRESS START 2P STANDS IN FOR DRUK — SAME TIER STRUCTURE, ARCADE FLAVOR, OPEN-LICENSE.</p>
+      </div>
+
+      <div class="card">
+        <h3>SPRITE SHEET</h3>
+        <div class="spr-sheet" id="spr-sheet"></div>
+        <p class="tiny">GENERATED FROM ASCII MAPS (src/sprites/maps.ts → npm run sprites) · ONE RECT PER PIXEL RUN, PALETTE COLORS ONLY · CRISP AT ANY SIZE</p>
+      </div>
+
+      <div class="card">
+        <h3>PIXEL MOVES</h3>
+        <p class="tiny" style="margin-top:0">HARD OFFSET SHADOWS (4PX 4PX 0 INK) · STEPS() EASING, NO SMOOTH TWEENS · SCANLINES ON GAME SCREENS ONLY · 8PX SQUARE LEDS · BLINKING VEIL TEXT · GRAPH-PAPER PAGE BACKGROUND · BORDER-RADIUS 0 EVERYWHERE</p>
+      </div>
+
+      <div class="card">
+        <h3>PILLS</h3>
+        <span class="pill">PUZZLE</span>
+        <span class="pill pill--live">LIVE</span>
+        <span class="pill pill--soon">SOON</span>
+        <span class="pill pill--daily">DAILY <b class="daily-num">#0</b></span>
+        <span class="pill pill--on">ALWAYS ON</span>
+      </div>
+
     </div>
   </section>
 </main>
+
+<footer>
+  <div class="container">
+    <p>INTERNAL LIVING REFERENCE — THE HUB IS THE PRODUCT. · <a href="/">← BACK TO THE ARCADE</a></p>
+  </div>
+</footer>
+
 </body>
 </html>
