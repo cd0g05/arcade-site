@@ -54,7 +54,8 @@ next_section: "## Partition: feat/foundation"
 
 - [x] Build hub page structure + chrome from mockup: header (SND toggle, credits, INSERT COIN), ticker, hub-games grid, Cabinets grid (SOON pills), high-scores panel, controls legend (touch-aware copy) <!-- id: 20 --> <!-- done: index.html carries the full static structure (mockup parity); 13 cabinet cards all SOON for now (6 roster + 7 mockup-flavor incl. Sudoku; Setrit got an original pipeline sprite); #live-grid is an empty mount — game cards are built per-game via card.ts; chrome wired in src/pages/hub.ts (SND, credits+coin, daily #, ticker via new src/ui/ticker.ts, shared pad/fmt in src/games/format.ts); ADDITIVE change to src/sprites: 4 new maps (tube/bricks/invader decoded from mockup SVGs, setrit original) + regenerated generated.ts, sprite specs green -->
 
-- [ ] Port Dino Run to a cartridge (canvas, procedural obstacles, jump physics, speed ramp, best persisted; click/tap/space/↑/W) <!-- id: 21 -->
+- [x] Port Dino Run to a cartridge (canvas, procedural obstacles, jump physics, speed ramp, best persisted; click/tap/space/↑/W) <!-- id: 21 --> <!-- done: faithful port of mockup step/draw onto createLoop (fixed 60Hz update — correct speed on 120Hz displays); setupScreen dprCap 1 (mockup-exact backing store); jump via claimed keys + canvas pointerdown gated on Hub.current; best:dino via store with validator; stats through card.setStat/flashStat; stop() preserves scene for PAUSED veil -->
+
 - [ ] Port 2048: `logic.ts` (slide/merge/spawn/game-over) with unit tests + cartridge UI (arrows/WASD/swipe, board persistence, NEW GAME, NO MOVES LEFT overlay) <!-- id: 22 -->
 - [ ] Port Token Miner as alwaysOn cartridge: `logic.ts` (rates, costs, offline earnings with 4h cap and negative-delta clamp) with tests + UI (mine button, BUY MINER, toast) <!-- id: 23 -->
 - [ ] Build Simon (sequence playback with per-pad tone+flash, click/tap input, best streak) <!-- id: 24 -->

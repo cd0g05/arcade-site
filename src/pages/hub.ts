@@ -7,10 +7,14 @@
  * which owns all wake/sleep/fullscreen/key routing.
  */
 import "../styles/main.css";
+import { Hub } from "../lib/hub";
 import { beep, soundEnabled, toggleSound } from "../lib/audio";
 import { store } from "../lib/storage";
+import { createCard, type CardOptions, type GameCard } from "../ui/card";
 import { fillTicker } from "../ui/ticker";
 import { pad, fmt } from "../games/format";
+import type { MountedGame } from "../games/types";
+import { mountDino } from "../games/dino/dino";
 
 function $<T extends HTMLElement>(sel: string): T {
   const el = document.querySelector<T>(sel);
@@ -53,6 +57,35 @@ renderCr();
 const now = new Date();
 const doy = Math.floor((now.getTime() - new Date(now.getFullYear(), 0, 0).getTime()) / 86400000);
 document.querySelectorAll(".daily-num").forEach((el) => (el.textContent = `#${doy}`));
+
+/* ---------- hub games ---------- */
+const grid = $("#live-grid");
+const resetHooks: (() => void)[] = [];
+
+function addGame(opts: CardOptions, mount: (card: GameCard) => MountedGame): void {
+  const card = createCard(opts);
+  grid.appendChild(card.root);
+  const mounted = mount(card);
+  Hub.register(opts.id, mounted.api, card.root);
+  resetHooks.push(() => mounted.onReset());
+}
+
+addGame(
+  {
+    id: "dino",
+    title: "DINO RUN",
+    wide: true,
+    veilMsg: "▶ CLICK TO WAKE",
+    veilSub: "[SPACE] JUMP · OR TAP",
+    stats: [
+      { label: "SCORE", value: "0000" },
+      { label: "BEST", value: "0000" },
+    ],
+    pill: "RUNNER",
+    ariaLabel: "Dino Run — click to play",
+  },
+  mountDino,
+);
 
 /* ---------- ticker ---------- */
 const minerTokens = store.get<{ tokens: number }>(
