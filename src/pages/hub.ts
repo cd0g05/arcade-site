@@ -19,6 +19,7 @@ import { mountG2048 } from "../games/g2048/g2048";
 import { mountMiner } from "../games/miner/miner";
 import { freshState, isMinerState } from "../games/miner/logic";
 import { mountSimon } from "../games/simon/simon";
+import { mountMemory } from "../games/memory/memory";
 
 function $<T extends HTMLElement>(sel: string): T {
   const el = document.querySelector<T>(sel);
@@ -133,6 +134,23 @@ addGame(
     ariaLabel: "Simon — click to play",
   },
   mountSimon,
+);
+
+addGame(
+  {
+    id: "memory",
+    title: "MEMORY",
+    centerBody: true,
+    veilMsg: "▶ CLICK TO WAKE",
+    veilSub: "MATCH THE SPRITES · FEWEST MOVES WINS",
+    stats: [
+      { label: "MOVES", value: "0" },
+      { label: "BEST", value: "—" },
+    ],
+    pill: "PAIRS",
+    ariaLabel: "Memory — click to play",
+  },
+  mountMemory,
 );
 
 /* ---------- ticker ---------- */
