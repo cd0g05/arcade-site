@@ -1,0 +1,85 @@
+/* minesweeper.css — game-owned styles (src/styles is frozen). */
+
+.ms-scroll {
+  overflow-x: auto;
+  padding: 4px 0;
+}
+
+.ms-grid {
+  display: grid;
+  gap: 2px;
+  width: max-content;
+  margin: 0 auto;
+}
+
+.ms-cell {
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: 1px solid var(--border);
+  background: var(--panel);
+  font-family: var(--font-ui);
+  font-size: 0.72rem;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--ink);
+  cursor: pointer;
+  border-radius: 0;
+}
+
+.ms-cell:hover {
+  border-color: var(--ink);
+}
+
+.ms-cell--open {
+  background: var(--base);
+  border-color: var(--grid);
+  cursor: default;
+}
+
+.ms-cell--flag {
+  color: var(--pink);
+}
+
+.ms-cell--mine {
+  background: var(--pink);
+  color: #fff;
+  border-color: var(--pink-dark);
+}
+
+.ms-cell[data-n="1"] { color: var(--green); }
+.ms-cell[data-n="2"] { color: var(--pink); }
+.ms-cell[data-n="3"] { color: var(--pink-dark); }
+
+.ms-diffs {
+  display: flex;
+  gap: 6px;
+}
+
+.ms-diff {
+  font-family: var(--font-ui);
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+  padding: 3px 8px;
+  border: 1px solid var(--border);
+  background: var(--base);
+  color: var(--sub);
+  cursor: pointer;
+  border-radius: 0;
+}
+
+.ms-diff--on {
+  border-color: var(--ink);
+  color: var(--ink);
+  font-weight: 700;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .ms-cell--mine {
+    animation: ms-pop 0.18s steps(2, end);
+  }
+  @keyframes ms-pop {
+    from { transform: scale(0.6); }
+    to { transform: scale(1); }
+  }
+}

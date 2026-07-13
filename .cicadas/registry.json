@@ -14,6 +14,11 @@
           "timestamp": "2026-07-13T02:29:45.557072+00:00",
           "message": "FROZEN-LAYER CHANGES on feat/launch (a11y pass, task 72): tokens.css --sub darkened #a1a1aa \u2192 #52525b (WCAG AA small-text contrast); arcade.css .cab--soon now dims sprite only (was whole-card opacity \u2014 killed pill contrast); base.css underlines links inside .tiny/footer + .panel h2.panel-heading joins the h3 rule; src/ui/cabinet.ts legend heading h3 \u2192 h2.panel-heading, sound button aria-label dropped (visible text is the name). Cabinet partitions inherit these \u2014 no action needed, but re-run Lighthouse on new cabinet pages.",
           "from_branch": "main"
+        },
+        {
+          "timestamp": "2026-07-13T07:32:24.350236+00:00",
+          "message": "SEQUENCING NOTE: cabinet partitions were built stacked (feat/cabinets-action on feat/launch, feat/cabinets-puzzle on feat/cabinets-action). Merge order: hub-games -> launch -> cabinets-action -> cabinets-puzzle (or a single merge of cabinets-puzzle carries all four). Launch task 70 was completed inside the cabinet partitions.",
+          "from_branch": "feat/cabinets-puzzle"
         }
       ],
       "created_at": "2026-07-12T22:23:07.577483+00:00"
@@ -63,6 +68,35 @@
       "owner": "unknown",
       "created_at": "2026-07-13T02:21:45.986200+00:00",
       "worktree_path": "/Users/cartercripe/dev/code/projects/personal-site/arcade-feat-launch",
+      "initiative": "arcade-buildout"
+    },
+    "feat/cabinets-action": {
+      "intent": "Action cabinets: Snake, Bricks, Aim Trainer on the shared cabinet scaffold; owns cabinet-entry.ts; flips their hub cards LIVE (stacked on feat/launch per Builder-directed sequencing)",
+      "modules": [
+        "games/bricks",
+        "src/games/aim",
+        "src/games/snake",
+        "games/snake",
+        "games/aim",
+        "src/pages/cabinet-entry.ts",
+        "src/games/bricks"
+      ],
+      "owner": "unknown",
+      "created_at": "2026-07-13T07:05:16.894350+00:00",
+      "initiative": "arcade-buildout"
+    },
+    "feat/cabinets-puzzle": {
+      "intent": "Puzzle cabinets: Minesweeper, Water Sort, Setrit on the shared scaffold (tested logic.ts each); flips their hub cards LIVE (stacked on feat/cabinets-action)",
+      "modules": [
+        "src/games/setrit",
+        "src/games/watersort",
+        "games/setrit",
+        "games/minesweeper",
+        "games/water-sort",
+        "src/games/minesweeper"
+      ],
+      "owner": "unknown",
+      "created_at": "2026-07-13T07:18:09.053829+00:00",
       "initiative": "arcade-buildout"
     }
   }

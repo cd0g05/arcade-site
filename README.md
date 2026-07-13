@@ -43,7 +43,7 @@ The hub (`/`) is a grid of **cartridges** — games that live in cards and wake 
 4. **Persist through `src/lib/storage.ts` only**: `store.get("best:yourgame", 0, validator)` — keys are `arcade:`-prefixed, reads are tolerant (corrupt data falls back, never crashes). Fewest-moves-style bests use `0` = unset, rendered `—`.
 5. **Real-time games** use `createLoop` (`src/lib/loop.ts`, fixed 60 Hz update + rAF render) and `setupScreen` (`src/lib/screen.ts`, low-res pixelated canvas). Turn-based games skip the loop and render on input.
 6. **Sprites** are ASCII maps in `src/sprites/maps.ts` (palette chars only) → `npm run sprites` regenerates the committed SVG module. Sound is `beep()` from `src/lib/audio.ts` — synthesized only, no audio files.
-7. **Cabinet games** additionally get `games/{slug}/index.html` (copy an existing one), a `vite.config.ts` rollup input, and the shared scaffold from `src/ui/cabinet.ts`.
+7. **Cabinet games** instead export `def: CabinetDef` (`options` for the scaffold + `mount`), get a 3-line `games/{slug}/index.html` shell (`<body data-game="{slug}">`, copy an existing one), a `vite.config.ts` rollup input, and an entry in the `LOADERS` map in `src/pages/cabinet-entry.ts` — the shared bootstrapper renders the scaffold and registers the game. On game over, sleep yourself (`Hub.sleep()`) and restyle the veil so the page gets its scroll keys back.
 
 ## Naming doctrine
 
