@@ -173,7 +173,9 @@ a.cab:hover {
 a.cab:hover .go { opacity: 1; }
 a.cab:active { transform: translate(0, 0); box-shadow: 2px 2px 0 var(--ink); }
 a.cab:focus-visible { outline: 2px solid var(--pink); outline-offset: 2px; }
-.cab--soon { opacity: .55; cursor: not-allowed; }
+.cab--soon { cursor: not-allowed; }
+.cab--soon .spr { opacity: .55; }
+.cab--soon .cab-name { color: var(--sub); }
 
 /* ---------- cabinet page scaffold (NEW — consumed by src/ui/cabinet.ts) ---------- */
 .cabinet-main { max-width: 900px; margin: 0 auto; }

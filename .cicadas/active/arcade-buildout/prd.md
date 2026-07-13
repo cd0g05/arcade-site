@@ -126,7 +126,7 @@ A month after launch Carter wants to add Whack-a-Mole in an evening. He copies t
 - Style system ported from the mockup: Light Film Room tokens + pixel layer (offset shadows, `steps()` timing, scanline overlay on game screens, LED indicators), self-hosted Press Start 2P + JetBrains Mono.
 - Sprite pipeline: build-time generation of crisp-edges inline SVG from ASCII pixel maps (replacing the mockup's `build.py`).
 - Hub page: header (sound toggle, decorative credits/insert-coin), live ticker, hub-game grid, Cabinets grid with LIVE/SOON pills, high-scores panel, controls legend, reset-save-data flow.
-- **6 hub-embedded games:** Dino Run, 2048, Token Miner (ported from mockup) + Simon, Memory (card-flip), Lights Out (new).
+- **6 hub-embedded games:** Dino Run, 2048, Token Miner (ported from mockup) + ECHO (né Simon — renamed, protected mark), Memory (card-flip), Lights Out (new).
 - **6 cabinets** on a shared cabinet scaffold: Snake, Minesweeper, Bricks (Breakout), Aim Trainer, Water Sort, Setrit (Tetris clone).
 - `/style-guide` page preserving the mockup's Design Tokens section as an internal living reference.
 
@@ -176,7 +176,7 @@ A month after launch Carter wants to add Whack-a-Mole in an evening. He copies t
 **FR-3.1:** **Dino Run** — canvas runner ported at feature parity: procedural obstacles, jump physics (space/↑/W/click/tap), speed ramp, best score persisted.
 **FR-3.2:** **2048** — full slide/merge/spawn/game-over logic, arrows + WASD + swipe, board state and best persisted, NEW GAME control, NO MOVES LEFT overlay.
 **FR-3.3:** **Token Miner** — `alwaysOn` idle clicker: click-to-mine, buyable auto-miners with scaling cost, offline earnings on return capped at 4 h, state persisted.
-**FR-3.4:** **Simon** — pattern-echo memory game: growing sequence with distinct tone+flash per pad, click/tap input, best-streak persisted.
+**FR-3.4:** **ECHO** *(built as "Simon"; renamed at the launch naming pass — SIMON is a live Hasbro mark, US Reg. 1211692)* — pattern-echo memory game: growing sequence with distinct tone+flash per pad, click/tap input, best-streak persisted.
 **FR-3.5:** **Memory** — card-flip pairs using pipeline sprites; move counter and best (fewest moves) persisted.
 **FR-3.6:** **Lights Out** — 5×5 toggle-neighbors puzzle, always-solvable board generation, move counter and best persisted.
 
@@ -222,7 +222,7 @@ All resolved by Builder (2026-07-12):
 
 - **Subdomain name** — ✅ `arcade.cartercripe.com` confirmed.
 - **Analytics** — ✅ Yes: **Vercel Web Analytics** (easiest/best given Vercel hosting — dashboard toggle + first-party `/_vercel/insights/script.js` tag on every page; cookieless, no third-party domain, no npm dependency). See FR-7.2.
-- **Game naming** — ✅ Policy: use the normal name unless it's a protected trademark. Applied: Setrit stays (Tetris — protected), Bricks stays (Breakout — Atari mark); Snake, Minesweeper, 2048, Simon, Memory, Lights Out, Water Sort, Aim Trainer ship under their normal names. The launch naming pass double-checks Simon (nominal Hasbro mark) only.
+- **Game naming** — ✅ Policy: use the normal name unless it's a protected trademark. Applied: Setrit stays (Tetris — protected), Bricks stays (Breakout — Atari mark); Snake, Minesweeper, 2048, Memory, Lights Out, Water Sort, Aim Trainer ship under their normal names. Launch naming pass 2026-07-12: Simon verified as a LIVE Hasbro mark (US Reg. 1211692) → shipped as **ECHO**.
 
 ---
 

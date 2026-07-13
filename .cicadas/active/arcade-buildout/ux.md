@@ -278,3 +278,23 @@ arcade.cartercripe.com/
 - `aria-label` on icon-only buttons (⛶, miner token button); veil state changes announced via `aria-live="polite"` on the card status line.
 - `prefers-reduced-motion`: ticker scroll, veil blink, and LED pulse disabled; games themselves still animate (they're the content).
 - Touch targets ≥ 44×44px for all buttons/pads; long-press = flag (Minesweeper), swipe = direction (2048, Snake), documented in the controls legend which swaps to touch copy on coarse pointers.
+
+---
+
+## Hub-Games Reflect Notes (feat/hub-games, 2026-07-12)
+
+Copy/IA reality vs. this spec — recorded at partition completion:
+
+- **Veil copy as shipped**: asleep veil is `▶ CLICK TO WAKE` (keeps the mockup's ▶ glyph); paused veil is `PAUSED · CLICK TO RESUME` (middle dot per the mockup — the copy table's em-dash variant was normalized to the mockup character, set by frozen `hub.ts`).
+- **Reset feedback**: `SAVE DATA CLEARED` renders inline in the scores panel where the link was (green, 3 s), rather than as a floating toast — consistent with the "no global toast system" rule; the miner keeps its own per-card toast for offline earnings.
+- **Cabinets grid**: 13 cards (roster six + mockup's seven flavor cards incl. Sudoku's DAILY pill), all `SOON` until launch flips the roster six to LIVE links.
+- **Scoreboard rows**: Dino, 2048, Tokens Mined, Simon Streak, Memory Moves, Lights Out Moves (fewest-moves rows show `—` until set), plus Snake/Minesweeper placeholders (`—`) for the cabinet partitions.
+- **Controls legend**: touch-aware copy shipped (CLICK/TAP, swipe guidance, note that mouse games never capture arrows).
+
+---
+
+## Launch Reflect Notes (feat/launch, 2026-07-12)
+
+- **Simon is now ECHO** everywhere in copy: card title `ECHO`, pill `MEMORY`, scoreboard row `ECHO STREAK`, ticker `ECHO STREAK {n}`, controls legend "Echo pads, Memory cards, Lights Out grid…".
+- **Contrast**: supporting text tone darkened (`--sub` #52525b) and SOON cabinet cards dim their sprite rather than all their text — same visual hierarchy, WCAG AA at small sizes.
+- **Links in fine print are underlined** (reset link, footer) — color alone no longer carries them.

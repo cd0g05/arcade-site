@@ -10,7 +10,7 @@
   --border: #d4d4d8;
   --grid: #e4e4e7;
   --ink: #18181b;
-  --sub: #a1a1aa;
+  --sub: #52525b; /* a11y: darkened from #a1a1aa — 4.5:1+ on base AND panel at small sizes */
   --pink: #be185d;
   --pink-dark: #9d174d;
   --green: #047857;

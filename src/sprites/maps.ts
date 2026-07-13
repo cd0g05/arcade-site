@@ -81,6 +81,52 @@ export const SPRITE_MAPS = {
     "..k.....k..",
     "...kkkkk...",
   ],
+  /** Water tube — Water Sort cabinet icon (decoded from the mockup). */
+  tube: [
+    "kk....kk",
+    ".k....k.",
+    ".k....k.",
+    ".kppppk.",
+    ".kppppk.",
+    ".kggggk.",
+    ".kggggk.",
+    ".kggggk.",
+    ".kkkkkk.",
+  ],
+  /** Brick wall + paddle + ball — Bricks cabinet icon (decoded from the mockup). */
+  bricks: [
+    "pppp.pppp.pp",
+    "pppp.pppp.pp",
+    "............",
+    "pp.pppp.pppp",
+    "pp.pppp.pppp",
+    "............",
+    ".....kk.....",
+    "............",
+    "...kkkkkk...",
+  ],
+  /** Pixel invader — Invaders cabinet icon (decoded from the mockup). */
+  invader: [
+    "..k.....k..",
+    "...k...k...",
+    "..kkkkkkk..",
+    ".kk.kkk.kk.",
+    "kkkkkkkkkkk",
+    "k.kkkkkkk.k",
+    "k.k.....k.k",
+    "...kk.kk...",
+  ],
+  /** Falling S-piece over a settled stack — Setrit cabinet icon (original). */
+  setrit: [
+    "...ppp....",
+    ".ppppp....",
+    ".ppp......",
+    "..........",
+    "........gg",
+    "gg.ggg..gg",
+    "gggggggggg",
+    "gggggggggg",
+  ],
 } as const satisfies Record<string, SpriteRows>;
 
 export type SpriteName = keyof typeof SPRITE_MAPS;

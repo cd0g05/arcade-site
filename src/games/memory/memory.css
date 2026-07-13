@@ -1,0 +1,60 @@
+/* memory.css — flip-pairs grid for the Memory cartridge (game-owned styles). */
+.mem {
+  display: grid;
+  grid-template-columns: repeat(4, 52px);
+  grid-auto-rows: 52px;
+  gap: 6px;
+  padding: 6px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+}
+.gcard.fs .mem {
+  grid-template-columns: repeat(4, min(13vmin, 96px));
+  grid-auto-rows: min(13vmin, 96px);
+}
+.mem-card {
+  border: 1px solid var(--grid);
+  background: var(--base);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  padding: 0;
+}
+.mem-card:focus-visible {
+  outline: 2px solid var(--pink);
+  outline-offset: 1px;
+}
+.mem-card .spr {
+  width: 26px;
+  height: auto;
+  display: none;
+}
+.gcard.fs .mem-card .spr {
+  width: 48px;
+}
+.mem-back {
+  font-family: var(--font-display);
+  font-size: 0.7rem;
+  color: var(--border);
+}
+.mem-card.flipped .spr,
+.mem-card.matched .spr {
+  display: block;
+}
+.mem-card.flipped .mem-back,
+.mem-card.matched .mem-back {
+  display: none;
+}
+.mem-card.matched {
+  border-color: var(--green);
+  opacity: 0.7;
+  cursor: default;
+}
+.mem-status {
+  font-family: var(--font-ui);
+  font-size: 0.62rem;
+  color: var(--sub);
+  letter-spacing: 0.06em;
+  text-align: center;
+  min-height: 1em;
+}
