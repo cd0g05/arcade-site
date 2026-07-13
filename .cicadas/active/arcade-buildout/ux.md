@@ -290,3 +290,11 @@ Copy/IA reality vs. this spec — recorded at partition completion:
 - **Cabinets grid**: 13 cards (roster six + mockup's seven flavor cards incl. Sudoku's DAILY pill), all `SOON` until launch flips the roster six to LIVE links.
 - **Scoreboard rows**: Dino, 2048, Tokens Mined, Simon Streak, Memory Moves, Lights Out Moves (fewest-moves rows show `—` until set), plus Snake/Minesweeper placeholders (`—`) for the cabinet partitions.
 - **Controls legend**: touch-aware copy shipped (CLICK/TAP, swipe guidance, note that mouse games never capture arrows).
+
+---
+
+## Launch Reflect Notes (feat/launch, 2026-07-12)
+
+- **Simon is now ECHO** everywhere in copy: card title `ECHO`, pill `MEMORY`, scoreboard row `ECHO STREAK`, ticker `ECHO STREAK {n}`, controls legend "Echo pads, Memory cards, Lights Out grid…".
+- **Contrast**: supporting text tone darkened (`--sub` #52525b) and SOON cabinet cards dim their sprite rather than all their text — same visual hierarchy, WCAG AA at small sizes.
+- **Links in fine print are underlined** (reset link, footer) — color alone no longer carries them.
