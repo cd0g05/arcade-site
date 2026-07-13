@@ -20,6 +20,7 @@ import { mountMiner } from "../games/miner/miner";
 import { freshState, isMinerState } from "../games/miner/logic";
 import { mountSimon } from "../games/simon/simon";
 import { mountMemory } from "../games/memory/memory";
+import { mountLightsOut } from "../games/lightsout/lightsout";
 
 function $<T extends HTMLElement>(sel: string): T {
   const el = document.querySelector<T>(sel);
@@ -151,6 +152,23 @@ addGame(
     ariaLabel: "Memory — click to play",
   },
   mountMemory,
+);
+
+addGame(
+  {
+    id: "lightsout",
+    title: "LIGHTS OUT",
+    centerBody: true,
+    veilMsg: "▶ CLICK TO WAKE",
+    veilSub: "TURN EVERY LIGHT OFF · CLICK OR TAP",
+    stats: [
+      { label: "MOVES", value: "0" },
+      { label: "BEST", value: "—" },
+    ],
+    pill: "PUZZLE",
+    ariaLabel: "Lights Out — click to play",
+  },
+  mountLightsOut,
 );
 
 /* ---------- ticker ---------- */

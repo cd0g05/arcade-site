@@ -1,0 +1,43 @@
+/* lightsout.css — 5×5 toggle grid for the Lights Out cartridge (game-owned styles). */
+.lo {
+  display: grid;
+  grid-template-columns: repeat(5, 40px);
+  grid-auto-rows: 40px;
+  gap: 5px;
+  padding: 6px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+}
+.gcard.fs .lo {
+  grid-template-columns: repeat(5, min(11vmin, 76px));
+  grid-auto-rows: min(11vmin, 76px);
+}
+.lo-cell {
+  border: 1px solid var(--grid);
+  background: var(--base);
+  padding: 0;
+  cursor: pointer;
+  transition: background 0.06s steps(2, end);
+}
+.lo-cell.lit {
+  background: var(--pink);
+  border-color: var(--pink-dark);
+  box-shadow: 2px 2px 0 var(--ink);
+}
+.lo-cell:focus-visible {
+  outline: 2px solid var(--pink);
+  outline-offset: 1px;
+}
+.lo-status {
+  font-family: var(--font-ui);
+  font-size: 0.62rem;
+  color: var(--sub);
+  letter-spacing: 0.06em;
+  text-align: center;
+  min-height: 1em;
+}
+@media (prefers-reduced-motion: reduce) {
+  .lo-cell {
+    transition: none;
+  }
+}
