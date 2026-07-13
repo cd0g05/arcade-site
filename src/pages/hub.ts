@@ -16,6 +16,8 @@ import { pad, fmt } from "../games/format";
 import type { MountedGame } from "../games/types";
 import { mountDino } from "../games/dino/dino";
 import { mountG2048 } from "../games/g2048/g2048";
+import { mountMiner } from "../games/miner/miner";
+import { freshState, isMinerState } from "../games/miner/logic";
 
 function $<T extends HTMLElement>(sel: string): T {
   const el = document.querySelector<T>(sel);
@@ -104,13 +106,19 @@ addGame(
   mountG2048,
 );
 
+addGame(
+  {
+    id: "miner",
+    title: "TOKEN MINER",
+    centerBody: true,
+    alwaysOn: true,
+    ariaLabel: "Token Miner — always running",
+  },
+  mountMiner,
+);
+
 /* ---------- ticker ---------- */
-const minerTokens = store.get<{ tokens: number }>(
-  "miner:state",
-  { tokens: 0 },
-  (v): v is { tokens: number } =>
-    typeof v === "object" && v !== null && typeof (v as { tokens?: unknown }).tokens === "number",
-).tokens;
+const minerTokens = store.get("miner:state", freshState(0), isMinerState).tokens;
 fillTicker([
   `DINO BEST ${pad(store.get<number>("best:dino", 0))}`,
   `2048 BEST ${store.get<number>("best:2048", 0)}`,

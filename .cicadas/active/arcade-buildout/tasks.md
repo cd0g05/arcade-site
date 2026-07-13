@@ -58,7 +58,8 @@ next_section: "## Partition: feat/foundation"
 
 - [x] Port 2048: `logic.ts` (slide/merge/spawn/game-over) with unit tests + cartridge UI (arrows/WASD/swipe, board persistence, NEW GAME, NO MOVES LEFT overlay) <!-- id: 22 --> <!-- done: pure logic module (immutable boards, injectable rand, isSavedState validator) with 12 specs incl. no-double-merge + non-mutation; UI restores saved board on load (over-state re-shown), swipe via gestures() gated on Hub.current, NEW GAME in card foot, merged-tile pop animation, best:2048 + 2048:state persisted -->
 
-- [ ] Port Token Miner as alwaysOn cartridge: `logic.ts` (rates, costs, offline earnings with 4h cap and negative-delta clamp) with tests + UI (mine button, BUY MINER, toast) <!-- id: 23 -->
+- [x] Port Token Miner as alwaysOn cartridge: `logic.ts` (rates, costs, offline earnings with 4h cap and negative-delta clamp) with tests + UI (mine button, BUY MINER, toast) <!-- id: 23 --> <!-- done: pure logic (cost curve, offlineGain w/ 4h cap + backwards-clock clamp, buyMiner, isMinerState validator) with 9 specs; UI on tech-design key arcade:miner:state {tokens,miners,last} (NOT mockup's arcade:clicker — validator rejects old shape → fresh fallback); alwaysOn card, token sprite from pipeline, 250ms tick / 5s save / beforeunload save, toast "WHILE YOU WERE GONE: +{n}" per ux copy -->
+
 - [ ] Build Simon (sequence playback with per-pad tone+flash, click/tap input, best streak) <!-- id: 24 -->
 - [ ] Build Memory (card-flip pairs with pipeline sprites, move counter, best) <!-- id: 25 -->
 - [ ] Build Lights Out: `logic.ts` (solvable-board generation via random press sequence) with tests + 5×5 UI <!-- id: 26 -->
