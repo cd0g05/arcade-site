@@ -68,7 +68,11 @@ next_section: "## Partition: feat/foundation"
 
 - [x] Wire scoreboard live updates + reset-save-data inline confirm flow + toasts; build `/style-guide` page from mockup's design-tokens section <!-- id: 27 --> <!-- done: src/ui/scoreboard.ts is generic (cellId→reader rows from hub.ts; 2s refresh interval + on-load + post-reset); reset flow per ux — inline SURE? … YES / NO (no browser confirm), YES → store.clearAll() + per-game onReset hooks + credits zeroed + green SAVE DATA CLEARED note (3s); /style-guide ported from mockup tokens section, sprite sheet rendered live from generated.ts so it tracks maps.ts -->
 
-- [ ] Run hub key-routing checklist (per approach.md acceptance criteria) and mockup side-by-side visual pass <!-- id: 28 -->
+- [x] Run hub key-routing checklist (per approach.md acceptance criteria) and mockup side-by-side visual pass <!-- id: 28 --> <!-- headless portion done: static audit — document-level listeners exist ONLY in src/lib/hub.ts; preventDefault callers are hub.ts (nav keys), input.ts (contextmenu during long-press, element-scoped), and the reset link's href="#" suppression; only dino + g2048 claim keys (Simon/Memory/LightsOut claim none, so arrows scroll while they're awake); build + tsc + 50 tests green; all 9 pages 200 under vite preview; hub JS 17.5 kB (6.6 kB gz) ≪ 100 kB budget. Real-browser items below for the Builder — no browser automation in this environment: -->
+  - [ ] MANUAL (Builder): hub key-routing checklist in a real browser — fresh load scrolls with arrows/space; wake Dino → space jumps, page doesn't scroll; wake 2048 → arrows slide; wake Simon/Memory/Lights Out → arrows STILL scroll; click-away pauses under PAUSED · CLICK TO RESUME; Esc pauses; F/⛶ fullscreen + Esc exits; Miner ticks while another game is awake
+  - [ ] MANUAL (Builder): mockup side-by-side visual pass (spacing, pills, LEDs, veils, ticker) — open Arcade Mockup Claude.html next to `npm run dev`
+  - [ ] MANUAL (Builder): touch pass — tap wakes; swipe slides 2048 tiles without scrolling while awake; asleep cards scroll normally; miner tap-mines
+
 - [ ] Reflect: update specs; confirm partition acceptance criteria; request Builder approval to merge feat/hub-games → initiative/arcade-buildout <!-- id: 29 -->
 
 ## Partition: feat/cabinets-action
