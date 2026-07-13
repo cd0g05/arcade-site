@@ -73,7 +73,8 @@ next_section: "## Partition: feat/foundation"
   - [ ] MANUAL (Builder): mockup side-by-side visual pass (spacing, pills, LEDs, veils, ticker) — open Arcade Mockup Claude.html next to `npm run dev`
   - [ ] MANUAL (Builder): touch pass — tap wakes; swipe slides 2048 tiles without scrolling while awake; asleep cards scroll normally; miner tap-mines
 
-- [ ] Reflect: update specs; confirm partition acceptance criteria; request Builder approval to merge feat/hub-games → initiative/arcade-buildout <!-- id: 29 -->
+- [x] Reflect: update specs; confirm partition acceptance criteria; request Builder approval to merge feat/hub-games → initiative/arcade-buildout <!-- id: 29 --> <!-- done: tech-design gained "Hub-Games Reflect Notes" (new best:* keys w/ 0-sentinel, game-owned CSS pattern, ticker/scoreboard/format/types modules, sprite additions, wake-click gating, a11y deferral to task 72); ux.md gained copy/IA notes (veil copy as shipped, inline reset feedback, 13-card grid, scoreboard rows); approach.md partition-2 criteria annotated (3 verified, 3 NEED Builder browser/visual pass); code review run — no blocking findings; 2 advisories recorded (focus-behind-veil → launch a11y task; Simon replays a completed round on resume, accepted). AWAITING BUILDER: real-browser + touch + visual checklist, and approval to merge feat/hub-games → initiative/arcade-buildout -->
+
 
 ## Partition: feat/cabinets-action
 
