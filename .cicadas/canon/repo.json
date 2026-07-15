@@ -1,0 +1,263 @@
+{
+  "schema_version": 1,
+  "scan_version": 1,
+  "generated_at": "2026-07-15T05:22:01.433077+00:00",
+  "repo_mode": "large-repo",
+  "scan": {
+    "tree_path": "repo-tree.jsonl",
+    "context_path": "repo-context.md",
+    "repo_file_count": 1719,
+    "meaningful_file_count": 89,
+    "estimated_loc": 7883,
+    "source_file_count": 54,
+    "code_file_count": 43,
+    "test_file_count": 11,
+    "documentation_file_count": 5,
+    "generated_or_local_file_count": 1630,
+    "config_file_count": 5,
+    "unknown_file_count": 25,
+    "estimated_code_loc": 5779,
+    "estimated_documentation_loc": 392,
+    "top_level_entries": 6,
+    "dominant_languages": [
+      "typescript"
+    ],
+    "dominant_repository_languages": [
+      "typescript",
+      "javascript",
+      "json"
+    ],
+    "build_systems": [
+      "node"
+    ],
+    "declared_modules": [],
+    "major_code_zones": [
+      "src",
+      "src/games",
+      "src/lib",
+      "src/pages",
+      "src/sprites",
+      "src/styles",
+      "src/tests",
+      "src/ui"
+    ],
+    "build_paths": [
+      "package.json"
+    ],
+    "test_paths": [
+      "src"
+    ],
+    "runtime_package_surfaces": [
+      "package.json",
+      "src",
+      "src/games",
+      "src/lib",
+      "src/pages",
+      "src/sprites",
+      "src/styles",
+      "src/tests"
+    ],
+    "runtime_paths": [
+      "package.json",
+      "src",
+      "src/games",
+      "src/lib",
+      "src/pages",
+      "src/sprites",
+      "src/styles",
+      "src/tests"
+    ],
+    "ownership_zone_candidates": [
+      "src",
+      "src/games",
+      "src/lib",
+      "src/pages",
+      "src/sprites",
+      "src/styles",
+      "src/tests",
+      "src/ui"
+    ]
+  },
+  "classification": {
+    "decision": "large-repo",
+    "scale_class": "normal-repo",
+    "topology_class": "large-repo",
+    "confidence": "medium",
+    "heuristic_scores": {
+      "meaningful_file_count": 89,
+      "estimated_loc": 7883,
+      "source_file_count": 54,
+      "code_file_count": 43,
+      "test_file_count": 11,
+      "documentation_file_count": 5,
+      "generated_or_local_file_count": 1630,
+      "estimated_code_loc": 5779,
+      "estimated_documentation_loc": 392,
+      "declared_module_count": 0,
+      "major_code_zone_count": 8,
+      "test_surface_count": 1,
+      "runtime_surface_count": 8,
+      "build_system_count": 1,
+      "language_count": 1,
+      "topology_score": 2
+    },
+    "evidence": [
+      {
+        "signal": "scale_floor",
+        "observation": "Detected 54 source/test files and 5779 estimated code LoC (with 5 documentation files, 392 documentation LoC, and 1630 generated/local files), giving a scale floor of `normal-repo`.",
+        "weight": "high"
+      },
+      {
+        "signal": "build_structure",
+        "observation": "Detected build systems node and 0 declared modules.",
+        "weight": "high"
+      },
+      {
+        "signal": "routing_surfaces",
+        "observation": "Observed 8 major code zones, 1 test surfaces, and 8 runtime/package surfaces.",
+        "weight": "medium"
+      }
+    ],
+    "ambiguous_with": [],
+    "decision_note": "Auto-classified from build-first structural scan of arcade."
+  },
+  "canon_plan": {
+    "strategy": "locality-first",
+    "orientation": [
+      "product-overview.md",
+      "tech-overview.md",
+      "summary.md"
+    ],
+    "historical_context": {
+      "hand_edit_recommended": true,
+      "why": "Preserve repo history, intent, and local rationale that scan evidence cannot infer safely."
+    },
+    "slice_dirs": [
+      "slices/"
+    ],
+    "seeded_slice_count": 3,
+    "minimum_slice_files": [
+      "summary.md",
+      "boundaries.md",
+      "architecture.md",
+      "invariants.md",
+      "change-guide.md"
+    ],
+    "module_dirs": [],
+    "module_snapshots": "minimal",
+    "generated_targets": [
+      "product-overview.md",
+      "tech-overview.md",
+      "summary.md",
+      "slices/"
+    ]
+  },
+  "slice_strategy": {
+    "unit": "slice",
+    "bootstrap_mode": "seeded-lazy",
+    "path_policy": "contiguous-by-default",
+    "allow_multi_path_when": "Only when repeated real work shows strong co-change across paths.",
+    "deepen_on": [
+      "initiative-start",
+      "tweak-start",
+      "bug-start"
+    ]
+  },
+  "candidate_slices": [
+    {
+      "name": "src",
+      "paths": [
+        "src"
+      ],
+      "status": "seeded",
+      "reason": "major-code-zone"
+    },
+    {
+      "name": "src-games",
+      "paths": [
+        "src/games"
+      ],
+      "status": "seeded",
+      "reason": "major-code-zone"
+    },
+    {
+      "name": "src-lib",
+      "paths": [
+        "src/lib"
+      ],
+      "status": "seeded",
+      "reason": "major-code-zone"
+    },
+    {
+      "name": "src-pages",
+      "paths": [
+        "src/pages"
+      ],
+      "status": "deferred",
+      "reason": "major-code-zone"
+    },
+    {
+      "name": "src-sprites",
+      "paths": [
+        "src/sprites"
+      ],
+      "status": "deferred",
+      "reason": "major-code-zone"
+    },
+    {
+      "name": "src-styles",
+      "paths": [
+        "src/styles"
+      ],
+      "status": "deferred",
+      "reason": "major-code-zone"
+    },
+    {
+      "name": "src-tests",
+      "paths": [
+        "src/tests"
+      ],
+      "status": "deferred",
+      "reason": "major-code-zone"
+    },
+    {
+      "name": "src-ui",
+      "paths": [
+        "src/ui"
+      ],
+      "status": "deferred",
+      "reason": "major-code-zone"
+    }
+  ],
+  "depth_policy": {
+    "seeded": [
+      "src",
+      "src-games",
+      "src-lib"
+    ],
+    "deferred": [
+      "src-pages",
+      "src-sprites",
+      "src-styles",
+      "src-tests",
+      "src-ui"
+    ]
+  },
+  "validation": {
+    "status": "pending",
+    "checks": [
+      "planned docs exist",
+      "seeded slices point to real code paths",
+      "orientation docs reflect real repo history and boundaries"
+    ],
+    "autocorrections": []
+  },
+  "graph_follow_on": {
+    "status": "not_available",
+    "parking_lot_topics": [
+      "dependency adjacency traversal",
+      "blast-radius queries",
+      "inside-out symbol routing"
+    ]
+  }
+}

@@ -1,0 +1,24 @@
+# Repo Context
+
+- Repo mode candidate: `large-repo`
+- Dominant languages: `typescript`
+- Source volume: `54` source/test files (`43` code, `11` test) and `5779` estimated code LoC
+- Documentation/context volume: `5` documentation files and `392` estimated documentation LoC
+- Non-source inventory: `5` config files, `25` unknown files, `1630` generated/local files
+- Build systems: `node`
+- Declared modules: `none detected`
+- Major code zones:
+  - `src`
+  - `src/games`
+  - `src/lib`
+  - `src/pages`
+  - `src/sprites`
+- Build/test/runtime surfaces:
+  - Build: `package.json`
+  - Test: `src`
+  - Runtime: `package.json`, `src`, `src/games`, `src/lib`, `src/pages`, `src/sprites`, `src/styles`, `src/tests`
+- Seeded slices:
+  - `src` -> `src`
+  - `src-games` -> `src/games`
+  - `src-lib` -> `src/lib`
+- Routing note: Start with `src` and expand to neighboring areas only if needed.

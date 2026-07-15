@@ -115,6 +115,6 @@ next_section: "## Partition: feat/foundation"
 
 ## Initiative Boundary
 
-- [ ] With Builder approval, merge initiative/arcade-buildout → main (direct merge; no PR per lifecycle) <!-- id: 100 -->
-- [ ] Synthesize canon on main (product/ux/tech overviews, module snapshots, canon/summary.md) and present for Builder review before committing <!-- id: 101 -->
+- [x] With Builder approval, merge initiative/arcade-buildout → main (direct merge; no PR per lifecycle) <!-- id: 100 --> <!-- done: Builder merged via GitHub PRs #6 (feat/cabinets-action), #7 (feat/cabinets-puzzle), #8 (initiative/arcade-buildout -> main); main HEAD 2f7e6f8 confirmed green (tsc clean, 85 tests, build ok) before canon synthesis -->
+- [x] Synthesize canon on main (product/ux/tech overviews, module snapshots, canon/summary.md) and present for Builder review before committing <!-- id: 101 --> <!-- done: canon/product-overview.md, ux-overview.md, tech-overview.md, modules/{lib,ui,games,sprites}.md, summary.md written greenfield (no prior canon existed) from the merged main codebase + all five partitions' specs. Auto-classified 'large-repo' by the synthesis scan (file-count artifact, not real repo size — 89 meaningful files/~5.8k LOC) so slice-pack mode was overridden in favor of the normal-repo template set the task itself names. Presented to the Builder in the wrap-up summary for review before the archive step (task 102) touches branches -->
 - [ ] Archive specs (`cicadas.py archive arcade-buildout --type initiative`), update index, clean up initiative + feature branches <!-- id: 102 -->
