@@ -185,6 +185,23 @@ a.cab:focus-visible { outline: 2px solid var(--pink); outline-offset: 2px; }
 .back-hub { font-family: var(--font-ui); font-size: .7rem; font-weight: 700; letter-spacing: .06em; }
 .back-hub:focus-visible { outline: 2px solid var(--pink); outline-offset: 2px; }
 
+/* ---------- pixel wipe (NEW — src/lib/wipe.ts, cabinet nav + fullscreen) ---------- */
+.px-wipe {
+  position: fixed; inset: 0; z-index: 500; pointer-events: auto;
+  display: grid;
+  grid-template-columns: repeat(var(--cols), 1fr);
+  grid-template-rows: repeat(var(--rows), 1fr);
+}
+.px-wipe-cell {
+  background: var(--ink);
+  opacity: 0;
+  transform: scale(0);
+  transition-property: opacity, transform;
+  transition-timing-function: steps(2, end);
+}
+.px-wipe-cell--accent { background: var(--pink); }
+.px-wipe-cell--on { opacity: 1; transform: scale(1); }
+
 /* ---------- reduced motion: decorative animation off, game loops exempt ---------- */
 @media (prefers-reduced-motion: reduce) {
   .ticker-track, .veil-msg, .gcard.active .led, .tile.pop, .flash { animation: none !important; }

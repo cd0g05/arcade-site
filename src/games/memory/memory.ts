@@ -21,7 +21,7 @@ const FACES: readonly SpriteName[] = [
   "tube",
   "bricks",
   "invader",
-  "setrit",
+  "tetrisio",
 ];
 
 const MISMATCH_MS = 700;

@@ -19,7 +19,7 @@ import {
   PIECE_COLORS,
   type Board,
   type Piece,
-} from "../games/setrit/logic";
+} from "../games/tetrisio/logic";
 
 const lcg = (seed: number): (() => number) => {
   let s = seed >>> 0;
@@ -35,7 +35,7 @@ const sortCells = (cells: [number, number][]): string =>
     .sort()
     .join(" ");
 
-describe("setrit logic", () => {
+describe("tetrisio logic", () => {
   it("every piece has 4 blocks in all 4 rotations", () => {
     for (const t of PIECE_TYPES)
       for (let rot = 0; rot < 4; rot++) {

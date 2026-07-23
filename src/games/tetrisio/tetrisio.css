@@ -1,0 +1,67 @@
+/* tetrisio.css — game-owned styles (src/styles is frozen). */
+
+.st-wrap {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 8px 0;
+}
+
+.st-well {
+  border: 2px solid var(--ink);
+  line-height: 0;
+}
+
+.st-well canvas {
+  display: block;
+  width: min(46vw, 126px);
+  height: auto;
+}
+
+/* fullscreen: the well is a tall 10x20 board, so grow it by height, not
+   width, and let aspect-ratio drive the (smaller) width to match. */
+.gcard.fs .st-well canvas {
+  width: auto;
+  height: min(84vh, 62vw, 860px);
+}
+
+.st-side {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-family: var(--font-ui);
+  font-size: 0.6rem;
+  letter-spacing: 0.08em;
+  color: var(--sub);
+}
+
+.st-next {
+  border: 1px solid var(--border);
+  background: var(--base);
+  line-height: 0;
+  padding: 4px;
+}
+
+.st-next canvas {
+  display: block;
+  width: min(20vw, 50px);
+  height: auto;
+}
+
+.gcard.fs .st-next canvas {
+  width: min(18vh, 130px);
+}
+
+.st-hint {
+  max-width: 90px;
+}
+
+.gcard.fs .st-side {
+  gap: 14px;
+}
+
+.gcard.fs .st-hint {
+  max-width: 150px;
+  font-size: 0.8rem;
+}
