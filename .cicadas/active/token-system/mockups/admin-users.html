@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Arcade Admin — Users</title>
+<style>
+  :root{
+    --base:#ffffff; --panel:#f4f4f5; --border:#d4d4d8; --grid:#e4e4e7;
+    --ink:#18181b; --sub:#52525b; --pink:#be185d; --pink-dark:#9d174d; --green:#047857;
+    --font-ui:'JetBrains Mono', ui-monospace, Consolas, monospace;
+    --font-display:'Press Start 2P','Courier New',monospace;
+    --font-body:'Helvetica Neue',Arial,sans-serif;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; font-family:var(--font-body); color:var(--ink); background:var(--base);
+    background-image:linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+    background-size:2rem 2rem;
+  }
+  .shell{display:grid; grid-template-columns:220px 1fr; min-height:100vh;}
+  .sidebar{background:var(--panel); border-right:2px solid var(--border); padding:1.5rem 0;}
+  .sidebar h1{font-family:var(--font-display); font-size:0.7rem; padding:0 1.25rem 1.5rem; margin:0; line-height:1.6;}
+  .nav-item{
+    display:block; padding:0.6rem 1.25rem; font-family:var(--font-ui); font-size:0.8rem;
+    color:var(--sub); border-left:3px solid transparent; text-decoration:none;
+  }
+  .nav-item.active{color:var(--ink); font-weight:700; border-left-color:var(--pink); background:var(--base);}
+  main{padding:2rem;}
+  .panel{background:var(--base); border:2px solid var(--border); padding:1.25rem;}
+  h2.panel-heading{font-family:var(--font-ui); font-size:0.95rem; text-transform:uppercase; letter-spacing:0.05em; margin:0 0 1rem;}
+  table{width:100%; border-collapse:collapse; font-family:var(--font-ui); font-size:0.85rem;}
+  th{text-align:left; color:var(--sub); font-weight:600; padding:0.5rem; border-bottom:2px solid var(--border);}
+  td{padding:0.6rem 0.5rem; border-bottom:1px solid var(--grid);}
+  tr.selected{background:var(--panel);}
+  tr:hover{background:var(--panel); cursor:pointer;}
+  .balance{font-weight:700;}
+  .layout{display:grid; grid-template-columns:1fr 1.3fr; gap:1.5rem; margin-top:1.5rem;}
+  .amt-pos{color:var(--green); font-weight:700;}
+  .amt-neg{color:var(--pink-dark); font-weight:700;}
+  .amt-neutral{color:var(--sub); font-weight:700;}
+  .drilldown-header{display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;}
+  .btn{
+    font-family:var(--font-ui); font-size:0.75rem; padding:0.4rem 0.8rem; border:2px solid var(--ink);
+    background:var(--base); cursor:pointer;
+  }
+  .btn-primary{background:var(--pink); color:#fff; border-color:var(--pink-dark);}
+  .adjust-row{
+    display:flex; align-items:center; gap:0.5rem; font-family:var(--font-ui); font-size:0.85rem;
+    background:var(--panel); border:1px solid var(--border); padding:0.6rem; margin-bottom:1rem;
+  }
+  .adjust-row input{
+    font-family:var(--font-ui); font-size:0.85rem; width:5rem; padding:0.3rem; border:1px solid var(--border);
+  }
+  .empty{color:var(--sub); font-style:italic; font-size:0.85rem; padding:1rem 0;}
+</style>
+</head>
+<body>
+<div class="shell">
+  <nav class="sidebar">
+    <h1>ARCADE<br/>ADMIN</h1>
+    <a class="nav-item active" href="#">Users</a>
+    <a class="nav-item" href="#">Games</a>
+    <a class="nav-item" href="#">Leaderboards</a>
+    <a class="nav-item" href="#">Bot Log</a>
+    <a class="nav-item" href="#">Analytics</a>
+  </nav>
+  <main>
+    <div class="layout">
+      <section class="panel">
+        <h2 class="panel-heading">Users</h2>
+        <table>
+          <thead><tr><th>Name</th><th>Balance</th><th>Last Active</th></tr></thead>
+          <tbody>
+            <tr class="selected"><td>Dana</td><td class="balance">142</td><td>2026-07-14</td></tr>
+            <tr><td>Marcus</td><td class="balance">88</td><td>2026-07-13</td></tr>
+            <tr><td>Priya</td><td class="balance">205</td><td>2026-07-14</td></tr>
+            <tr><td>Carter</td><td class="balance">61</td><td>2026-07-14</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section class="panel">
+        <div class="drilldown-header">
+          <h2 class="panel-heading" style="margin:0;">Dana — Transaction Log</h2>
+          <button class="btn">Adjust balance</button>
+        </div>
+
+        <div class="adjust-row" aria-label="Balance adjustment in progress">
+          <span>Confirm: 142 &rarr;</span>
+          <input type="number" value="157" />
+          <button class="btn btn-primary">Confirm</button>
+          <button class="btn">Cancel</button>
+        </div>
+
+        <table>
+          <thead><tr><th>Time</th><th>Amount</th><th>Reason</th><th>Source</th></tr></thead>
+          <tbody>
+            <tr><td>10:41</td><td class="amt-pos">+15</td><td>High Score: Dino Run</td><td>site</td></tr>
+            <tr><td>10:40</td><td class="amt-neg">-1</td><td>Cartridge: Dino Run</td><td>site</td></tr>
+            <tr><td>09:02</td><td class="amt-pos">+10</td><td>Daily Login</td><td>site</td></tr>
+            <tr><td>Yesterday</td><td class="amt-neutral">+15</td><td>Admin adjusted 127 &rarr; 142</td><td>admin</td></tr>
+            <tr><td>Yesterday</td><td class="amt-pos">+5</td><td>Daily Submission: Wordle</td><td>bot</td></tr>
+          </tbody>
+        </table>
+      </section>
+    </div>
+
+    <section class="panel" style="margin-top:1.5rem;">
+      <h2 class="panel-heading">Achievement Builder — Dino Run</h2>
+      <p class="empty">No achievements configured for this game yet.</p>
+      <button class="btn btn-primary">+ Add criteria</button>
+    </section>
+  </main>
+</div>
+</body>
+</html>
