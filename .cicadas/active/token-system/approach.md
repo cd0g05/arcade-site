@@ -44,12 +44,12 @@ Mostly sequential with two points of parallelism. The backend has a hard bottom-
 full-stack
 
 #### How to Run
-- start: `cd arcade-backend && npm run dev -- --port 3001` <!-- NEEDS MANUAL REVIEW: package.json scripts don't exist yet, confirm exact script name once scaffolded -->
+- start: `cd arcade-backend && npm run dev` (confirmed: `next dev --port 3001`)
 - ready-check: `GET http://localhost:3001/api/health returns 200`
 - teardown: `Ctrl+C`
 
 #### Acceptance Criteria
-- [ ] `npm run db:migrate` (or equivalent Drizzle command) applies the initial schema to a local/dev Postgres with zero errors <!-- NEEDS MANUAL REVIEW: exact script name TBD at scaffold time -->
+- [ ] `npm run db:migrate` (confirmed script name) applies the initial schema to a local/dev Postgres with zero errors — blocked on Neon provisioning (Builder manual step, see arcade-backend/README.md)
 - [ ] `POST /api/ledger` (internal test-only route, or a direct `lib/ledger.ts` unit test) writing a transaction results in `GET /api/balance` reflecting the correct `SUM(amount)` for that user
 - [ ] Visiting `/api/auth/signin` redirects to Google's OAuth consent screen
 - [ ] `games` table contains one row per existing hub cartridge/cabinet with the correct tier and token cost (1 for cartridge, 3 for cabinet) after running the seed script
@@ -103,7 +103,7 @@ _(no persistent process — pure library, exercised via unit tests)_
 rest-api
 
 #### How to Run
-- start: `cd arcade-backend && npm run dev -- --port 3001` <!-- NEEDS MANUAL REVIEW: confirm script name -->
+- start: `cd arcade-backend && npm run dev` (confirmed: `next dev --port 3001`)
 - ready-check: `GET http://localhost:3001/api/health returns 200`
 - teardown: `Ctrl+C`
 
@@ -137,7 +137,7 @@ rest-api
 web-ui
 
 #### How to Run
-- start: `cd arcade-backend && npm run dev -- --port 3001` <!-- NEEDS MANUAL REVIEW: confirm script name -->
+- start: `cd arcade-backend && npm run dev` (confirmed: `next dev --port 3001`)
 - ready-check: `GET http://localhost:3001/admin/users returns 200 for an authenticated admin session`
 - teardown: `Ctrl+C`
 
@@ -168,7 +168,7 @@ web-ui
 
 #### How to Run
 - start: `npm run dev` (existing Vite dev server, per current `vite.config.ts`)
-- ready-check: `GET http://localhost:5173/ returns 200` <!-- NEEDS MANUAL REVIEW: confirm actual dev port from vite.config.ts -->
+- ready-check: `GET http://localhost:5173/ returns 200` (confirmed: `vite`'s default port, no override in vite.config.ts)
 - teardown: `Ctrl+C`
 
 #### Acceptance Criteria
