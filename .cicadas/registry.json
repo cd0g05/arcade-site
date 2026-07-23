@@ -22,6 +22,12 @@
         }
       ],
       "created_at": "2026-07-12T22:23:07.577483+00:00"
+    },
+    "token-system": {
+      "intent": "Add a gamified token economy to Carter's Arcade: earn/spend tokens via gameplay, achievements, daily leaderboards, and riddles/tasks; new Next.js backend + admin dashboard at dev.cartercripe.com/arcade; Discord bot integration via a published API contract (bot built separately by Carter).",
+      "owner": "unknown",
+      "signals": [],
+      "created_at": "2026-07-23T04:24:24.080031+00:00"
     }
   },
   "branches": {
@@ -98,6 +104,19 @@
       "owner": "unknown",
       "created_at": "2026-07-13T07:18:09.053829+00:00",
       "initiative": "arcade-buildout"
+    },
+    "feat/backend-foundation": {
+      "intent": "Scaffold arcade-backend/ Next.js project: Drizzle schema, Neon Postgres, Auth.js (Google), ledger write helper, games seed",
+      "modules": [
+        "arcade-backend/lib/ledger.ts",
+        "arcade-backend/lib/auth.ts",
+        "arcade-backend/lib/db",
+        "arcade-backend/drizzle"
+      ],
+      "owner": "unknown",
+      "created_at": "2026-07-23T04:37:25.360337+00:00",
+      "worktree_path": "/Users/cartercripe/dev/code/projects/personal-site/arcade-feat-backend-foundation",
+      "initiative": "token-system"
     }
   }
 }
