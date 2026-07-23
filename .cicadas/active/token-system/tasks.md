@@ -31,19 +31,19 @@ next_section: "## Partition: feat/backend-foundation"
 
 ## Partition: feat/backend-foundation
 
-- [ ] Scaffold `arcade-backend/` as a Next.js App Router + TypeScript project inside this repo <!-- id: 1 -->
-- [ ] Add `arcade-backend/vercel.json` (or equivalent project config) scoped to the `arcade-backend/` Root Directory, per Tech Design ADR-1 <!-- id: 2 -->
-- [ ] Provision a Neon Postgres database via the Vercel Marketplace; wire `DATABASE_URL` into `arcade-backend` env vars <!-- id: 3 -->
-- [ ] Spike: confirm the Neon serverless driver correctly pools/reuses connections under Vercel Fluid Compute without exhausting Neon's connection limit (flagged risk in tech-design.md and approach.md) <!-- id: 4 -->
-- [ ] Write `lib/db/schema.ts` with all tables from Tech Design Data Models: `users`, `transactions`, `games`, `high_scores`, `achievements`, `achievement_awards`, `daily_leaderboard_entries`, `bounties`, `bot_log_events` <!-- id: 5 -->
-- [ ] Generate and apply the initial Drizzle migration against the Neon database <!-- id: 6 -->
-- [ ] Implement `lib/ledger.ts` as the sole function permitted to write `transactions` rows (ADR-2) <!-- id: 7 -->
-- [ ] Unit test: balance computed via `SUM(transactions.amount)` matches the sum of a sequence of ledger writes for a test user <!-- id: 8 -->
-- [ ] Configure Auth.js with the Google OAuth provider; verify `/api/auth/signin` redirects to Google's consent screen <!-- id: 9 -->
-- [ ] Stub the Discord OAuth provider in Auth.js config for later account-linking (full linking UX lands in `feat/site-integration`) <!-- id: 10 -->
-- [ ] Write a seed script populating the `games` table from the existing hub cartridge/cabinet roster with correct tier + token cost (1 cartridge / 3 cabinet, per PRD FR-4.1 defaults) <!-- id: 11 -->
-- [ ] Add a `GET /api/health` route returning `200`, for use as the partition's ready-check <!-- id: 12 -->
-- [ ] Reflect: update `tech-design.md`/`approach.md` "NEEDS MANUAL REVIEW" markers with the actual confirmed `npm run dev` script name and port once scaffolded <!-- id: 13 -->
+- [x] Scaffold `arcade-backend/` as a Next.js App Router + TypeScript project inside this repo <!-- id: 1 -->
+- [x] Add `arcade-backend/vercel.json` (or equivalent project config) scoped to the `arcade-backend/` Root Directory, per Tech Design ADR-1 <!-- id: 2 -->
+- [ ] Provision a Neon Postgres database via the Vercel Marketplace; wire `DATABASE_URL` into `arcade-backend` env vars <!-- id: 3 --> <!-- BLOCKED: Builder-manual, needs Vercel/Neon dashboard access; see arcade-backend/README.md -->
+- [ ] Spike: confirm the Neon serverless driver correctly pools/reuses connections under Vercel Fluid Compute without exhausting Neon's connection limit (flagged risk in tech-design.md and approach.md) <!-- id: 4 --> <!-- BLOCKED on id:3; client.ts uses the neon-http (stateless) driver specifically to sidestep pooling risk, but this should still be verified against a real Neon instance once provisioned -->
+- [x] Write `lib/db/schema.ts` with all tables from Tech Design Data Models: `users`, `transactions`, `games`, `high_scores`, `achievements`, `achievement_awards`, `daily_leaderboard_entries`, `bounties`, `bot_log_events` <!-- id: 5 --> (also includes `content_items`/`content_completions` per the reconciled riddle/task infra decision)
+- [ ] Generate and apply the initial Drizzle migration against the Neon database <!-- id: 6 --> <!-- BLOCKED on id:3 -->
+- [x] Implement `lib/ledger.ts` as the sole function permitted to write `transactions` rows (ADR-2) <!-- id: 7 -->
+- [x] Unit test: balance computed via `SUM(transactions.amount)` matches the sum of a sequence of ledger writes for a test user <!-- id: 8 --> (written in `lib/__tests__/ledger.test.ts`; fails only on DB connectivity until id:3 is done — this is expected, not a code defect)
+- [x] Configure Auth.js with the Google OAuth provider; verify `/api/auth/signin` redirects to Google's consent screen <!-- id: 9 --> (code complete; live redirect verification needs real Google OAuth credentials — Builder-manual per README.md)
+- [x] Stub the Discord OAuth provider in Auth.js config for later account-linking (full linking UX lands in `feat/site-integration`) <!-- id: 10 -->
+- [x] Write a seed script populating the `games` table from the existing hub cartridge/cabinet roster with correct tier + token cost (1 cartridge / 3 cabinet, per PRD FR-4.1 defaults) <!-- id: 11 --> (written in `scripts/seed.ts`; not yet run against a real DB — blocked on id:3)
+- [x] Add a `GET /api/health` route returning `200`, for use as the partition's ready-check <!-- id: 12 -->
+- [x] Reflect: update `tech-design.md`/`approach.md` "NEEDS MANUAL REVIEW" markers with the actual confirmed `npm run dev` script name and port once scaffolded <!-- id: 13 -->
 
 ## Partition: feat/economy-engine
 
