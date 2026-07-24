@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Arcade — Token Balance Pill</title>
+<style>
+  :root{
+    --base:#ffffff; --panel:#f4f4f5; --border:#d4d4d8; --grid:#e4e4e7;
+    --ink:#18181b; --sub:#52525b; --pink:#be185d; --pink-dark:#9d174d; --green:#047857;
+    --font-ui:'JetBrains Mono', ui-monospace, Consolas, monospace;
+    --font-display:'Press Start 2P','Courier New',monospace;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; background:var(--base); font-family:var(--font-ui); color:var(--ink); padding:2rem;}
+  header{
+    display:flex; justify-content:space-between; align-items:center;
+    border-bottom:2px solid var(--border); padding-bottom:1rem; margin-bottom:1rem;
+  }
+  .wordmark{font-family:var(--font-display); font-size:0.9rem;}
+  .header-right{display:flex; align-items:center; gap:1rem; position:relative;}
+
+  .balance-pill{
+    display:flex; align-items:center; gap:0.4rem; border:2px solid var(--ink);
+    padding:0.3rem 0.6rem; font-size:0.85rem; font-weight:700; background:var(--panel);
+  }
+  .led{width:8px; height:8px; background:var(--green); box-shadow:0 0 0 1px var(--ink);}
+  .led.loading{background:var(--border); animation:pulse 1.2s steps(4) infinite;}
+  @keyframes pulse{0%,100%{opacity:1;} 50%{opacity:0.3;}}
+
+  .toast{
+    position:absolute; top:110%; right:0; background:var(--ink); color:#fff;
+    font-size:0.75rem; padding:0.4rem 0.7rem; white-space:nowrap;
+  }
+  .toast .amt{color:var(--green);}
+
+  .section-label{font-size:0.7rem; color:var(--sub); text-transform:uppercase; margin:2rem 0 0.5rem;}
+
+  /* mobile variant preview */
+  .mobile-frame{width:375px; border:2px solid var(--border); margin-top:1rem;}
+  .mobile-frame header{padding:0.75rem; margin:0; border-bottom:2px solid var(--border);}
+  .mobile-frame .balance-pill{padding:0.25rem 0.45rem; font-size:0.75rem;}
+  .mobile-frame .toast{position:static; margin-top:0.4rem; display:inline-block;}
+</style>
+</head>
+<body>
+
+  <div class="section-label">Desktop — Populated + Toast</div>
+  <header>
+    <div class="wordmark">CARTER'S ARCADE</div>
+    <div class="header-right">
+      <div class="balance-pill" aria-label="Token balance: 142">
+        <span class="led"></span>
+        <span>142</span>
+      </div>
+      <div class="toast" role="status" aria-live="polite">
+        <span class="amt">+15</span> High Score: Dino Run
+      </div>
+    </div>
+  </header>
+
+  <div class="section-label">Desktop — Loading</div>
+  <header>
+    <div class="wordmark">CARTER'S ARCADE</div>
+    <div class="header-right">
+      <div class="balance-pill" aria-label="Token balance loading">
+        <span class="led loading"></span>
+        <span>&hellip;</span>
+      </div>
+    </div>
+  </header>
+
+  <div class="section-label">Mobile (375px) — Populated + Toast, icon+number only</div>
+  <div class="mobile-frame">
+    <header>
+      <div class="wordmark" style="font-size:0.6rem;">ARCADE</div>
+      <div class="header-right" style="flex-direction:column; align-items:flex-end; gap:0.25rem;">
+        <div class="balance-pill" aria-label="Token balance: 142">
+          <span class="led"></span>
+          <span>142</span>
+        </div>
+        <div class="toast" role="status" aria-live="polite">
+          <span class="amt">+15</span> Dino Run
+        </div>
+      </div>
+    </header>
+  </div>
+
+</body>
+</html>
