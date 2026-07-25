@@ -22,6 +22,10 @@ dev and CI can proceed normally.
    site's own Vercel project. Assign it the `dev.cartercripe.com/arcade` domain/route.
 5. **`BOT_API_KEY`**: Generate one (`openssl rand -hex 32`) and set it in this project's env
    vars. Hand the same value to the separate Discord bot project when Carter builds it.
+6. **`AUTH_SECRET`**: Generate one (`openssl rand -base64 32`) and set it locally **and** in
+   the Vercel project's env vars. Auth.js v5 requires it — without it every `/api/auth/*`
+   route returns HTTP 500 (`"There was a problem with the server configuration"`) rather than
+   a useful error, which is an easy hour to lose.
 
 ## Local development
 
@@ -38,6 +42,11 @@ npm run dev           # http://localhost:3001
 
 - `lib/ledger.ts` is the only file permitted to write `transactions` rows (ADR-2) — balance
   is always `SUM(amount)`, never a stored field.
+- The DB client uses Drizzle's **`neon-http`** driver, which has **no `db.transaction()`
+  support** (it throws). Use `db.batch([...])` or a single-statement data-modifying CTE where
+  atomicity matters — see tech-design.md "Spike result: Neon pooling under Fluid Compute".
+  `scripts/spike-neon-pooling.ts` re-runs the connection-pooling verification if the driver
+  or Neon plan ever changes.
 - See `.cicadas/active/token-system/tech-design.md` for the full architecture and
   `docs/discord-bot-api.md` (added in `feat/api-and-bot-contract`) for the bot-facing API
   contract.

@@ -1,5 +1,5 @@
 ---
-summary: "Foundation-mode task breakdown across the five partitions from approach.md: backend-foundation (schema/auth/ledger) -> economy-engine (achievements/leaderboard) -> {api-and-bot-contract, admin-dashboard} in parallel -> site-integration. No PR tasks injected (lifecycle.json has all pr_boundaries false) — every boundary merges directly."
+summary: "Foundation-mode task breakdown across the five partitions from approach.md: backend-foundation (schema/auth/ledger) -> economy-engine (achievements/leaderboard) -> {api-and-bot-contract, admin-dashboard} in parallel -> site-integration. No PR tasks injected (lifecycle.json has all pr_boundaries false) — every boundary merges directly. STATUS: Partition 1 (feat/backend-foundation) is COMPLETE — ids 1-16 all done and verified against a live Neon instance; Neon is provisioned, migration applied, games seeded, Google OAuth redirect confirmed. Next up is Partition 2 (feat/economy-engine, ids 20-37), which carries one inherited constraint: id:22 cannot use db.transaction() (unsupported on neon-http) and must use the CTE pattern documented in tech-design.md."
 phase: "tasks"
 when_to_load:
   - "When selecting the next implementation task or reviewing completion state."
@@ -21,7 +21,7 @@ index:
   partition_four: "## Partition: feat/admin-dashboard"
   partition_five: "## Partition: feat/site-integration"
   initiative_boundary: "## Initiative Boundary"
-next_section: "## Partition: feat/backend-foundation"
+next_section: "## Partition: feat/economy-engine"
 ---
 
 # Tasks: Token System
@@ -33,23 +33,27 @@ next_section: "## Partition: feat/backend-foundation"
 
 - [x] Scaffold `arcade-backend/` as a Next.js App Router + TypeScript project inside this repo <!-- id: 1 -->
 - [x] Add `arcade-backend/vercel.json` (or equivalent project config) scoped to the `arcade-backend/` Root Directory, per Tech Design ADR-1 <!-- id: 2 -->
-- [ ] Provision a Neon Postgres database via the Vercel Marketplace; wire `DATABASE_URL` into `arcade-backend` env vars <!-- id: 3 --> <!-- BLOCKED: Builder-manual, needs Vercel/Neon dashboard access; see arcade-backend/README.md -->
-- [ ] Spike: confirm the Neon serverless driver correctly pools/reuses connections under Vercel Fluid Compute without exhausting Neon's connection limit (flagged risk in tech-design.md and approach.md) <!-- id: 4 --> <!-- BLOCKED on id:3; client.ts uses the neon-http (stateless) driver specifically to sidestep pooling risk, but this should still be verified against a real Neon instance once provisioned -->
+- [x] Provision a Neon Postgres database via the Vercel Marketplace; wire `DATABASE_URL` into `arcade-backend` env vars <!-- id: 3 --> (Builder provisioned; live instance `ep-solitary-field-aud3q72f-pooler` verified reachable, all 11 tables + `drizzle.__drizzle_migrations` present. NOTE: verified for **local** `.env.local` only — mirroring `DATABASE_URL` into the Vercel project's env vars remains Builder-manual and is covered by task id:99)
+- [x] Spike: confirm the Neon serverless driver correctly pools/reuses connections under Vercel Fluid Compute without exhausting Neon's connection limit (flagged risk in tech-design.md and approach.md) <!-- id: 4 --> (PASS — 175 concurrent queries, 0 failures, ≤7 of 112 connections used. `neon-http` is stateless-over-HTTPS + `-pooler` endpoint. Reproducible via `scripts/spike-neon-pooling.ts`; findings in tech-design.md. **Surfaced a new constraint for id:22** — no `db.transaction()` on this driver)
 - [x] Write `lib/db/schema.ts` with all tables from Tech Design Data Models: `users`, `transactions`, `games`, `high_scores`, `achievements`, `achievement_awards`, `daily_leaderboard_entries`, `bounties`, `bot_log_events` <!-- id: 5 --> (also includes `content_items`/`content_completions` per the reconciled riddle/task infra decision)
-- [ ] Generate and apply the initial Drizzle migration against the Neon database <!-- id: 6 --> <!-- BLOCKED on id:3 -->
+- [x] Generate and apply the initial Drizzle migration against the Neon database <!-- id: 6 --> (migration `drizzle/0000_wooden_paladin.sql` generated and applied; `drizzle-kit check` reports "Everything's fine", confirming schema.ts and the live DB are in sync)
 - [x] Implement `lib/ledger.ts` as the sole function permitted to write `transactions` rows (ADR-2) <!-- id: 7 -->
-- [x] Unit test: balance computed via `SUM(transactions.amount)` matches the sum of a sequence of ledger writes for a test user <!-- id: 8 --> (written in `lib/__tests__/ledger.test.ts`; fails only on DB connectivity until id:3 is done — this is expected, not a code defect)
-- [x] Configure Auth.js with the Google OAuth provider; verify `/api/auth/signin` redirects to Google's consent screen <!-- id: 9 --> (code complete; live redirect verification needs real Google OAuth credentials — Builder-manual per README.md)
+- [x] Unit test: balance computed via `SUM(transactions.amount)` matches the sum of a sequence of ledger writes for a test user <!-- id: 8 --> (`lib/__tests__/ledger.test.ts` — **now green against the live Neon instance**: 2/2 passing, no longer blocked on id:3)
+- [x] Configure Auth.js with the Google OAuth provider; verify `/api/auth/signin` redirects to Google's consent screen <!-- id: 9 --> (**live redirect now verified**: `POST /api/auth/signin/google` after a CSRF handshake returns `302` → `accounts.google.com/o/oauth2/v2/auth` with the correct `client_id`, `redirect_uri`, and PKCE `code_challenge`. Required fixing a missing `AUTH_SECRET` — see id:14)
 - [x] Stub the Discord OAuth provider in Auth.js config for later account-linking (full linking UX lands in `feat/site-integration`) <!-- id: 10 -->
-- [x] Write a seed script populating the `games` table from the existing hub cartridge/cabinet roster with correct tier + token cost (1 cartridge / 3 cabinet, per PRD FR-4.1 defaults) <!-- id: 11 --> (written in `scripts/seed.ts`; not yet run against a real DB — blocked on id:3)
-- [x] Add a `GET /api/health` route returning `200`, for use as the partition's ready-check <!-- id: 12 -->
+- [x] Write a seed script populating the `games` table from the existing hub cartridge/cabinet roster with correct tier + token cost (1 cartridge / 3 cabinet, per PRD FR-4.1 defaults) <!-- id: 11 --> (`scripts/seed.ts` — **now run against the live Neon instance**: all 12 games present with correct tier/cost (6 cartridge @1, 6 cabinet @3); re-run confirmed idempotent via `onConflictDoNothing`)
+- [x] Add a `GET /api/health` route returning `200`, for use as the partition's ready-check <!-- id: 12 --> (verified live against the running dev server: `200` / `{"ok":true}`)
 - [x] Reflect: update `tech-design.md`/`approach.md` "NEEDS MANUAL REVIEW" markers with the actual confirmed `npm run dev` script name and port once scaffolded <!-- id: 13 -->
+- [x] Add the missing `AUTH_SECRET` env var (required by Auth.js v5; absent from the env template, so every `/api/auth/*` route returned `500`) — documented in `.env.example` + README step 6, set locally <!-- id: 14 --> (discovered while verifying id:9)
+- [x] Create the missing `arcade-backend/.env.example` — it was referenced by README, `lib/db/client.ts`, and `lib/db/migrate.ts` but never existed <!-- id: 15 --> (discovered while verifying id:9)
+- [x] Fix root `.gitignore` silently ignoring `.env.example` via the blanket `.env.*` rule — added an `!.env.example` negation so the template is actually committable <!-- id: 16 --> (discovered while creating id:15)
+- [x] Centralize env loading in `lib/load-env.ts` for non-Next entrypoints (tsx scripts, drizzle-kit, Vitest `setupFiles`) and remove `dotenv` from `lib/db/client.ts` <!-- id: 17 --> (`next build` was logging `injected env (0) from ../../../../ROOT/arcade-backend/.env.local` — the bundled `__dirname` resolved a nonsense path. Next.js loads `.env*` natively, so app code must not call dotenv. Verified after: `tsc`, `vitest`, `drizzle-kit check`, `db:migrate`, `db:seed`, `next build`, and the id:4 spike all pass; bogus path gone from build output)
 
 ## Partition: feat/economy-engine
 
 - [ ] Implement `lib/achievements.ts` threshold-mode evaluation: award once when score first crosses a fixed value <!-- id: 20 -->
 - [ ] Implement `lib/achievements.ts` interval-gap-mode evaluation, reading/writing `high_scores.last_awarded_high_score` distinctly from `current_high_score` (ADR-5) <!-- id: 21 -->
-- [ ] Implement idempotent award insertion via `(user_id, achievement_id)` unique constraint + `ON CONFLICT DO NOTHING`, paired with the ledger write in one DB transaction (ADR-3) <!-- id: 22 -->
+- [ ] Implement idempotent award insertion via `(user_id, achievement_id)` unique constraint + `ON CONFLICT DO NOTHING`, paired with the ledger write in one DB transaction (ADR-3) <!-- id: 22 --> <!-- CONSTRAINT from id:4 spike: `db.transaction()` throws on the neon-http driver. Use the single-statement data-modifying CTE pattern (verified working, documented in tech-design.md "Spike result") — NOT two awaited queries. May require `lib/ledger.ts` to expose a CTE/batch-participating form. -->
 - [ ] Unit test: scoring 1050 after a `last_awarded_high_score` of 1000 with gap 100 produces no award but updates `current_high_score` <!-- id: 23 -->
 - [ ] Unit test: a subsequent score of 1100 in the same scenario produces exactly one award and exactly one `achievement_awards` row <!-- id: 24 -->
 - [ ] Unit test: calling the same score-evaluation twice with identical input (simulated retry) never double-awards <!-- id: 25 -->

@@ -1,3 +1,4 @@
+import '../lib/load-env';
 import { db } from '../lib/db/client';
 import { games } from '../lib/db/schema';
 

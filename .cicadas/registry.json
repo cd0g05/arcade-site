@@ -26,7 +26,13 @@
     "token-system": {
       "intent": "Add a gamified token economy to Carter's Arcade: earn/spend tokens via gameplay, achievements, daily leaderboards, and riddles/tasks; new Next.js backend + admin dashboard at dev.cartercripe.com/arcade; Discord bot integration via a published API contract (bot built separately by Carter).",
       "owner": "unknown",
-      "signals": [],
+      "signals": [
+        {
+          "timestamp": "2026-07-25T02:36:02.919329+00:00",
+          "message": "DRIVER CONSTRAINT from feat/backend-foundation (task id:4 spike): Drizzle's neon-http driver has NO db.transaction() support \u2014 it throws 'No transactions support in neon-http driver'. db.batch([...]) IS supported (Neon wraps a batch in one transaction) but batched statements cannot read each other's results. This directly affects feat/economy-engine task id:22 (ADR-3 atomic achievement-award + ledger write): do NOT implement as two awaited queries. Use a single-statement data-modifying CTE (INSERT ... ON CONFLICT DO NOTHING RETURNING, feeding the ledger INSERT) \u2014 verified working against the live DB, and an empty result set doubles as the 'already awarded' idempotency signal. May require lib/ledger.ts to expose a CTE/batch-participating form alongside its standalone insert. Full pattern + measurements in tech-design.md 'Spike result: Neon pooling under Fluid Compute'. Pooling itself is a NON-issue: 175 concurrent queries used <=7 of 112 connections. Secondary note for feat/admin-dashboard: each neon-http query is its own HTTPS round trip, so batch/join in SQL rather than per-row query loops (100 concurrent queries showed ~13x per-query latency degradation).",
+          "from_branch": "feat/backend-foundation"
+        }
+      ],
       "created_at": "2026-07-23T04:24:24.080031+00:00"
     }
   },

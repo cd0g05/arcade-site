@@ -1,4 +1,12 @@
 {
   "schema_version": "2.0",
-  "entries": []
+  "entries": [
+    {
+      "timestamp": "2026-07-25T02:36:42.813727+00:00",
+      "branch": "feat/backend-foundation",
+      "summary": "Partition 1 complete: Neon provisioned + migration applied + games seeded; ledger tests and Google OAuth redirect verified live. Pooling spike PASSED (risk retired); surfaced neon-http db.transaction() constraint for economy-engine id:22. Fixed missing .env.example, missing AUTH_SECRET, .gitignore swallowing the env template, and dotenv bundled into app code.",
+      "decisions": "",
+      "modules": []
+    }
+  ]
 }

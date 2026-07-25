@@ -1,5 +1,5 @@
 ---
-summary: "New Next.js service at arcade-backend/ (same git repo as the static arcade site, but deployed as its own separate Vercel project via Root Directory) hosted at dev.cartercripe.com/arcade, using Auth.js (Google OAuth + Discord account link), Postgres via Vercel Marketplace (Neon) with Drizzle ORM, and Vercel Functions (Fluid Compute) for the API. Ledger-first data model (transactions table is the only source of truth for balance). Achievement checking runs synchronously and idempotently inside the score-submission handler. Discord bot (Carter-owned, separate codebase) authenticates as a service principal via a static API key against a documented REST contract."
+summary: "New Next.js service at arcade-backend/ (same git repo as the static arcade site, but deployed as its own separate Vercel project via Root Directory) hosted at dev.cartercripe.com/arcade, using Auth.js (Google OAuth + Discord account link), Postgres via Vercel Marketplace (Neon) with Drizzle ORM, and Vercel Functions (Fluid Compute) for the API. Ledger-first data model (transactions table is the only source of truth for balance). Achievement checking runs synchronously and idempotently inside the score-submission handler. Discord bot (Carter-owned, separate codebase) authenticates as a service principal via a static API key against a documented REST contract. VERIFIED CONSTRAINT: the DB client uses Drizzle's neon-http driver, which has no db.transaction() support — atomic multi-write paths (notably ADR-3) must use db.batch() or a single-statement data-modifying CTE."
 phase: "tech"
 when_to_load:
   - "When implementing or reviewing architecture, interfaces, data models, conventions, and sequencing."
@@ -21,6 +21,7 @@ index:
   conventions: "## Implementation Patterns & Conventions"
   security_performance: "## Security & Performance"
   implementation_sequence: "## Implementation Sequence"
+  neon_pooling_spike: "### Spike result: Neon pooling under Fluid Compute (task id:4, RESOLVED)"
 next_section: "done"
 ---
 
@@ -81,6 +82,9 @@ This resolves the PRD's open hosting question: rather than bolting a backend ont
 - `next-auth` — Google + Discord OAuth.
 - `zod` — request/response schema validation.
 - `@neondatabase/serverless` (or Neon's Drizzle driver adapter) — Postgres driver compatible with Vercel Functions.
+- `dotenv` — added during Partition 1 so the standalone `tsx` entrypoints (`lib/db/migrate.ts`, `scripts/seed.ts`, `drizzle.config.ts`) load `.env.local`; Next.js loads it automatically, these do not.
+
+**As-built versions** (Partition 1, reflected from `arcade-backend/package.json` — the scaffold drifted upward from the versions originally pencilled in): `next` ^16.2.11 (not 15.x), `drizzle-orm` ^0.45.2, `drizzle-kit` ^0.31.10, `next-auth` ^5.0.0-beta.25, `react`/`react-dom` ^19, `zod` ^3.24, `vitest` ^2.1. `tsconfig.json` uses `jsx: "react-jsx"` and includes `.next/dev/types/**/*.ts` (Next 16 dev-types path).
 
 **Dependencies explicitly rejected:**
 - `@vercel/postgres` / `@vercel/kv` — discontinued Vercel-native offerings; superseded by Marketplace integrations.
@@ -488,5 +492,48 @@ describe('evaluateScoreSubmission — interval_gap mode', () => {
 **Parallel work opportunities:** Admin dashboard (4) and arcade site integration (5) can be built concurrently once the API layer (3) contract is stable, since both are pure consumers of it.
 
 **Known implementation risks:**
-- Neon/Vercel Marketplace Postgres provisioning and connection-pooling behavior under Vercel Fluid Compute is worth a quick spike before Foundation is considered done — confirm the serverless driver handles connection reuse correctly rather than exhausting Neon's connection limit under bursty admin-dashboard + API traffic.
+- ~~Neon/Vercel Marketplace Postgres provisioning and connection-pooling behavior under Vercel Fluid Compute is worth a quick spike before Foundation is considered done~~ — **RESOLVED in `feat/backend-foundation` (task id:4).** See "Spike result: Neon pooling under Fluid Compute" below.
+- CORS + cookie-based session auth across two different subdomains (arcade site's domain vs. `dev.cartercripe.com`) needs verification early — cross-subdomain cookie/session handling is a common source of silent auth failures.
+
+### Spike result: Neon pooling under Fluid Compute (task id:4, RESOLVED)
+
+Reproducible via `arcade-backend/scripts/spike-neon-pooling.ts` (`npx tsx scripts/spike-neon-pooling.ts`).
+
+Two independent factors make connection exhaustion a non-risk for this stack:
+
+1. **`lib/db/client.ts` uses the `neon-http` driver, not `neon-serverless`/`Pool`.** Each query is a stateless one-shot HTTPS request to Neon's SQL-over-HTTP endpoint — there is no client-held TCP connection to leak, so a reused warm Fluid Compute instance cannot accumulate connections across invocations.
+2. **`DATABASE_URL` points at the `-pooler` endpoint** (Neon's PgBouncer), which multiplexes many logical queries onto a small pool of real Postgres backends.
+
+Measured against the live Neon instance (`max_connections = 112`), firing concurrent queries off a single module-scope `neon()` client to simulate one warm instance serving concurrent requests:
+
+| Burst | Queries | Failures | Distinct backend PIDs | Wall time |
+|---|---|---|---|---|
+| A | 25 concurrent | 0 | 2 | 642 ms |
+| B | 50 concurrent | 0 | 4 | 611 ms |
+| C | 100 concurrent | 0 | 6 | 7966 ms |
+
+175 concurrent queries total consumed at most **7** backends — ~6% of `max_connections` — with zero failures, and sequential reuse on the same warm client worked normally (20 queries, 2222 ms).
+
+**Caveats carried forward:**
+- Throughput, not connections, is the ceiling: burst C's per-query latency degraded ~13× vs. burst B (each query is its own HTTPS round trip). Admin-dashboard pages should batch/join in SQL rather than issue per-row queries in a loop — relevant to `feat/admin-dashboard` (Users list, Analytics).
+- **`db.transaction()` is unavailable on this driver** — verified, it throws `No transactions support in neon-http driver`. `db.batch([...])` *is* supported and Neon wraps a batch in a single transaction, but batched statements cannot read each other's results.
+
+  This directly constrains **ADR-3** (`feat/economy-engine` task id:22), which requires the idempotent `achievement_awards` insert and the `transactions` ledger write to be atomic. Do **not** implement it as two separately awaited queries — that is not atomic and can award tokens without a matching award row (or vice versa) if the second call fails. Two viable options, in order of preference:
+
+  1. **Single statement with a CTE** — atomic *and* naturally expresses ADR-3's conditionality, since the ledger row is only written when the award insert actually produced a row:
+
+     ```sql
+     WITH award AS (
+       INSERT INTO achievement_awards (user_id, achievement_id, ...)
+       VALUES (...) ON CONFLICT (user_id, achievement_id) DO NOTHING
+       RETURNING user_id, achievement_id
+     )
+     INSERT INTO transactions (user_id, amount, reason, ...)
+     SELECT user_id, $amount, $reason, ... FROM award
+     RETURNING *;
+     ```
+
+     An empty result set means "already awarded, nothing written" — the idempotency signal comes for free. **Verified against the live instance during this spike**: first call wrote the dependent row and returned 1 row; an identical repeat call hit the conflict and wrote nothing, returning 0 rows. Note this means `lib/ledger.ts` (ADR-2, sole writer of `transactions`) needs to expose a form that participates in a caller-supplied CTE/batch rather than only standalone inserts; reconcile this when implementing id:22.
+
+  2. **Switch the achievement path to the `neon-serverless` (WebSocket `Pool`) driver**, which does support interactive transactions. This reintroduces the connection-pooling concern this spike cleared for `neon-http`, so it would need its own re-verification and is the fallback, not the default.
 - CORS + cookie-based session auth across two different subdomains (arcade site's domain vs. `dev.cartercripe.com`) needs verification early — cross-subdomain cookie/session handling is a common source of silent auth failures.
