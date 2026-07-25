@@ -79,6 +79,7 @@ export async function evaluateScoreSubmission(
         achievementId: achievement.id,
         amount: achievement.award,
         reason: `High Score: ${gameName}`,
+        gameId,
       });
       if (awarded) {
         awards.push({
@@ -117,6 +118,7 @@ export async function evaluateScoreSubmission(
         userId,
         amount: achievement.award,
         reason: `High Score: ${gameName}`,
+        gameId,
       });
       awards.push({
         amount: achievement.award,
@@ -197,12 +199,14 @@ async function writeIntervalGapAward(input: {
   userId: string;
   amount: number;
   reason: string;
+  gameId: string;
 }): Promise<void> {
   await writeTransaction({
     userId: input.userId,
     amount: input.amount,
     reason: input.reason,
     source: 'achievement',
+    gameId: input.gameId,
   });
 }
 

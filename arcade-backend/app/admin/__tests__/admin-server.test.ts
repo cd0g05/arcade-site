@@ -382,19 +382,75 @@ describe('admin dashboard (feat/admin-dashboard)', () => {
 
   // --- Analytics (id:69) ----------------------------------------------------
 
-  it('counts paid plays per game from the ledger reason convention', async () => {
-    const [game] = await db.select().from(games).where(eq(games.id, gameId));
-
+  it('counts paid plays per game by game_id, not by parsing the reason string', async () => {
     await writeTransaction({
       userId: playerId,
       amount: -3,
-      // Exactly what spendTokens() writes: "{Tier}: {Display Name}".
-      reason: `Cabinet: ${game.displayName}`,
+      // Deliberately NOT the "{Tier}: {Display Name}" copy the old join relied on — the
+      // count must survive any change to the reason wording.
+      reason: 'some entirely different wording',
       source: 'cabinet_spend',
+      gameId,
     });
 
     const { mostPlayed } = await getAnalytics();
     expect(mostPlayed.find((r) => r.gameId === gameId)?.plays).toBe(1);
+  });
+
+  it('stamps game_id on every game-related ledger write path', async () => {
+    const { spendTokens } = await import('@/lib/spend');
+    const { submitDailyScore } = await import('@/lib/leaderboard');
+
+    asAdmin();
+    await createAchievementAction({ gameId, mode: 'threshold', value: 100, award: 25 });
+
+    await writeTransaction({
+      userId: playerId,
+      amount: 100,
+      reason: 'Seed',
+      source: 'admin_adjustment',
+    });
+    await spendTokens(playerId, gameId);
+    await submitDailyScore({
+      userId: playerId,
+      gameId,
+      score: 150,
+      submittedVia: 'site',
+    });
+    const { evaluateScoreSubmission } = await import('@/lib/achievements');
+    await evaluateScoreSubmission({
+      userId: playerId,
+      gameId,
+      score: 150,
+      isDailySubmission: true,
+    });
+
+    const rows = await db
+      .select()
+      .from(transactions)
+      .where(eq(transactions.userId, playerId));
+
+    // Each writer path goes through a different insert site in lib/ledger.ts — plain
+    // insert (spend, participation), and the CTE form (achievement award).
+    for (const source of ['cabinet_spend', 'daily_submission', 'achievement'] as const) {
+      const row = rows.find((r) => r.source === source);
+      expect(row, `expected a ${source} row`).toBeDefined();
+      expect(row!.gameId, `${source} should carry game_id`).toBe(gameId);
+    }
+    // The seed adjustment has no game, and must stay null rather than inherit one.
+    expect(rows.find((r) => r.source === 'admin_adjustment')!.gameId).toBeNull();
+  });
+
+  it('does not attribute a gameless transaction to any game', async () => {
+    await writeTransaction({
+      userId: playerId,
+      amount: 10,
+      reason: 'Daily Login',
+      source: 'login',
+    });
+
+    const { mostPlayed } = await getAnalytics();
+    expect(mostPlayed.every((r) => r.plays === 0)).toBe(true);
   });
 
   it('counts distinct daily submitters per game/day', async () => {

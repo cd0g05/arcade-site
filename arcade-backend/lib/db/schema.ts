@@ -53,10 +53,20 @@ export const transactions = pgTable(
       ],
     }).notNull(),
     actorUserId: uuid('actor_user_id').references(() => users.id), // set for admin_adjustment
+    // Which game this transaction is about, when it is about one.
+    //
+    // Nullable by design — login bonuses, riddle/task completions, and admin adjustments
+    // have no game. This does NOT reintroduce game state into the ledger (ADR-2 is about
+    // balance never being stored); it is an attribution column, so analytics can group by
+    // game without parsing `reason`. Before it existed, the admin "most played" count
+    // matched `reason` against a reconstructed "{Tier}: {Display Name}" string, which
+    // would silently return zero the moment that copy convention changed.
+    gameId: text('game_id').references(() => games.id),
     createdAt: timestamp('created_at').notNull().defaultNow(),
   },
   (t) => ({
     userTimeIdx: index('transactions_user_id_created_at_idx').on(t.userId, t.createdAt),
+    gameSourceIdx: index('transactions_game_id_source_idx').on(t.gameId, t.source),
   }),
 );
 

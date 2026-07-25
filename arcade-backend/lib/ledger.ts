@@ -43,6 +43,8 @@ export interface WriteTransactionInput {
   reason: string;
   source: TransactionSource;
   actorUserId?: string; // set for admin_adjustment
+  /** The game this transaction is about, when it is about one (spends, score awards). */
+  gameId?: string;
 }
 
 /**
@@ -60,6 +62,7 @@ export async function writeTransaction(input: WriteTransactionInput) {
       reason: input.reason,
       source: input.source,
       actorUserId: input.actorUserId,
+      gameId: input.gameId,
     })
     .returning();
   return row;
@@ -87,6 +90,7 @@ export async function awardAchievement(input: {
   achievementId: string;
   amount: number;
   reason: string;
+  gameId: string;
 }): Promise<{ awarded: boolean }> {
   const result = await db.execute(sql`
     WITH award AS (
@@ -95,8 +99,8 @@ export async function awardAchievement(input: {
       ON CONFLICT (user_id, achievement_id) DO NOTHING
       RETURNING user_id
     )
-    INSERT INTO transactions (user_id, amount, reason, source)
-    SELECT user_id, ${input.amount}, ${input.reason}, 'achievement'
+    INSERT INTO transactions (user_id, amount, reason, source, game_id)
+    SELECT user_id, ${input.amount}, ${input.reason}, 'achievement', ${input.gameId}
     FROM award
     RETURNING id
   `);
@@ -204,8 +208,8 @@ export async function settleTopScoreAward(input: {
       ON CONFLICT (game_id, game_date) DO NOTHING
       RETURNING user_id
     )
-    INSERT INTO transactions (user_id, amount, reason, source)
-    SELECT user_id, ${input.amount}, ${input.reason}, ${input.source}
+    INSERT INTO transactions (user_id, amount, reason, source, game_id)
+    SELECT user_id, ${input.amount}, ${input.reason}, ${input.source}, ${input.gameId}
     FROM settlement
     RETURNING id
   `);

@@ -328,6 +328,7 @@ None — this is a new service with no pre-existing schema.
 | `0001_large_maestro.sql` | economy-engine | `content_completions.once_per_day` + partial unique index `content_completions_once_per_day_uniq`. |
 | `0002_early_unicorn.sql` | economy-engine | `daily_top_score_settlements` table, PK `(game_id, game_date)`. |
 | `0003_shiny_fat_cobra.sql` | api-and-bot-contract | Unique `bounties_game_id_game_date_uniq` on `bounties (game_id, game_date)`. |
+| `0004_chemical_midnight.sql` | ledger-game-id | Nullable `transactions.game_id` FK + `transactions_game_id_source_idx`, plus a backfill of historical rows from their reason strings. |
 
 Both economy-engine migrations exist to move a one-time guarantee out of application logic and into a DB constraint, extending ADR-3's principle to two cases the original schema handled with read-then-write checks:
 
@@ -414,11 +415,15 @@ duplicating auth and validation for no gain. Three things are worth carrying for
    either fail or erase the record of awards people received. `active: false` stops future
    awards and `lib/achievements.ts` already filters on it.
 
-**Known coupling** — the Analytics "most played" count joins `transactions.reason` against
-a reconstructed `"{Tier}: {Display Name}"` string, because the ledger has no `game_id`
-column (deliberately game-agnostic per ADR-2). Matched exactly rather than with a LIKE, but
-if that copy convention changes the count silently goes to zero. A `transactions.game_id`
-column is the durable fix if analytics grows past this page.
+**Resolved coupling** — the Analytics "most played" count originally joined
+`transactions.reason` against a reconstructed `"{Tier}: {Display Name}"` string, which
+would silently return zero if that copy convention ever changed. Builder-approved
+2026-07-25: `transactions.game_id` (migration `0004`) replaced it. The column is nullable
+and purely attributive — login, riddle/task, and admin-adjustment rows have no game, and
+this does not reintroduce state into the ledger (ADR-2 is about balance never being
+stored). `lib/ledger.ts` stamps it at all three game-related insert sites; the migration
+backfilled existing rows from their reason strings, which was the last point at which that
+mapping was guaranteed intact.
 
 ### New Endpoints
 

@@ -174,6 +174,18 @@
       "owner": "unknown",
       "created_at": "2026-07-25T17:51:59.263408+00:00",
       "initiative": "token-system"
+    },
+    "feat/ledger-game-id": {
+      "intent": "Add transactions.game_id (nullable FK to games) as the durable fix for the analytics reason-string coupling flagged at Partition 4: admin Analytics counted plays by matching transactions.reason against a reconstructed '{Tier}: {Display Name}' string, which silently zeroes if the copy changes. Threads gameId through lib/ledger.ts's five insert sites and their callers, backfills existing rows, and switches lib/admin.ts to join on the column.",
+      "modules": [
+        "arcade-backend/lib/ledger.ts",
+        "arcade-backend/lib/db/schema.ts",
+        "arcade-backend/lib/admin.ts",
+        "arcade-backend/drizzle"
+      ],
+      "owner": "unknown",
+      "created_at": "2026-07-25T18:08:50.872259+00:00",
+      "initiative": "token-system"
     }
   }
 }

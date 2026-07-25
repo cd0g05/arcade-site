@@ -67,6 +67,7 @@ export async function spendTokens(userId: string, gameId: string): Promise<Spend
     amount: -cost,
     reason,
     source: 'cabinet_spend',
+    gameId,
   });
 
   return { newBalance: balance - cost, cost, reason };

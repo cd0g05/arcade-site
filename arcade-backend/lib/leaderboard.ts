@@ -71,6 +71,7 @@ export async function submitDailyScore(
     amount: DAILY_PARTICIPATION_AWARD,
     reason,
     source: 'daily_submission',
+    gameId: input.gameId,
   });
 
   return [{ amount: DAILY_PARTICIPATION_AWARD, reason, source: 'daily_submission' }];
