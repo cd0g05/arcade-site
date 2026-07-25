@@ -16,6 +16,8 @@ context.md
 # ==========================================
 .env
 .env.*
+# ...but the committed template must stay committable — it holds only placeholders.
+!.env.example
 .secrets
 *.pem
 
