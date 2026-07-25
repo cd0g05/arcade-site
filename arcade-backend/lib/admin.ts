@@ -153,15 +153,10 @@ export async function getAnalytics(): Promise<AdminAnalytics> {
   // "Most played" counts spend transactions rather than score submissions: a play is
   // paid for at start (FR-4.1), whereas not every play produces a submitted score.
   //
-  // Joined on the reason string because `transactions` has no `game_id` column — the
-  // ledger is deliberately game-agnostic (ADR-2). `spendTokens()` builds that string
-  // deterministically as "{Tier}: {Display Name}", so this reconstructs it and matches
-  // exactly rather than guessing with a LIKE wildcard, which would mis-attribute one
-  // game whose name is a suffix of another's.
-  //
-  // The coupling is real but narrow: if that copy convention changes, this count silently
-  // goes to zero. A `transactions.game_id` column would be the durable fix and is worth
-  // revisiting if analytics grows past this page.
+  // Joined on `transactions.game_id`. This previously matched a reconstructed
+  // "{Tier}: {Display Name}" reason string, which meant a copy change would silently
+  // zero the count; the column removed that coupling. Historical rows were backfilled
+  // from those strings in migration 0004.
   const mostPlayed = await db
     .select({
       gameId: games.id,
@@ -172,8 +167,8 @@ export async function getAnalytics(): Promise<AdminAnalytics> {
     .leftJoin(
       transactions,
       and(
+        eq(transactions.gameId, games.id),
         eq(transactions.source, 'cabinet_spend'),
-        sql`${transactions.reason} = initcap(${games.tier}) || ': ' || ${games.displayName}`,
       ),
     )
     .groupBy(games.id, games.displayName)
