@@ -14,6 +14,13 @@
       "summary": "Economy engine complete: achievements (threshold + interval-gap per ADR-5), leaderboard (day bucketing, +5 participation, 2+-submitter gating, bounty/default award), spend with InsufficientBalanceError, rolling-24h login bonus, content once-per-day/unlimited. 45 tests green; 100% stmt/line/func coverage on the 5 lib modules. Added content_completions.once_per_day partial unique index and daily_top_score_settlements to replace two racy read-then-write guards.",
       "decisions": "",
       "modules": []
+    },
+    {
+      "timestamp": "2026-07-25T17:51:28.436246+00:00",
+      "branch": "feat/api-and-bot-contract",
+      "summary": "Partition 3: all 9 HTTP routes, zod schemas, bot service-key auth, CORS allow-list, Vercel cron daily settle trigger, published docs/discord-bot-api.md. Migration 0003 (unique bounties game/day). 81 tests green.",
+      "decisions": "",
+      "modules": []
     }
   ]
 }
