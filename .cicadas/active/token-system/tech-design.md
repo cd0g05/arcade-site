@@ -392,6 +392,34 @@ routes are cookie-authenticated, so reflecting any origin alongside
 logged-in user. Preview deploys are admitted by configured host suffix, matched on a dot
 boundary so `arcade.vercel.app.attacker.com` cannot pass.
 
+### As-built notes (feat/admin-dashboard)
+
+The dashboard is server-rendered pages plus **server actions**, not a second API surface —
+the admin is same-origin, so routing its writes through `/api/*` would have meant
+duplicating auth and validation for no gain. Three things are worth carrying forward:
+
+1. **Every server action re-checks the admin guard.** The layout guard is not a gate on
+   them: a server action compiles to a directly-reachable POST endpoint with a generated
+   URL, so it can be invoked without ever rendering the page that hosts its form. Relying
+   on the layout alone would have left every admin write open to any authenticated user.
+
+2. **`adjustBalanceAction` re-reads the balance instead of trusting the client's
+   `previousBalance`.** The confirm step shows the value the admin saw, but the user may
+   earn or spend between render and confirm; writing the client's delta would silently
+   reverse that activity. The `"Admin adjusted {old} -> {new}"` reason therefore always
+   describes the adjustment that actually happened.
+
+3. **The Achievement Builder deactivates rather than deletes.** `achievement_awards` has a
+   foreign key to `achievements`, so removing a criteria row that has ever paid out would
+   either fail or erase the record of awards people received. `active: false` stops future
+   awards and `lib/achievements.ts` already filters on it.
+
+**Known coupling** — the Analytics "most played" count joins `transactions.reason` against
+a reconstructed `"{Tier}: {Display Name}"` string, because the ledger has no `game_id`
+column (deliberately game-agnostic per ADR-2). Matched exactly rather than with a LIKE, but
+if that copy convention changes the count silently goes to zero. A `transactions.game_id`
+column is the durable fix if analytics grows past this page.
+
 ### New Endpoints
 
 ```

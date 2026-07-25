@@ -1,5 +1,5 @@
 ---
-summary: "Foundation-mode task breakdown across the five partitions from approach.md: backend-foundation (schema/auth/ledger) -> economy-engine (achievements/leaderboard) -> {api-and-bot-contract, admin-dashboard} in parallel -> site-integration. No PR tasks injected (lifecycle.json has all pr_boundaries false) — every boundary merges directly. STATUS: Partitions 1, 2 AND 3 are COMPLETE. Partition 1 (feat/backend-foundation, ids 1-17) verified against a live Neon instance. Partition 2 (feat/economy-engine, ids 20-39) implements the full library layer — achievements, leaderboard, spend, login bonus, content — with 45 tests green against live Postgres and 100% stmt/line/function coverage on the five lib modules; two schema deviations are recorded as ids 38-39. Partition 3 (feat/api-and-bot-contract, ids 40-55) implements all 9 HTTP routes, zod schemas, bot service-key auth, CORS allow-listing, the Vercel cron settle trigger, and the published docs/discord-bot-api.md — 34 route tests green, 78 total, next build compiles all routes. THREE BUILDER DECISIONS 2026-07-25: (a) interval-gap achievements keep writing no achievement_awards row — the Partition 2 acceptance criterion was amended to match, no schema change; (b) the daily settle trigger is a Vercel cron hitting /api/cron/settle-daily, added as ids 53-54; (c) partitions 3 and 4 run back to back without pausing. THREE PARTITION 3 DEVIATIONS: migration 0003 adds a unique (game_id, game_date) on bounties (id:56); isValidBotApiKey moved lib/auth.ts -> lib/bot-key.ts (id:57); POST /api/bot/log added as id:55 to make FR-5.4's bot log reachable. NEXT: Partition 4 (feat/admin-dashboard, ids 60-70)."
+summary: "Foundation-mode task breakdown across the five partitions from approach.md: backend-foundation (schema/auth/ledger) -> economy-engine (achievements/leaderboard) -> {api-and-bot-contract, admin-dashboard} in parallel -> site-integration. No PR tasks injected (lifecycle.json has all pr_boundaries false) — every boundary merges directly. STATUS: Partitions 1, 2, 3 AND 4 are COMPLETE. Partition 1 (feat/backend-foundation, ids 1-17) verified against a live Neon instance. Partition 2 (feat/economy-engine, ids 20-39) implements the full library layer — achievements, leaderboard, spend, login bonus, content — with 45 tests green against live Postgres and 100% stmt/line/function coverage on the five lib modules; two schema deviations are recorded as ids 38-39. Partition 3 (feat/api-and-bot-contract, ids 40-55) implements all 9 HTTP routes, zod schemas, bot service-key auth, CORS allow-listing, the Vercel cron settle trigger, and the published docs/discord-bot-api.md — 34 route tests green, 78 total, next build compiles all routes. THREE BUILDER DECISIONS 2026-07-25: (a) interval-gap achievements keep writing no achievement_awards row — the Partition 2 acceptance criterion was amended to match, no schema change; (b) the daily settle trigger is a Vercel cron hitting /api/cron/settle-daily, added as ids 53-54; (c) partitions 3 and 4 run back to back without pausing. THREE PARTITION 3 DEVIATIONS: migration 0003 adds a unique (game_id, game_date) on bounties (id:56); isValidBotApiKey moved lib/auth.ts -> lib/bot-key.ts (id:57); POST /api/bot/log added as id:55 to make FR-5.4's bot log reachable. Partition 4 (feat/admin-dashboard, ids 60-73) implements the /admin dashboard: guard, Users list + drill-down, balance-adjust confirm flow, Achievement Builder, Games config, Leaderboards, Bot Log, Analytics — server-rendered with server actions, 24 tests (16 server + 8 component). Its deviations: lib/admin.ts + lib/admin-guard.ts added (id:71), the guard re-checked inside every server action since actions are directly-reachable endpoints (id:72), and jsdom/testing-library devDeps wired per-file (id:73). NEXT: Partition 5 (feat/site-integration)."
 phase: "tasks"
 when_to_load:
   - "When selecting the next implementation task or reviewing completion state."
@@ -21,7 +21,7 @@ index:
   partition_four: "## Partition: feat/admin-dashboard"
   partition_five: "## Partition: feat/site-integration"
   initiative_boundary: "## Initiative Boundary"
-next_section: "## Partition: feat/admin-dashboard"
+next_section: "## Partition: feat/site-integration"
 ---
 
 # Tasks: Token System
@@ -95,17 +95,20 @@ next_section: "## Partition: feat/admin-dashboard"
 
 ## Partition: feat/admin-dashboard
 
-- [ ] Implement Auth.js session guard + `users.isAdmin` check as shared `/admin` layout middleware; verify non-admins get `403`/redirect <!-- id: 60 -->
-- [ ] Build the Users list page (`/admin/users`) with balance + last-active columns, per UX Mock-Up 1 (`admin-users.html`) <!-- id: 61 -->
-- [ ] Build the per-user transaction drill-down (inline, no full navigation) sortable by time/amount/reason <!-- id: 62 -->
-- [ ] Build the "Adjust balance" inline edit flow with the `"Confirm: {old} -> {new}?"` confirm step, writing an `"Admin adjusted {old} -> {new}"` transaction on confirm <!-- id: 63 -->
-- [ ] Build the Achievement Builder (per-game criteria-row CRUD: mode, threshold/gap value, award, one-time flag), live-applying without redeploy <!-- id: 64 -->
-- [ ] Build empty-state copy for the Achievement Builder: `"No achievements configured for this game yet."` <!-- id: 65 -->
-- [ ] Build Games config page: per-game token cost editing <!-- id: 66 -->
-- [ ] Build Leaderboards page: daily leaderboard history, edit/delete a bad entry <!-- id: 67 -->
-- [ ] Build Bot Log page: read-only feed of `bot_log_events` <!-- id: 68 -->
-- [ ] Build basic Analytics page: most-played games, daily leaderboard participation counts, per-user first-place counts <!-- id: 69 -->
-- [ ] Component/page tests for balance-edit confirm flow and achievement builder empty/populated states <!-- id: 70 -->
+- [x] Implement Auth.js session guard + `users.isAdmin` check as shared `/admin` layout middleware; verify non-admins get `403`/redirect <!-- id: 60 -->
+- [x] Build the Users list page (`/admin/users`) with balance + last-active columns, per UX Mock-Up 1 (`admin-users.html`) <!-- id: 61 -->
+- [x] Build the per-user transaction drill-down (inline, no full navigation) sortable by time/amount/reason <!-- id: 62 -->
+- [x] Build the "Adjust balance" inline edit flow with the `"Confirm: {old} -> {new}?"` confirm step, writing an `"Admin adjusted {old} -> {new}"` transaction on confirm <!-- id: 63 -->
+- [x] Build the Achievement Builder (per-game criteria-row CRUD: mode, threshold/gap value, award, one-time flag), live-applying without redeploy <!-- id: 64 -->
+- [x] Build empty-state copy for the Achievement Builder: `"No achievements configured for this game yet."` <!-- id: 65 -->
+- [x] Build Games config page: per-game token cost editing <!-- id: 66 -->
+- [x] Build Leaderboards page: daily leaderboard history, edit/delete a bad entry <!-- id: 67 -->
+- [x] Build Bot Log page: read-only feed of `bot_log_events` <!-- id: 68 -->
+- [x] Build basic Analytics page: most-played games, daily leaderboard participation counts, per-user first-place counts <!-- id: 69 -->
+- [x] Component/page tests for balance-edit confirm flow and achievement builder empty/populated states <!-- id: 70 -->
+- [x] Add `lib/admin.ts` (aggregate read queries) and `lib/admin-guard.ts` (`getAdminSession()`). **Deviation from the declared module list**, which named only `arcade-backend/app/admin`: the Users list and Analytics pages need joined/aggregated SQL that does not belong in a page component, and the guard is shared by the layout *and* every server action <!-- id: 71 -->
+- [x] Re-check the admin guard inside every server action, not just the layout. **Not in the plan and a real hole if missed**: a server action is a directly-reachable POST endpoint with a generated URL, so the layout guard is not a gate on it — without this, any authenticated user could call `adjustBalanceAction` <!-- id: 72 -->
+- [x] Add `@vitejs/plugin-react`, `@testing-library/react`, `@testing-library/jest-dom`, `jsdom` as devDeps and wire a `lib/test-setup.ts`; component test files opt into jsdom per-file via an `@vitest-environment` docblock so lib/route tests keep the node env they need for live Postgres. `@vitejs/plugin-react` is pinned to v4 — v6 requires Vite 8 and vitest 2.1.9 ships Vite 5 <!-- id: 73 -->
 
 ## Partition: feat/site-integration
 

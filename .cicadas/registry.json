@@ -41,6 +41,11 @@
           "timestamp": "2026-07-25T17:51:20.630962+00:00",
           "message": "PARTITION 3 COMPLETE \u2014 API layer stable for feat/admin-dashboard and feat/site-integration. THREE THINGS PARTITION 4 MUST KNOW: (1) MIGRATION 0003 is new \u2014 run npm run db:migrate. It adds unique bounties(game_id, game_date); computeDailyLeaderboard() always assumed one row per game/day but nothing enforced it. (2) isValidBotApiKey MOVED from lib/auth.ts to lib/bot-key.ts \u2014 lib/auth.ts now exports only Auth.js machinery (handlers, auth, signIn, signOut). Import the key check from lib/bot-key.ts. Note next-auth CANNOT be imported under vitest's node env at all (fails to resolve next/server), so any admin page test must vi.mock('@/lib/auth') wholesale rather than spreading importOriginal \u2014 see app/api/__tests__/routes.test.ts for the working pattern. (3) POST /api/bot/log now EXISTS and is the writer for bot_log_events \u2014 Partition 4 task id:68 (Bot Log page) has real data to read; it is a read-only feed, do not add write UI. ALSO REUSABLE BY PARTITION 4: lib/api-auth.ts exports requireSession() -> {userId, isAdmin} (throws 401) and the handle() error boundary (ZodError->400, HttpError->its status, else logged opaque 500); the /admin guard (id:60) should check isAdmin off that same session shape, which lib/auth.ts's session callback already populates from users.isAdmin. lib/cors.ts is browser-origin allow-listing only and is irrelevant to same-origin admin pages. PERFORMANCE REMINDER STILL LIVE: each neon-http query is its own HTTPS round trip, so batch/join in SQL on the Users list and Analytics pages rather than looping per row.",
           "from_branch": "feat/api-and-bot-contract"
+        },
+        {
+          "timestamp": "2026-07-25T18:02:51.049724+00:00",
+          "message": "PARTITION 4 COMPLETE \u2014 /admin dashboard done. FOR feat/site-integration (Partition 5): the API contract you consume is unchanged and documented in arcade-backend/docs/discord-bot-api.md (the session-only routes GET /api/balance, POST /api/spend, GET /api/content, POST /api/content/complete are the ones the arcade site calls). CORS: lib/cors.ts allow-lists https://arcade.cartercripe.com plus dev localhost:5173 by default; set CORS_ALLOWED_ORIGINS and CORS_ALLOWED_ORIGIN_SUFFIXES in the Vercel project for the real production/preview origins. Credentials are sent, so the site must fetch with credentials:'include'. NEW DEV DEPS in arcade-backend: @vitejs/plugin-react (PINNED v4 \u2014 v6 needs Vite 8, vitest 2.1.9 ships Vite 5), @testing-library/react, @testing-library/jest-dom, jsdom; vitest.config.ts now has a react() plugin and a second setup file lib/test-setup.ts, and component tests opt into jsdom per-file with an @vitest-environment docblock. NEW SHARED MODULES: lib/admin.ts (aggregate reads), lib/admin-guard.ts (getAdminSession). KNOWN COUPLING worth not breaking: Analytics counts plays by matching transactions.reason against a reconstructed '{Tier}: {Display Name}' string, because transactions has no game_id \u2014 if site-integration changes the spend reason copy, that count silently goes to zero.",
+          "from_branch": "feat/admin-dashboard"
         }
       ],
       "created_at": "2026-07-23T04:24:24.080031+00:00"
@@ -158,6 +163,16 @@
       ],
       "owner": "unknown",
       "created_at": "2026-07-25T17:35:48.005305+00:00",
+      "initiative": "token-system"
+    },
+    "feat/admin-dashboard": {
+      "intent": "Admin dashboard at /admin: session guard + users.isAdmin check as shared layout, Users list with balance/last-active per UX Mock-Up 1, inline per-user transaction drill-down, Adjust-balance confirm flow writing 'Admin adjusted {old} -> {new}', Achievement Builder (per-game criteria CRUD, live-applying), Games cost config, Leaderboards history with entry edit/delete, read-only Bot Log feed, basic Analytics. Server-rendered, batching/joining in SQL per the neon-http round-trip constraint.",
+      "modules": [
+        "arcade-backend/lib/admin.ts",
+        "arcade-backend/app/admin"
+      ],
+      "owner": "unknown",
+      "created_at": "2026-07-25T17:51:59.263408+00:00",
       "initiative": "token-system"
     }
   }
