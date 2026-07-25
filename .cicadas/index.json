@@ -21,6 +21,13 @@
       "summary": "Partition 3: all 9 HTTP routes, zod schemas, bot service-key auth, CORS allow-list, Vercel cron daily settle trigger, published docs/discord-bot-api.md. Migration 0003 (unique bounties game/day). 81 tests green.",
       "decisions": "",
       "modules": []
+    },
+    {
+      "timestamp": "2026-07-25T18:03:00.804359+00:00",
+      "branch": "feat/admin-dashboard",
+      "summary": "Partition 4: /admin dashboard \u2014 guard, users list + drill-down, balance-adjust confirm flow, achievement builder, games config, leaderboards edit/delete, bot log, analytics. Server actions with per-action guard re-check. 105 tests green.",
+      "decisions": "",
+      "modules": []
     }
   ]
 }
