@@ -1,5 +1,5 @@
 ---
-summary: "Foundation-mode task breakdown across the five partitions from approach.md: backend-foundation (schema/auth/ledger) -> economy-engine (achievements/leaderboard) -> {api-and-bot-contract, admin-dashboard} in parallel -> site-integration. No PR tasks injected (lifecycle.json has all pr_boundaries false) — every boundary merges directly. STATUS: Partition 1 (feat/backend-foundation) is COMPLETE — ids 1-16 all done and verified against a live Neon instance; Neon is provisioned, migration applied, games seeded, Google OAuth redirect confirmed. Next up is Partition 2 (feat/economy-engine, ids 20-37), which carries one inherited constraint: id:22 cannot use db.transaction() (unsupported on neon-http) and must use the CTE pattern documented in tech-design.md."
+summary: "Foundation-mode task breakdown across the five partitions from approach.md: backend-foundation (schema/auth/ledger) -> economy-engine (achievements/leaderboard) -> {api-and-bot-contract, admin-dashboard} in parallel -> site-integration. No PR tasks injected (lifecycle.json has all pr_boundaries false) — every boundary merges directly. STATUS: Partitions 1 AND 2 are COMPLETE. Partition 1 (feat/backend-foundation, ids 1-17) verified against a live Neon instance. Partition 2 (feat/economy-engine, ids 20-39) implements the full library layer — achievements, leaderboard, spend, login bonus, content — with 45 tests green against live Postgres and 100% stmt/line/function coverage on the five lib modules. Two schema deviations were required and are recorded as ids 38-39. Next up is Partition 3 (feat/api-and-bot-contract, ids 40-52) and Partition 4 (feat/admin-dashboard, ids 60-70), which approach.md says can run in parallel now that the lib layer is stable."
 phase: "tasks"
 when_to_load:
   - "When selecting the next implementation task or reviewing completion state."
@@ -21,7 +21,7 @@ index:
   partition_four: "## Partition: feat/admin-dashboard"
   partition_five: "## Partition: feat/site-integration"
   initiative_boundary: "## Initiative Boundary"
-next_section: "## Partition: feat/economy-engine"
+next_section: "## Partition: feat/api-and-bot-contract"
 ---
 
 # Tasks: Token System
@@ -51,24 +51,26 @@ next_section: "## Partition: feat/economy-engine"
 
 ## Partition: feat/economy-engine
 
-- [ ] Implement `lib/achievements.ts` threshold-mode evaluation: award once when score first crosses a fixed value <!-- id: 20 -->
-- [ ] Implement `lib/achievements.ts` interval-gap-mode evaluation, reading/writing `high_scores.last_awarded_high_score` distinctly from `current_high_score` (ADR-5) <!-- id: 21 -->
-- [ ] Implement idempotent award insertion via `(user_id, achievement_id)` unique constraint + `ON CONFLICT DO NOTHING`, paired with the ledger write in one DB transaction (ADR-3) <!-- id: 22 --> <!-- CONSTRAINT from id:4 spike: `db.transaction()` throws on the neon-http driver. Use the single-statement data-modifying CTE pattern (verified working, documented in tech-design.md "Spike result") — NOT two awaited queries. May require `lib/ledger.ts` to expose a CTE/batch-participating form. -->
-- [ ] Unit test: scoring 1050 after a `last_awarded_high_score` of 1000 with gap 100 produces no award but updates `current_high_score` <!-- id: 23 -->
-- [ ] Unit test: a subsequent score of 1100 in the same scenario produces exactly one award and exactly one `achievement_awards` row <!-- id: 24 -->
-- [ ] Unit test: calling the same score-evaluation twice with identical input (simulated retry) never double-awards <!-- id: 25 -->
-- [ ] Implement `lib/leaderboard.ts`: midnight-cutoff day bucketing for `daily_leaderboard_entries` <!-- id: 26 -->
-- [ ] Implement participation award (+5, always awarded on any daily-game submission) <!-- id: 27 -->
-- [ ] Implement 2+-submitter gating for top-score awards (no award if only one distinct submitter for a game/day) <!-- id: 28 -->
-- [ ] Unit test: single-submitter day yields participation award only, no top-score award <!-- id: 29 -->
-- [ ] Unit test: multi-submitter day correctly identifies the top scorer <!-- id: 30 -->
-- [ ] Implement `lib/spend.ts`: deduct-before-play using `lib/ledger.ts`, throwing a typed `InsufficientBalanceError` with `{ required, balance }` details <!-- id: 31 -->
-- [ ] Implement daily login bonus (+10 per rolling 24h, no buildup across inactivity) as its own ledger-writing function <!-- id: 32 -->
-- [ ] Add `games.default_top_score_award` (default 10) to the schema and use it in `lib/leaderboard.ts` when no bounty is set for a game/day (PRD Open Questions resolution) <!-- id: 33 -->
-- [ ] Implement `lib/content.ts`: `completeContentItem(userId, contentItemId, answerText)`, enforcing once-per-day only for `type in ('riddle', 'trivia')`, unlimited for `type: 'task'` (FR-3.4 infra; content itself is seeded, not authored in-app this initiative) <!-- id: 34 -->
-- [ ] Unit test: a riddle/trivia completion awards tokens once per day, a second same-day attempt returns `already_completed_today` with no award <!-- id: 35 -->
-- [ ] Unit test: a task completion awards tokens on every call with no once-per-day restriction <!-- id: 36 -->
-- [ ] Confirm 100% test coverage on `lib/ledger.ts`, `lib/achievements.ts`, `lib/leaderboard.ts`, `lib/content.ts` per Tech Design coverage expectations <!-- id: 37 -->
+- [x] Implement `lib/achievements.ts` threshold-mode evaluation: award once when score first crosses a fixed value <!-- id: 20 --> (`lib/achievements.ts` `evaluateScoreSubmission`; awards once via `awardAchievement()`'s unique-constraint CTE)
+- [x] Implement `lib/achievements.ts` interval-gap-mode evaluation, reading/writing `high_scores.last_awarded_high_score` distinctly from `current_high_score` (ADR-5) <!-- id: 21 --> (reads/writes `high_scores.last_awarded_high_score` distinctly from `current_high_score` per ADR-5; one submission clearing several gap multiples awards each exactly once)
+- [x] Implement idempotent award insertion via `(user_id, achievement_id)` unique constraint + `ON CONFLICT DO NOTHING`, paired with the ledger write in one DB transaction (ADR-3) <!-- id: 22 --> (**deviation forced by the id:4 driver constraint** — `db.transaction()` is unavailable on neon-http, so this is a single-statement data-modifying CTE in `lib/ledger.ts` `awardAchievement()`, keeping ADR-2's sole-writer rule intact. Repeatable interval-gap awards can't use the once-ever `(user_id, achievement_id)` constraint, so they're guarded by a compare-and-set on the watermark instead)
+- [x] Unit test: scoring 1050 after a `last_awarded_high_score` of 1000 with gap 100 produces no award but updates `current_high_score` <!-- id: 23 --> (`achievements.test.ts` — asserts no award, `currentHighScore` 1050, `lastAwardedHighScore` still 1000)
+- [x] Unit test: a subsequent score of 1100 in the same scenario produces exactly one award and exactly one `achievement_awards` row <!-- id: 24 --> (`achievements.test.ts` — exactly 1 award and exactly 1 `transactions` row)
+- [x] Unit test: calling the same score-evaluation twice with identical input (simulated retry) never double-awards <!-- id: 25 --> (`achievements.test.ts` — sequential replay **and** a 3-way concurrent replay; both yield exactly one award)
+- [x] Implement `lib/leaderboard.ts`: midnight-cutoff day bucketing for `daily_leaderboard_entries` <!-- id: 26 --> (`lib/leaderboard.ts` `dayBucket()` + `computeDailyLeaderboard()`; day bucket derived once and passed through so one request can't hold two notions of "today")
+- [x] Implement participation award (+5, always awarded on any daily-game submission) <!-- id: 27 --> (`submitDailyScore()` — `DAILY_PARTICIPATION_AWARD` = 5, unconditional)
+- [x] Implement 2+-submitter gating for top-score awards (no award if only one distinct submitter for a game/day) <!-- id: 28 --> (counts *distinct* submitters, keeping each user's best; one user submitting twice does not unlock the top-score award)
+- [x] Unit test: single-submitter day yields participation award only, no top-score award <!-- id: 29 --> (`leaderboard.test.ts`)
+- [x] Unit test: multi-submitter day correctly identifies the top scorer <!-- id: 30 --> (`leaderboard.test.ts`)
+- [x] Implement `lib/spend.ts`: deduct-before-play using `lib/ledger.ts`, throwing a typed `InsufficientBalanceError` with `{ required, balance }` details <!-- id: 31 --> (`lib/spend.ts` — cost read from `games.token_cost` per FR-4.1, not hardcoded; `InsufficientBalanceError.details` carries `{required, balance}` for the `"Need {N} tokens"` veil and the 402 body)
+- [x] Implement daily login bonus (+10 per rolling 24h, no buildup across inactivity) as its own ledger-writing function <!-- id: 32 --> (`lib/ledger.ts` `awardDailyLoginBonus()` — the 24h guard is a `NOT EXISTS` inside the INSERT, so concurrent logins can't double-award. Tested: 30-day absence yields exactly one bonus, not 30)
+- [x] Add `games.default_top_score_award` (default 10) to the schema and use it in `lib/leaderboard.ts` when no bounty is set for a game/day (PRD Open Questions resolution) <!-- id: 33 --> (**column already existed** — `games.default_top_score_award` (default 10) landed with the Partition 1 schema and is live in the DB, so no migration was needed. This task reduced to consuming it in `lib/leaderboard.ts`, which now falls back to it whenever no bounty amount is set)
+- [x] Implement `lib/content.ts`: `completeContentItem(userId, contentItemId, answerText)`, enforcing once-per-day only for `type in ('riddle', 'trivia')`, unlimited for `type: 'task'` (FR-3.4 infra; content itself is seeded, not authored in-app this initiative) <!-- id: 34 --> (`lib/content.ts` — once-per-day enforced by a **partial unique index**, not an app-level check; see id:38)
+- [x] Unit test: a riddle/trivia completion awards tokens once per day, a second same-day attempt returns `already_completed_today` with no award <!-- id: 35 --> (`content.test.ts` — also covers trivia, a different day, and a 3-way concurrent submit)
+- [x] Unit test: a task completion awards tokens on every call with no once-per-day restriction <!-- id: 36 --> (`content.test.ts` — 3 task completions, 3 awards)
+- [x] Confirm 100% test coverage on `lib/ledger.ts`, `lib/achievements.ts`, `lib/leaderboard.ts`, `lib/content.ts` per Tech Design coverage expectations <!-- id: 37 --> (**100% statements / lines / functions** on `ledger.ts`, `achievements.ts`, `leaderboard.ts`, `content.ts` *and* `spend.ts`. Branch coverage 88% overall — the residual gaps are unreachable defensive `??` fallbacks such as `game?.displayName ?? gameId`, where `game_id` is a foreign key so the row always exists. Not gamed with artificial tests)
+- [x] Add `content_completions.once_per_day` + partial unique index `content_completions_once_per_day_uniq` (migration `0001_large_maestro.sql`) <!-- id: 38 --> (**schema deviation.** The original schema deliberately used a plain lookup index plus an application-level "completed today?" check, reasoning that a partial unique index keyed on `content_items.type` was awkward in Drizzle. But a read-then-write check races: a double-submitted riddle can award twice, which id:35 forbids. Denormalizing the once-per-day flag onto the completion row makes a partial unique index expressible, moving the guarantee into the DB per ADR-3's stated principle. Tasks store `false`, fall outside the partial index, and stay unlimited. Verified by a 3-way concurrent-submit test)
+- [x] Add `daily_top_score_settlements` table (PK `(game_id, game_date)`, migration `0002_early_unicorn.sql`) <!-- id: 39 --> (**found by a failing test.** The first cut guarded repeat settlement with `transactions.created_at::date = gameDate`, which is wrong whenever settlement runs after the day being settled — the day played and the day paid differ, so the guard never matched and the award paid twice. Replaced with a one-row-per-game/day constraint, giving the bounty and default-award paths one shared idempotency mechanism. `bounties.claimed_by_user_id` is now bookkeeping for the bot's pending-bounty view, not the guard)
 
 ## Partition: feat/api-and-bot-contract
 

@@ -320,6 +320,21 @@ None — this is a new service with no pre-existing schema.
 - Initial migration creates all tables above in one Drizzle migration; no phased rollout needed since this is a greenfield schema.
 - `games` table is seeded with the current hub cartridge + cabinet roster (costs per PRD FR-4.1 defaults: 1 for cartridge, 3 for cabinet) as part of initial setup, not hardcoded in application code.
 
+**As-built migrations** (reflected from `arcade-backend/drizzle/`):
+
+| Migration | Partition | Contents |
+|---|---|---|
+| `0000_wooden_paladin.sql` | backend-foundation | All 11 initial tables. |
+| `0001_large_maestro.sql` | economy-engine | `content_completions.once_per_day` + partial unique index `content_completions_once_per_day_uniq`. |
+| `0002_early_unicorn.sql` | economy-engine | `daily_top_score_settlements` table, PK `(game_id, game_date)`. |
+
+Both economy-engine migrations exist to move a one-time guarantee out of application logic and into a DB constraint, extending ADR-3's principle to two cases the original schema handled with read-then-write checks:
+
+- **`content_completions.once_per_day`** — the once-per-day rule for riddles/trivia (FR-3.4) originally relied on `lib/content.ts` checking a lookup index before inserting. That races: two concurrent submissions of the same riddle both see "not completed" and both award. A unique index cannot reference `content_items.type`, so the flag is denormalized onto the completion row at insert time, which makes a *partial* unique index expressible. Tasks store `false`, fall outside the index, and remain unlimited per FR-3.4.
+- **`daily_top_score_settlements`** — the top-score award (FR-3.3) needs "settle at most once per game/day". A guard comparing `transactions.created_at::date` to the game date is wrong whenever settlement runs after the day being settled, because those are different dates; a test caught it paying twice. One row per `(game_id, game_date)` makes the constraint exact and lets the bounty and default-award paths share a single mechanism.
+
+**Interval-gap awards are the one deliberate exception** to constraint-based idempotency: they are *repeatable* by design, so the once-ever `(user_id, achievement_id)` unique constraint on `achievement_awards` cannot apply. They are guarded instead by a compare-and-set on `high_scores.last_awarded_high_score` — the UPDATE only matches while the watermark still holds its expected value, so concurrent duplicate submissions cannot both award. Consequently interval-gap awards write a `transactions` row but no `achievement_awards` row.
+
 ---
 
 ## API & Interface Design

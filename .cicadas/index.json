@@ -7,6 +7,13 @@
       "summary": "Partition 1 complete: Neon provisioned + migration applied + games seeded; ledger tests and Google OAuth redirect verified live. Pooling spike PASSED (risk retired); surfaced neon-http db.transaction() constraint for economy-engine id:22. Fixed missing .env.example, missing AUTH_SECRET, .gitignore swallowing the env template, and dotenv bundled into app code.",
       "decisions": "",
       "modules": []
+    },
+    {
+      "timestamp": "2026-07-25T03:18:07.030808+00:00",
+      "branch": "feat/economy-engine",
+      "summary": "Economy engine complete: achievements (threshold + interval-gap per ADR-5), leaderboard (day bucketing, +5 participation, 2+-submitter gating, bounty/default award), spend with InsufficientBalanceError, rolling-24h login bonus, content once-per-day/unlimited. 45 tests green; 100% stmt/line/func coverage on the 5 lib modules. Added content_completions.once_per_day partial unique index and daily_top_score_settlements to replace two racy read-then-write guards.",
+      "decisions": "",
+      "modules": []
     }
   ]
 }

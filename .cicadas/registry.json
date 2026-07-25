@@ -31,6 +31,11 @@
           "timestamp": "2026-07-25T02:36:02.919329+00:00",
           "message": "DRIVER CONSTRAINT from feat/backend-foundation (task id:4 spike): Drizzle's neon-http driver has NO db.transaction() support \u2014 it throws 'No transactions support in neon-http driver'. db.batch([...]) IS supported (Neon wraps a batch in one transaction) but batched statements cannot read each other's results. This directly affects feat/economy-engine task id:22 (ADR-3 atomic achievement-award + ledger write): do NOT implement as two awaited queries. Use a single-statement data-modifying CTE (INSERT ... ON CONFLICT DO NOTHING RETURNING, feeding the ledger INSERT) \u2014 verified working against the live DB, and an empty result set doubles as the 'already awarded' idempotency signal. May require lib/ledger.ts to expose a CTE/batch-participating form alongside its standalone insert. Full pattern + measurements in tech-design.md 'Spike result: Neon pooling under Fluid Compute'. Pooling itself is a NON-issue: 175 concurrent queries used <=7 of 112 connections. Secondary note for feat/admin-dashboard: each neon-http query is its own HTTPS round trip, so batch/join in SQL rather than per-row query loops (100 concurrent queries showed ~13x per-query latency degradation).",
           "from_branch": "feat/backend-foundation"
+        },
+        {
+          "timestamp": "2026-07-25T03:18:07.131355+00:00",
+          "message": "PARTITION 2 COMPLETE \u2014 lib/ layer is now stable and frozen for consumers. Signatures for feat/api-and-bot-contract and feat/admin-dashboard to build against: evaluateScoreSubmission({userId, gameId, score, isDailySubmission}) -> AwardResult[]; submitDailyScore({userId, gameId, score, submittedVia, gameDate?}) -> AwardResult[]; computeDailyLeaderboard(gameId, gameDate?) -> DailyLeaderboardResult; settleDailyTopScore(gameId, gameDate?) -> AwardResult|null; spendTokens(userId, gameId) -> {newBalance, cost, reason} (throws InsufficientBalanceError with .details {required, balance} -> map to 402, and UnknownGameError); awardDailyLoginBonus(userId) -> {awarded}; completeContentItem(userId, contentItemId, answerText, now?) -> {status:'awarded', award}|{status:'already_completed_today'} (throws UnknownContentItemError/InactiveContentItemError); listContentForUser(userId) -> items with completedToday. TWO NOTES: (1) settleDailyTopScore is one-shot per game/day by constraint \u2014 call it only after the day closes, since whoever leads at first successful call keeps the award. (2) Interval-gap achievement awards intentionally write NO achievement_awards row (that table's unique key means once-ever, wrong for repeatable gap awards); they are guarded by a watermark compare-and-set. This diverges from one approach.md acceptance criterion as literally written \u2014 flagged inline for Builder confirmation. Also: two new migrations (0001, 0002) \u2014 run npm run db:migrate before working.",
+          "from_branch": "feat/economy-engine"
         }
       ],
       "created_at": "2026-07-23T04:24:24.080031+00:00"
@@ -122,6 +127,20 @@
       "owner": "unknown",
       "created_at": "2026-07-23T04:37:25.360337+00:00",
       "worktree_path": "/Users/cartercripe/dev/code/projects/personal-site/arcade-feat-backend-foundation",
+      "initiative": "token-system"
+    },
+    "feat/economy-engine": {
+      "intent": "Economy engine library layer: lib/achievements.ts (threshold + interval-gap evaluation, ADR-3/ADR-5 idempotency), lib/leaderboard.ts (midnight bucketing, +5 participation, 2+-submitter top-score gating, games.default_top_score_award fallback), lib/spend.ts (deduct-before-play, InsufficientBalanceError), daily login bonus, lib/content.ts (riddle/trivia once-per-day, task unlimited). Pure library, no HTTP routes. Adds games.default_top_score_award column + migration (id:33).",
+      "modules": [
+        "arcade-backend/lib/achievements.ts",
+        "arcade-backend/lib/content.ts",
+        "arcade-backend/lib/spend.ts",
+        "arcade-backend/drizzle",
+        "arcade-backend/lib/db/schema.ts",
+        "arcade-backend/lib/leaderboard.ts"
+      ],
+      "owner": "unknown",
+      "created_at": "2026-07-25T03:00:46.027268+00:00",
       "initiative": "token-system"
     }
   }

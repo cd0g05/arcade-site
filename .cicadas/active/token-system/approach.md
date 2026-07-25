@@ -77,13 +77,13 @@ library
 _(no persistent process — pure library, exercised via unit tests)_
 
 #### Acceptance Criteria
-- [ ] `evaluateScoreSubmission({ score: 1050, ... })` against a seeded `lastAwardedHighScore: 1000, gap: 100` interval-gap achievement returns no award, but updates `currentHighScore`
-- [ ] A subsequent `evaluateScoreSubmission({ score: 1100, ... })` against the same state returns exactly one award and inserts exactly one `achievement_awards` row
-- [ ] Calling `evaluateScoreSubmission` twice with identical input (simulated retry) never produces two `transactions` rows for the same achievement (ADR-3 idempotency)
-- [ ] `computeDailyLeaderboard(gameId, date)` with only one submitter for that game/date returns no top-score award, but the submitter still receives the participation award
-- [ ] `computeDailyLeaderboard(gameId, date)` with two or more submitters correctly identifies the top scorer for bounty/award purposes
-- [ ] `completeContentItem(userId, contentItemId, answerText)` for a `type: 'riddle'` item awards tokens on first completion today, and returns `already_completed_today` (no award) on a second attempt the same day
-- [ ] `completeContentItem` for a `type: 'task'` item awards tokens on every call, with no once-per-day restriction
+- [x] `evaluateScoreSubmission({ score: 1050, ... })` against a seeded `lastAwardedHighScore: 1000, gap: 100` interval-gap achievement returns no award, but updates `currentHighScore`
+- [x] A subsequent `evaluateScoreSubmission({ score: 1100, ... })` against the same state returns exactly one award and inserts exactly one `achievement_awards` row — **met with one deviation, needs Builder confirmation**: exactly one award and exactly one `transactions` row, but **no `achievement_awards` row**. That table's unique `(user_id, achievement_id)` constraint encodes "once ever", which is correct for threshold achievements and wrong for interval-gap ones that fire repeatedly at every gap multiple — a second gap award would violate it. Interval-gap idempotency comes from a compare-and-set on `high_scores.last_awarded_high_score` instead. If an audit trail of every gap award is wanted, `achievement_awards` needs its constraint relaxed (e.g. include the awarded score in the key), which is a schema change deferred pending Builder input.
+- [x] Calling `evaluateScoreSubmission` twice with identical input (simulated retry) never produces two `transactions` rows for the same achievement (ADR-3 idempotency)
+- [x] `computeDailyLeaderboard(gameId, date)` with only one submitter for that game/date returns no top-score award, but the submitter still receives the participation award
+- [x] `computeDailyLeaderboard(gameId, date)` with two or more submitters correctly identifies the top scorer for bounty/award purposes
+- [x] `completeContentItem(userId, contentItemId, answerText)` for a `type: 'riddle'` item awards tokens on first completion today, and returns `already_completed_today` (no award) on a second attempt the same day
+- [x] `completeContentItem` for a `type: 'task'` item awards tokens on every call, with no once-per-day restriction
 
 #### Implementation Steps
 1. Implement `lib/achievements.ts`: threshold mode, interval-gap mode (reading/writing `high_scores.last_awarded_high_score`), `ON CONFLICT DO NOTHING` idempotency per ADR-3.
