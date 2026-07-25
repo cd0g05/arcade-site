@@ -1,0 +1,2 @@
+ALTER TABLE "content_completions" ADD COLUMN "once_per_day" boolean NOT NULL;--> statement-breakpoint
+CREATE UNIQUE INDEX "content_completions_once_per_day_uniq" ON "content_completions" USING btree ("user_id","content_item_id","completed_date") WHERE "content_completions"."once_per_day";

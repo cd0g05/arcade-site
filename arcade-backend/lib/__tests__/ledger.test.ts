@@ -2,7 +2,12 @@ import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { eq } from 'drizzle-orm';
 import { db } from '../db/client';
 import { users, transactions } from '../db/schema';
-import { writeTransaction, getBalance, adminAdjustBalance } from '../ledger';
+import {
+  writeTransaction,
+  getBalance,
+  adminAdjustBalance,
+  getRecentTransactions,
+} from '../ledger';
 
 // Requires DATABASE_URL to point at a real (dev/test) Postgres instance — per
 // tech-design.md's Mocking strategy, ledger correctness is tested against real
@@ -51,5 +56,18 @@ describe('ledger — balance is always reconstructable from the transaction log 
     const rows = await db.select().from(transactions).where(eq(transactions.userId, userId));
     const adjustment = rows.find((r) => r.source === 'admin_adjustment');
     expect(adjustment?.reason).toBe(`Admin adjusted ${before} -> ${before + 15}`);
+  });
+
+  it('returns recent transactions newest-first, respecting the limit', async () => {
+    // Backs the `recent` half of GET /api/balance's { balance, recent } response.
+    const recent = await getRecentTransactions(userId, 2);
+
+    expect(recent).toHaveLength(2);
+    for (let i = 1; i < recent.length; i++) {
+      expect(recent[i - 1].createdAt.getTime()).toBeGreaterThanOrEqual(
+        recent[i].createdAt.getTime(),
+      );
+    }
+    expect(recent.every((r) => r.userId === userId)).toBe(true);
   });
 });

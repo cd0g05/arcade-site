@@ -123,6 +123,20 @@
       "created_at": "2026-07-23T04:37:25.360337+00:00",
       "worktree_path": "/Users/cartercripe/dev/code/projects/personal-site/arcade-feat-backend-foundation",
       "initiative": "token-system"
+    },
+    "feat/economy-engine": {
+      "intent": "Economy engine library layer: lib/achievements.ts (threshold + interval-gap evaluation, ADR-3/ADR-5 idempotency), lib/leaderboard.ts (midnight bucketing, +5 participation, 2+-submitter top-score gating, games.default_top_score_award fallback), lib/spend.ts (deduct-before-play, InsufficientBalanceError), daily login bonus, lib/content.ts (riddle/trivia once-per-day, task unlimited). Pure library, no HTTP routes. Adds games.default_top_score_award column + migration (id:33).",
+      "modules": [
+        "arcade-backend/lib/achievements.ts",
+        "arcade-backend/lib/content.ts",
+        "arcade-backend/lib/spend.ts",
+        "arcade-backend/drizzle",
+        "arcade-backend/lib/db/schema.ts",
+        "arcade-backend/lib/leaderboard.ts"
+      ],
+      "owner": "unknown",
+      "created_at": "2026-07-25T03:00:46.027268+00:00",
+      "initiative": "token-system"
     }
   }
 }

@@ -8,6 +8,20 @@
       "when": 1784946001670,
       "tag": "0000_wooden_paladin",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1784948567109,
+      "tag": "0001_large_maestro",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1784948957665,
+      "tag": "0002_early_unicorn",
+      "breakpoints": true
     }
   ]
 }
