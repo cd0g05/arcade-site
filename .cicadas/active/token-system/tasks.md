@@ -1,5 +1,5 @@
 ---
-summary: "Foundation-mode task breakdown across the five partitions from approach.md: backend-foundation (schema/auth/ledger) -> economy-engine (achievements/leaderboard) -> {api-and-bot-contract, admin-dashboard} in parallel -> site-integration. No PR tasks injected (lifecycle.json has all pr_boundaries false) — every boundary merges directly. STATUS: Partitions 1 AND 2 are COMPLETE. Partition 1 (feat/backend-foundation, ids 1-17) verified against a live Neon instance. Partition 2 (feat/economy-engine, ids 20-39) implements the full library layer — achievements, leaderboard, spend, login bonus, content — with 45 tests green against live Postgres and 100% stmt/line/function coverage on the five lib modules. Two schema deviations were required and are recorded as ids 38-39. Next up is Partition 3 (feat/api-and-bot-contract, ids 40-52) and Partition 4 (feat/admin-dashboard, ids 60-70), which approach.md says can run in parallel now that the lib layer is stable."
+summary: "Foundation-mode task breakdown across the five partitions from approach.md: backend-foundation (schema/auth/ledger) -> economy-engine (achievements/leaderboard) -> {api-and-bot-contract, admin-dashboard} in parallel -> site-integration. No PR tasks injected (lifecycle.json has all pr_boundaries false) — every boundary merges directly. STATUS: Partitions 1, 2 AND 3 are COMPLETE. Partition 1 (feat/backend-foundation, ids 1-17) verified against a live Neon instance. Partition 2 (feat/economy-engine, ids 20-39) implements the full library layer — achievements, leaderboard, spend, login bonus, content — with 45 tests green against live Postgres and 100% stmt/line/function coverage on the five lib modules; two schema deviations are recorded as ids 38-39. Partition 3 (feat/api-and-bot-contract, ids 40-55) implements all 9 HTTP routes, zod schemas, bot service-key auth, CORS allow-listing, the Vercel cron settle trigger, and the published docs/discord-bot-api.md — 34 route tests green, 78 total, next build compiles all routes. THREE BUILDER DECISIONS 2026-07-25: (a) interval-gap achievements keep writing no achievement_awards row — the Partition 2 acceptance criterion was amended to match, no schema change; (b) the daily settle trigger is a Vercel cron hitting /api/cron/settle-daily, added as ids 53-54; (c) partitions 3 and 4 run back to back without pausing. THREE PARTITION 3 DEVIATIONS: migration 0003 adds a unique (game_id, game_date) on bounties (id:56); isValidBotApiKey moved lib/auth.ts -> lib/bot-key.ts (id:57); POST /api/bot/log added as id:55 to make FR-5.4's bot log reachable. NEXT: Partition 4 (feat/admin-dashboard, ids 60-70)."
 phase: "tasks"
 when_to_load:
   - "When selecting the next implementation task or reviewing completion state."
@@ -21,7 +21,7 @@ index:
   partition_four: "## Partition: feat/admin-dashboard"
   partition_five: "## Partition: feat/site-integration"
   initiative_boundary: "## Initiative Boundary"
-next_section: "## Partition: feat/api-and-bot-contract"
+next_section: "## Partition: feat/admin-dashboard"
 ---
 
 # Tasks: Token System
@@ -74,19 +74,24 @@ next_section: "## Partition: feat/api-and-bot-contract"
 
 ## Partition: feat/api-and-bot-contract
 
-- [ ] Implement service-API-key middleware: constant-time comparison against `BOT_API_KEY` env var, applied to bot-only routes <!-- id: 40 -->
-- [ ] Implement `GET /api/balance` (user session required) returning `{ balance, recent }` <!-- id: 41 -->
-- [ ] Implement `POST /api/spend` (user session required) returning `200`/`{ ok: true, newBalance }` or `402`/`{ ok: false, error: "insufficient_balance", required, balance }` <!-- id: 42 -->
-- [ ] Implement `POST /api/scores/submit` accepting either a user session or a service API key + `discordId` lookup, delegating to `lib/achievements.ts` + `lib/leaderboard.ts` <!-- id: 43 -->
-- [ ] Implement `GET /api/bounty/pending` (service API key only) <!-- id: 44 -->
-- [ ] Implement `POST /api/bounty/set` (service API key only) <!-- id: 45 -->
-- [ ] Implement `GET /api/users/by-discord-id` (service API key only), `404` when unresolved <!-- id: 46 -->
-- [ ] Implement `GET /api/content` (user session), returning active `content_items` with per-item `completedToday` flag <!-- id: 47 -->
-- [ ] Implement `POST /api/content/complete` (user session), delegating to `lib/content.ts`; no create/edit/delete routes for `content_items` — authoring is explicitly out of scope this initiative <!-- id: 48 -->
-- [ ] Add `zod` request/response schemas for every route above <!-- id: 49 -->
-- [ ] Configure CORS to allow-list the arcade site's production + preview origins only <!-- id: 50 -->
-- [ ] Integration tests covering every Acceptance Criterion listed for this partition in `approach.md` <!-- id: 51 -->
-- [ ] Write and publish `docs/discord-bot-api.md` documenting every bot-relevant endpoint, request/response shape, and auth requirement, ready to hand off to Carter's separate Discord bot build (Tech Design Implementation Sequence step 6) <!-- id: 52 -->
+- [x] Implement service-API-key middleware: constant-time comparison against `BOT_API_KEY` env var, applied to bot-only routes <!-- id: 40 -->
+- [x] Implement `GET /api/balance` (user session required) returning `{ balance, recent }` <!-- id: 41 -->
+- [x] Implement `POST /api/spend` (user session required) returning `200`/`{ ok: true, newBalance }` or `402`/`{ ok: false, error: "insufficient_balance", required, balance }` <!-- id: 42 -->
+- [x] Implement `POST /api/scores/submit` accepting either a user session or a service API key + `discordId` lookup, delegating to `lib/achievements.ts` + `lib/leaderboard.ts` <!-- id: 43 -->
+- [x] Implement `GET /api/bounty/pending` (service API key only) <!-- id: 44 -->
+- [x] Implement `POST /api/bounty/set` (service API key only) <!-- id: 45 -->
+- [x] Implement `GET /api/users/by-discord-id` (service API key only), `404` when unresolved <!-- id: 46 -->
+- [x] Implement `GET /api/content` (user session), returning active `content_items` with per-item `completedToday` flag <!-- id: 47 -->
+- [x] Implement `POST /api/content/complete` (user session), delegating to `lib/content.ts`; no create/edit/delete routes for `content_items` — authoring is explicitly out of scope this initiative <!-- id: 48 -->
+- [x] Implement `POST /api/cron/settle-daily` (service API key / cron secret only): calls `settleDailyTopScore()` for every game for the day that just closed. Builder-decided 2026-07-25 as the trigger for the one-shot daily settle, which had no caller after Partition 2 <!-- id: 53 -->
+- [x] Add the Vercel cron entry invoking `/api/cron/settle-daily` just after the day boundary (arcade-backend project config) <!-- id: 54 -->
+- [x] Implement `POST /api/bot/log` (service API key only): ingest endpoint for `bot_log_events`. Not in the original route list, but FR-5.4 specifies the table is "populated via the same API the bot writes through" and Partition 4's Bot Log page (id:68) reads it — without this the table is permanently empty and that page has nothing to show <!-- id: 55 -->
+- [x] Add `zod` request/response schemas for every route above <!-- id: 49 -->
+- [x] Configure CORS to allow-list the arcade site's production + preview origins only <!-- id: 50 -->
+- [x] Integration tests covering every Acceptance Criterion listed for this partition in `approach.md` <!-- id: 51 -->
+- [x] Write and publish `docs/discord-bot-api.md` documenting every bot-relevant endpoint, request/response shape, and auth requirement, ready to hand off to Carter's separate Discord bot build (Tech Design Implementation Sequence step 6) <!-- id: 52 -->
+- [x] Migration `0003`: unique `(game_id, game_date)` on `bounties`. **Deviation, not in the original plan.** `computeDailyLeaderboard()` already read this table as `const [bounty] = ...`, assuming at most one row per game/day, but nothing enforced it. Both API writers (the pending-row open on an admin daily submission, and `/api/bounty/set`) need a conflict target to be idempotent — without it a retried bot call silently creates a second row and which one supplies the award amount is arbitrary. Constraint-first per ADR-3 <!-- id: 56 -->
+- [x] Move `isValidBotApiKey` from `lib/auth.ts` to `lib/bot-key.ts`. **Deviation.** It shares no machinery with Auth.js, and living in that module forced `next-auth` into every context that only needed to compare a key — which made it untestable outside a Next.js runtime (`next-auth` cannot resolve `next/server` under vitest's node env) <!-- id: 57 -->
 
 ## Partition: feat/admin-dashboard
 

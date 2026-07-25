@@ -142,6 +142,18 @@
       "owner": "unknown",
       "created_at": "2026-07-25T03:00:46.027268+00:00",
       "initiative": "token-system"
+    },
+    "feat/api-and-bot-contract": {
+      "intent": "HTTP route layer + published Discord bot contract: bot service-API-key middleware (constant-time), 8 routes (balance, spend, scores/submit, bounty/pending, bounty/set, users/by-discord-id, content, content/complete), plus Builder-decided POST /api/cron/settle-daily + Vercel cron entry as the trigger for the one-shot daily top-score settle. zod schemas on every route, CORS allow-list, integration tests, docs/discord-bot-api.md. Consumes the frozen lib/ layer read-only.",
+      "modules": [
+        "arcade-backend/app/api",
+        "arcade-backend/docs",
+        "arcade-backend/vercel.json",
+        "arcade-backend/lib/api-auth.ts"
+      ],
+      "owner": "unknown",
+      "created_at": "2026-07-25T17:35:48.005305+00:00",
+      "initiative": "token-system"
     }
   }
 }

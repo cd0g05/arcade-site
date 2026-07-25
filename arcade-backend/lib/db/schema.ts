@@ -133,16 +133,28 @@ export const dailyLeaderboardEntries = pgTable('daily_leaderboard_entries', {
   createdAt: timestamp('created_at').notNull().defaultNow(),
 });
 
-export const bounties = pgTable('bounties', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  gameId: text('game_id')
-    .notNull()
-    .references(() => games.id),
-  gameDate: date('game_date').notNull(),
-  amount: integer('amount'), // null until Carter sets it
-  claimedByUserId: uuid('claimed_by_user_id').references(() => users.id),
-  createdAt: timestamp('created_at').notNull().defaultNow(),
-});
+export const bounties = pgTable(
+  'bounties',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    gameId: text('game_id')
+      .notNull()
+      .references(() => games.id),
+    gameDate: date('game_date').notNull(),
+    amount: integer('amount'), // null until Carter sets it
+    claimedByUserId: uuid('claimed_by_user_id').references(() => users.id),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+  },
+  (t) => ({
+    // At most one bounty per game/day. `computeDailyLeaderboard()` already reads this
+    // table expecting a single row (`const [bounty] = await db.select()...`), and both
+    // API writers — the pending-row creation on an admin daily submission and
+    // `POST /api/bounty/set` — need a conflict target to be idempotent. Without this,
+    // a retried bot call silently creates a second row and which one wins the award
+    // amount becomes arbitrary. Constraint-first per ADR-3.
+    gameDayUniq: unique('bounties_game_id_game_date_uniq').on(t.gameId, t.gameDate),
+  }),
+);
 
 /**
  * One row per game/day whose top-score award has been paid (FR-3.3).

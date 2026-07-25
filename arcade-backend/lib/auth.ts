@@ -58,19 +58,5 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   },
 });
 
-/**
- * Service-to-service auth for the Discord bot (FR-6.1/6.2) — a static API key compared
- * in constant time, not a user session. Applied only to bot-relevant routes
- * (scores/submit, bounty/*, users/by-discord-id).
- */
-export function isValidBotApiKey(providedKey: string | null): boolean {
-  const expected = process.env.BOT_API_KEY;
-  if (!expected || !providedKey) return false;
-  if (providedKey.length !== expected.length) return false;
-
-  let mismatch = 0;
-  for (let i = 0; i < expected.length; i++) {
-    mismatch |= providedKey.charCodeAt(i) ^ expected.charCodeAt(i);
-  }
-  return mismatch === 0;
-}
+// Bot service-key auth lives in lib/bot-key.ts — it shares nothing with Auth.js, and
+// keeping it here forced `next-auth` into any context that only needed to check a key.
