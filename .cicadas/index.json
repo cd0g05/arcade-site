@@ -28,6 +28,13 @@
       "summary": "Partition 4: /admin dashboard \u2014 guard, users list + drill-down, balance-adjust confirm flow, achievement builder, games config, leaderboards edit/delete, bot log, analytics. Server actions with per-action guard re-check. 105 tests green.",
       "decisions": "",
       "modules": []
+    },
+    {
+      "timestamp": "2026-07-25T18:12:27.216600+00:00",
+      "branch": "feat/ledger-game-id",
+      "summary": "Cross-cutting: transactions.game_id column (migration 0004 + backfill), threaded through lib/ledger.ts insert sites; admin Analytics joins on it instead of parsing reason strings.",
+      "decisions": "",
+      "modules": []
     }
   ]
 }
