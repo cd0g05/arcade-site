@@ -133,7 +133,7 @@ rest-api
 ---
 
 ### Partition 4: Admin Dashboard → `feat/admin-dashboard`
-**Modules**: `arcade-backend/app/admin`
+**Modules**: `arcade-backend/app/admin`, plus `arcade-backend/lib/admin.ts` and `arcade-backend/lib/admin-guard.ts` (added during implementation — aggregate read queries don't belong in page components, and the guard is shared by the layout and every server action)
 **Scope**: Users list + transaction drill-down (UX Mock-Up 1), achievement builder (CRUD on `achievements` table), game/cabinet config management (cost editing, daily entry edit/delete), bot log view (read-only `bot_log_events`), basic analytics view. Admin-only auth guard (`users.isAdmin`).
 **Dependencies**: Requires `feat/economy-engine` (reads/writes the same `lib/` functions and tables)
 
@@ -146,12 +146,12 @@ web-ui
 - teardown: `Ctrl+C`
 
 #### Acceptance Criteria
-- [ ] Visiting `/admin/users` as a non-admin authenticated user returns `403` or redirects away, per Tech Design Security table
-- [ ] Visiting `/admin/users` as the admin account renders the user list with balance and last-active columns matching UX Mock-Up 1
-- [ ] Clicking a user row renders their transaction log inline without a full page navigation
-- [ ] Using "Adjust balance" to change a value from 40 to 55 creates a transaction with `reason = "Admin adjusted 40 -> 55"`, visible in both the admin drill-down and (on next fetch) the user's own `/api/balance` recent list
-- [ ] Adding an achievement criteria row in the builder for a game persists it and it appears in the list without a page reload
-- [ ] An empty achievement list for a game renders the copy `"No achievements configured for this game yet."` per UX Copy & Tone
+- [x] Visiting `/admin/users` as a non-admin authenticated user returns `403` or redirects away, per Tech Design Security table
+- [x] Visiting `/admin/users` as the admin account renders the user list with balance and last-active columns matching UX Mock-Up 1
+- [x] Clicking a user row renders their transaction log inline without a full page navigation
+- [x] Using "Adjust balance" to change a value from 40 to 55 creates a transaction with `reason = "Admin adjusted 40 -> 55"`, visible in both the admin drill-down and (on next fetch) the user's own `/api/balance` recent list
+- [x] Adding an achievement criteria row in the builder for a game persists it and it appears in the list without a page reload
+- [x] An empty achievement list for a game renders the copy `"No achievements configured for this game yet."` per UX Copy & Tone
 
 #### Implementation Steps
 1. Implement Auth.js session guard + `isAdmin` check as shared admin layout middleware.

@@ -159,6 +159,16 @@
       "owner": "unknown",
       "created_at": "2026-07-25T17:35:48.005305+00:00",
       "initiative": "token-system"
+    },
+    "feat/admin-dashboard": {
+      "intent": "Admin dashboard at /admin: session guard + users.isAdmin check as shared layout, Users list with balance/last-active per UX Mock-Up 1, inline per-user transaction drill-down, Adjust-balance confirm flow writing 'Admin adjusted {old} -> {new}', Achievement Builder (per-game criteria CRUD, live-applying), Games cost config, Leaderboards history with entry edit/delete, read-only Bot Log feed, basic Analytics. Server-rendered, batching/joining in SQL per the neon-http round-trip constraint.",
+      "modules": [
+        "arcade-backend/lib/admin.ts",
+        "arcade-backend/app/admin"
+      ],
+      "owner": "unknown",
+      "created_at": "2026-07-25T17:51:59.263408+00:00",
+      "initiative": "token-system"
     }
   }
 }
