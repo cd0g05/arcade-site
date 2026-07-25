@@ -1,0 +1,1 @@
+ALTER TABLE "bounties" ADD CONSTRAINT "bounties_game_id_game_date_uniq" UNIQUE("game_id","game_date");

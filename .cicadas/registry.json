@@ -36,6 +36,11 @@
           "timestamp": "2026-07-25T03:18:07.131355+00:00",
           "message": "PARTITION 2 COMPLETE \u2014 lib/ layer is now stable and frozen for consumers. Signatures for feat/api-and-bot-contract and feat/admin-dashboard to build against: evaluateScoreSubmission({userId, gameId, score, isDailySubmission}) -> AwardResult[]; submitDailyScore({userId, gameId, score, submittedVia, gameDate?}) -> AwardResult[]; computeDailyLeaderboard(gameId, gameDate?) -> DailyLeaderboardResult; settleDailyTopScore(gameId, gameDate?) -> AwardResult|null; spendTokens(userId, gameId) -> {newBalance, cost, reason} (throws InsufficientBalanceError with .details {required, balance} -> map to 402, and UnknownGameError); awardDailyLoginBonus(userId) -> {awarded}; completeContentItem(userId, contentItemId, answerText, now?) -> {status:'awarded', award}|{status:'already_completed_today'} (throws UnknownContentItemError/InactiveContentItemError); listContentForUser(userId) -> items with completedToday. TWO NOTES: (1) settleDailyTopScore is one-shot per game/day by constraint \u2014 call it only after the day closes, since whoever leads at first successful call keeps the award. (2) Interval-gap achievement awards intentionally write NO achievement_awards row (that table's unique key means once-ever, wrong for repeatable gap awards); they are guarded by a watermark compare-and-set. This diverges from one approach.md acceptance criterion as literally written \u2014 flagged inline for Builder confirmation. Also: two new migrations (0001, 0002) \u2014 run npm run db:migrate before working.",
           "from_branch": "feat/economy-engine"
+        },
+        {
+          "timestamp": "2026-07-25T17:51:20.630962+00:00",
+          "message": "PARTITION 3 COMPLETE \u2014 API layer stable for feat/admin-dashboard and feat/site-integration. THREE THINGS PARTITION 4 MUST KNOW: (1) MIGRATION 0003 is new \u2014 run npm run db:migrate. It adds unique bounties(game_id, game_date); computeDailyLeaderboard() always assumed one row per game/day but nothing enforced it. (2) isValidBotApiKey MOVED from lib/auth.ts to lib/bot-key.ts \u2014 lib/auth.ts now exports only Auth.js machinery (handlers, auth, signIn, signOut). Import the key check from lib/bot-key.ts. Note next-auth CANNOT be imported under vitest's node env at all (fails to resolve next/server), so any admin page test must vi.mock('@/lib/auth') wholesale rather than spreading importOriginal \u2014 see app/api/__tests__/routes.test.ts for the working pattern. (3) POST /api/bot/log now EXISTS and is the writer for bot_log_events \u2014 Partition 4 task id:68 (Bot Log page) has real data to read; it is a read-only feed, do not add write UI. ALSO REUSABLE BY PARTITION 4: lib/api-auth.ts exports requireSession() -> {userId, isAdmin} (throws 401) and the handle() error boundary (ZodError->400, HttpError->its status, else logged opaque 500); the /admin guard (id:60) should check isAdmin off that same session shape, which lib/auth.ts's session callback already populates from users.isAdmin. lib/cors.ts is browser-origin allow-listing only and is irrelevant to same-origin admin pages. PERFORMANCE REMINDER STILL LIVE: each neon-http query is its own HTTPS round trip, so batch/join in SQL on the Users list and Analytics pages rather than looping per row.",
+          "from_branch": "feat/api-and-bot-contract"
         }
       ],
       "created_at": "2026-07-23T04:24:24.080031+00:00"
@@ -141,6 +146,18 @@
       ],
       "owner": "unknown",
       "created_at": "2026-07-25T03:00:46.027268+00:00",
+      "initiative": "token-system"
+    },
+    "feat/api-and-bot-contract": {
+      "intent": "HTTP route layer + published Discord bot contract: bot service-API-key middleware (constant-time), 8 routes (balance, spend, scores/submit, bounty/pending, bounty/set, users/by-discord-id, content, content/complete), plus Builder-decided POST /api/cron/settle-daily + Vercel cron entry as the trigger for the one-shot daily top-score settle. zod schemas on every route, CORS allow-list, integration tests, docs/discord-bot-api.md. Consumes the frozen lib/ layer read-only.",
+      "modules": [
+        "arcade-backend/app/api",
+        "arcade-backend/docs",
+        "arcade-backend/vercel.json",
+        "arcade-backend/lib/api-auth.ts"
+      ],
+      "owner": "unknown",
+      "created_at": "2026-07-25T17:35:48.005305+00:00",
       "initiative": "token-system"
     }
   }

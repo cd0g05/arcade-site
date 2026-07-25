@@ -78,7 +78,7 @@ _(no persistent process — pure library, exercised via unit tests)_
 
 #### Acceptance Criteria
 - [x] `evaluateScoreSubmission({ score: 1050, ... })` against a seeded `lastAwardedHighScore: 1000, gap: 100` interval-gap achievement returns no award, but updates `currentHighScore`
-- [x] A subsequent `evaluateScoreSubmission({ score: 1100, ... })` against the same state returns exactly one award and inserts exactly one `achievement_awards` row — **met with one deviation, needs Builder confirmation**: exactly one award and exactly one `transactions` row, but **no `achievement_awards` row**. That table's unique `(user_id, achievement_id)` constraint encodes "once ever", which is correct for threshold achievements and wrong for interval-gap ones that fire repeatedly at every gap multiple — a second gap award would violate it. Interval-gap idempotency comes from a compare-and-set on `high_scores.last_awarded_high_score` instead. If an audit trail of every gap award is wanted, `achievement_awards` needs its constraint relaxed (e.g. include the awarded score in the key), which is a schema change deferred pending Builder input.
+- [x] A subsequent `evaluateScoreSubmission({ score: 1100, ... })` against the same state returns exactly one award and inserts exactly one `transactions` row — and, **for threshold achievements only**, exactly one `achievement_awards` row. **Interval-gap achievements deliberately write no `achievement_awards` row** (Builder-confirmed 2026-07-25, criterion amended to match the implementation). Rationale: that table's unique `(user_id, achievement_id)` constraint encodes "once ever", which is correct for threshold achievements and wrong for interval-gap ones that fire repeatedly at every gap multiple — a second gap award would violate it. Interval-gap idempotency comes instead from a compare-and-set on `high_scores.last_awarded_high_score`. The `transactions` ledger still records every gap award with its `reason` string, so the token audit trail is complete; `achievement_awards` simply is not a second copy of it. Relaxing the constraint to log every gap award was considered and **explicitly declined** — no schema change.
 - [x] Calling `evaluateScoreSubmission` twice with identical input (simulated retry) never produces two `transactions` rows for the same achievement (ADR-3 idempotency)
 - [x] `computeDailyLeaderboard(gameId, date)` with only one submitter for that game/date returns no top-score award, but the submitter still receives the participation award
 - [x] `computeDailyLeaderboard(gameId, date)` with two or more submitters correctly identifies the top scorer for bounty/award purposes
@@ -97,6 +97,8 @@ _(no persistent process — pure library, exercised via unit tests)_
 ### Partition 3: API & Bot Contract → `feat/api-and-bot-contract`
 **Modules**: `arcade-backend/app/api`
 **Scope**: All route handlers (`/api/balance`, `/api/spend`, `/api/scores/submit`, `/api/bounty/pending`, `/api/bounty/set`, `/api/users/by-discord-id`, `/api/content`, `/api/content/complete`), `zod` request validation, service-API-key middleware for bot-only routes, CORS allow-listing for the arcade site origin. Ends with the API contract published for Carter's separate Discord bot build (Tech Design Implementation Sequence step 6 — a documentation handoff, not code). No content-authoring routes (create/edit/delete `content_items`) are built here — deliberately deferred per PRD Open Questions.
+
+Also owns the **daily settle trigger** (Builder-decided 2026-07-25): a Vercel cron invokes a service-key-guarded `POST /api/cron/settle-daily` just after the day boundary, which calls `settleDailyTopScore()` for every game for the day that just closed. This was an open question carried out of Partition 2 — `settleDailyTopScore()` is one-shot per game/day by DB constraint, so it must run only after the day closes, and nothing triggered it until now. An admin-dashboard manual button and deferral to Partition 5 were both considered and declined.
 **Dependencies**: Requires `feat/economy-engine`
 
 #### Artifact Type
@@ -108,16 +110,18 @@ rest-api
 - teardown: `Ctrl+C`
 
 #### Acceptance Criteria
-- [ ] `GET /api/balance` with a valid session returns `200` with `{ balance: number, recent: Transaction[] }`
-- [ ] `GET /api/balance` with no session returns `401`
-- [ ] `POST /api/spend` with `{ gameId: "dino-run" }` and sufficient balance returns `200` with `{ ok: true, newBalance }`; with insufficient balance returns `402` with `{ ok: false, error: "insufficient_balance", required, balance }`
-- [ ] `POST /api/scores/submit` with a valid session and a new personal-best score returns `200` with `awards` containing the expected achievement entry when criteria are met
-- [ ] `POST /api/scores/submit` using a valid service API key (no user session) succeeds when `discordId` resolves to a linked account, and returns `404` when it does not
-- [ ] `POST /api/bounty/set` without a valid service API key returns `401`
-- [ ] `GET /api/users/by-discord-id?discordId=X` returns `200` with `{ userId, displayName }` for a linked account and `404` otherwise
-- [ ] `GET /api/content` returns `200` with an empty `items` array when no content is seeded (expected at launch), and correct `completedToday` flags once items exist
-- [ ] `POST /api/content/complete` on a `riddle`/`trivia` item awards tokens once, then returns `{ ok: false, error: "already_completed_today" }` on a same-day retry; on a `task` item it awards tokens every call
-- [ ] A request from a non-allow-listed origin is rejected by CORS <!-- NEEDS MANUAL REVIEW: exact test harness for CORS behavior TBD -->
+- [x] `GET /api/balance` with a valid session returns `200` with `{ balance: number, recent: Transaction[] }`
+- [x] `GET /api/balance` with no session returns `401`
+- [x] `POST /api/spend` with `{ gameId: "dino-run" }` and sufficient balance returns `200` with `{ ok: true, newBalance }`; with insufficient balance returns `402` with `{ ok: false, error: "insufficient_balance", required, balance }`
+- [x] `POST /api/scores/submit` with a valid session and a new personal-best score returns `200` with `awards` containing the expected achievement entry when criteria are met
+- [x] `POST /api/scores/submit` using a valid service API key (no user session) succeeds when `discordId` resolves to a linked account, and returns `404` when it does not
+- [x] `POST /api/bounty/set` without a valid service API key returns `401`
+- [x] `GET /api/users/by-discord-id?discordId=X` returns `200` with `{ userId, displayName }` for a linked account and `404` otherwise
+- [x] `GET /api/content` returns `200` with an empty `items` array when no content is seeded (expected at launch), and correct `completedToday` flags once items exist
+- [x] `POST /api/content/complete` on a `riddle`/`trivia` item awards tokens once, then returns `{ ok: false, error: "already_completed_today" }` on a same-day retry; on a `task` item it awards tokens every call
+- [x] A request from a non-allow-listed origin is rejected by CORS — **resolved**: `lib/cors.ts` is an explicit allow-list, and the harness question is settled by asserting on response headers rather than driving a browser. A disallowed origin gets no `Access-Control-Allow-Origin` header (the browser then blocks the response for the caller); preflight `OPTIONS` returns 204 for an allow-listed origin and 403 otherwise. Covered by three tests, including a `arcade.vercel.app.attacker.com` lookalike against the preview-suffix rule
+- [x] `POST /api/cron/settle-daily` without a valid service API key (or Vercel cron secret) returns `401`
+- [x] `POST /api/cron/settle-daily` settles the previous day for every game, and a second call for the same day is a no-op (returns already-settled rather than re-awarding)
 
 #### Implementation Steps
 1. Implement service-API-key middleware (constant-time comparison against `BOT_API_KEY` env var).

@@ -327,17 +327,70 @@ None — this is a new service with no pre-existing schema.
 | `0000_wooden_paladin.sql` | backend-foundation | All 11 initial tables. |
 | `0001_large_maestro.sql` | economy-engine | `content_completions.once_per_day` + partial unique index `content_completions_once_per_day_uniq`. |
 | `0002_early_unicorn.sql` | economy-engine | `daily_top_score_settlements` table, PK `(game_id, game_date)`. |
+| `0003_shiny_fat_cobra.sql` | api-and-bot-contract | Unique `bounties_game_id_game_date_uniq` on `bounties (game_id, game_date)`. |
 
 Both economy-engine migrations exist to move a one-time guarantee out of application logic and into a DB constraint, extending ADR-3's principle to two cases the original schema handled with read-then-write checks:
 
 - **`content_completions.once_per_day`** — the once-per-day rule for riddles/trivia (FR-3.4) originally relied on `lib/content.ts` checking a lookup index before inserting. That races: two concurrent submissions of the same riddle both see "not completed" and both award. A unique index cannot reference `content_items.type`, so the flag is denormalized onto the completion row at insert time, which makes a *partial* unique index expressible. Tasks store `false`, fall outside the index, and remain unlimited per FR-3.4.
 - **`daily_top_score_settlements`** — the top-score award (FR-3.3) needs "settle at most once per game/day". A guard comparing `transactions.created_at::date` to the game date is wrong whenever settlement runs after the day being settled, because those are different dates; a test caught it paying twice. One row per `(game_id, game_date)` makes the constraint exact and lets the bounty and default-award paths share a single mechanism.
 
+Migration `0003` continues the same pattern into the API layer:
+
+- **`bounties (game_id, game_date)` unique** — `computeDailyLeaderboard()` already read this table as `const [bounty] = await db.select()...`, i.e. assuming at most one row per game/day, but nothing enforced that. The API layer added two writers that both need a conflict target to be idempotent: the pending-row open on an admin daily submission (`ON CONFLICT DO NOTHING`, so a resubmitted score never clears an amount already set) and `POST /api/bounty/set` (`ON CONFLICT DO UPDATE`, so a retried bot call overwrites rather than duplicating). Without the constraint a retry silently creates a second row and which one supplies the award amount becomes arbitrary.
+
 **Interval-gap awards are the one deliberate exception** to constraint-based idempotency: they are *repeatable* by design, so the once-ever `(user_id, achievement_id)` unique constraint on `achievement_awards` cannot apply. They are guarded instead by a compare-and-set on `high_scores.last_awarded_high_score` — the UPDATE only matches while the watermark still holds its expected value, so concurrent duplicate submissions cannot both award. Consequently interval-gap awards write a `transactions` row but no `achievement_awards` row.
 
 ---
 
 ## API & Interface Design
+
+### As-built notes (feat/api-and-bot-contract)
+
+The endpoint list below is the plan; all of it shipped. Three things differ from it, plus
+one route that was added:
+
+1. **`POST /api/bot/log` was added** (tasks.md id:55). FR-5.4 specifies `bot_log_events`
+   is "populated via the same API the bot writes through" and Partition 4 builds a
+   read-only view of it, but no route was ever specified to write to it — the admin page
+   would have shown a permanently empty feed. Service-key auth, opaque jsonb `payload`,
+   free-form `eventType` (a closed enum would discard exactly the information a debugging
+   log exists to capture).
+
+2. **`POST|GET /api/cron/settle-daily` was added** (ids 53-54) as the Builder-chosen
+   trigger for the daily settle. Exposed as **both** verbs: Vercel Cron invokes with a
+   `GET`, while manual backfills are more naturally a `POST` with a body. Defaults to
+   settling **yesterday**, not today, because `settleDailyTopScore()` is one-shot per
+   game/day — running it mid-day would award the day to whoever led at that instant.
+   Auth accepts the Vercel `CRON_SECRET` or the bot service key. Schedule `15 0 * * *`
+   (UTC, matching `dayBucket()`'s server-local basis on Vercel).
+
+3. **`GET /api/bounty/pending` needed a writer that did not exist.** Partition 2 documented
+   a bounty row that "can exist with a null amount — created when Carter posts a score",
+   but nothing created it, so `pending` could never be true. `/api/scores/submit` now opens
+   that row when the submitting user `isAdmin` and the submission is a daily one. This
+   also required **migration `0003`**, a unique `(game_id, game_date)` on `bounties` — see
+   "Schema / Migration Notes".
+
+4. **`isValidBotApiKey` moved from `lib/auth.ts` to `lib/bot-key.ts`.** It shares nothing
+   with Auth.js, and living in that module dragged `next-auth` into any context that only
+   needed to compare a key — including tests, where `next-auth` cannot be imported at all
+   under a plain node env (it fails to resolve `next/server`).
+
+**Auth split as implemented** — `lib/api-auth.ts` holds `requireSession()`,
+`requireBotKey()`, `requireCronAuth()`, plus the single `handle()` error boundary
+(ZodError → 400, typed `HttpError` → its status, anything else → logged opaque 500).
+Domain errors from `lib/` are mapped in their own routes, since their statuses are
+route-specific (`InsufficientBalanceError` → 402, `UnknownContentItemError` → 404).
+
+**On `/api/scores/submit`, a body `userId` is ignored on the session path** — the subject is
+always the session's own user, so a logged-in player cannot submit scores as someone else.
+The bot path must name its subject, since it acts on behalf of Discord users.
+
+**CORS** (`lib/cors.ts`) is an explicit allow-list, never an `Origin` reflector: these
+routes are cookie-authenticated, so reflecting any origin alongside
+`Access-Control-Allow-Credentials` would let any site make authenticated requests as the
+logged-in user. Preview deploys are admitted by configured host suffix, matched on a dot
+boundary so `arcade.vercel.app.attacker.com` cannot pass.
 
 ### New Endpoints
 
