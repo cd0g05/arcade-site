@@ -71,12 +71,30 @@ export function tokensConfigured(): boolean {
   return API_BASE !== '';
 }
 
+/**
+ * The page to come back to after signing in or out.
+ *
+ * Without this the backend has no idea the arcade exists: Auth.js falls back to its own
+ * host root, which on that deployment serves nothing, so the player signs in and lands on
+ * a 404 instead of back at the games. The backend allow-lists this origin before honouring
+ * it (arcade-backend/lib/auth-redirect.ts) — it is not free-form.
+ */
+function returnTo(): string {
+  return typeof location === 'undefined' ? '' : location.href;
+}
+
+function authUrl(action: 'signin' | 'signout'): string {
+  const back = returnTo();
+  const query = back ? `?callbackUrl=${encodeURIComponent(back)}` : '';
+  return `${API_BASE}/api/auth/${action}${query}`;
+}
+
 export function signInUrl(): string {
-  return `${API_BASE}/api/auth/signin`;
+  return authUrl('signin');
 }
 
 export function signOutUrl(): string {
-  return `${API_BASE}/api/auth/signout`;
+  return authUrl('signout');
 }
 
 /** Discord account linking reuses Auth.js's provider sign-in (FR-1.2). */

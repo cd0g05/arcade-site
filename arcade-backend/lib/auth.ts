@@ -4,6 +4,7 @@ import Discord from 'next-auth/providers/discord';
 import { eq } from 'drizzle-orm';
 import { db } from './db/client';
 import { users } from './db/schema';
+import { resolveRedirect } from './auth-redirect';
 
 // Google is the primary identity provider (FR-1.1). Discord is configured here so the
 // account-linking step (FR-1.2) can reuse Auth.js's provider-linking flow, but the actual
@@ -21,6 +22,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     }),
   ],
   callbacks: {
+    // Where to land after sign-in/sign-out. Logic and rationale in lib/auth-redirect.ts,
+    // which is kept out of this file so it can be tested without importing next-auth.
+    redirect({ url, baseUrl }) {
+      return resolveRedirect(url, baseUrl);
+    },
+
     async signIn({ user, account }) {
       if (account?.provider !== 'google' || !user.email) return false;
 
