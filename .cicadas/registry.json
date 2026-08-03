@@ -186,6 +186,19 @@
       "owner": "unknown",
       "created_at": "2026-07-25T18:08:50.872259+00:00",
       "initiative": "token-system"
+    },
+    "feat/site-integration": {
+      "intent": "Arcade site integration: src/lib/tokenApi.ts fetch client with graceful degradation, balance pill + sign-in control in the header, award toast (aria-live, reduced-motion aware), spend-before-play gate on the Hub wake path, score submission on new personal bests, Account surface (Discord link + own transaction log), Riddles/Tasks list. Purely additive \u2014 no existing game logic, Hub contract, or localStorage key changes; gameplay must survive a backend outage.",
+      "modules": [
+        "src/ui",
+        "src/styles",
+        "src/pages",
+        "src/lib",
+        "index.html"
+      ],
+      "owner": "unknown",
+      "created_at": "2026-07-25T18:14:30.488055+00:00",
+      "initiative": "token-system"
     }
   }
 }

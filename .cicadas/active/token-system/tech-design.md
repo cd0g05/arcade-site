@@ -425,6 +425,43 @@ stored). `lib/ledger.ts` stamps it at all three game-related insert sites; the m
 backfilled existing rows from their reason strings, which was the last point at which that
 mapping was guaranteed intact.
 
+### As-built notes (feat/site-integration)
+
+The token layer is additive and removable: not calling `initTokens()` leaves the arcade
+byte-for-byte as it was. Three integration points, each deliberately narrow.
+
+1. **`Hub.setWakeGate()` — spend-before-play.** The plan said to wire spend "into the
+   existing `Hub.register(...)` start flow", but `register()` only attaches listeners; the
+   **wake** is what starts a game, and it was synchronous. The gate is opt-in and unset by
+   default, may only *decline* a wake (never trigger one), and `toggleFs()` routes through
+   it too — otherwise the ⛶ button would have been a free way to start a paid game. Once a
+   gate approves, the wake proceeds unconditionally: the player has already been charged,
+   so declining because they clicked elsewhere meanwhile would take tokens and give nothing.
+
+2. **`store.observe()` — score submission.** Task id:86 said to wire submission into each
+   game's score-save path, which would have meant editing twelve game files. All twelve
+   already funnel their personal best through `store.set("best:{game}", n)`, and
+   `storage.ts` is the only module permitted to touch localStorage (ADR-4) — so that is
+   where the score-save paths already converge. Observing there means **zero changes to
+   game logic**, which is what approach.md's Migrations & Compat section actually requires.
+   Observers cannot throw into the caller: a game is mid-frame when it writes.
+
+3. **`src/lib/tokenGames.ts` — the id map.** Three identifiers exist per game and none
+   agree: the Hub id (`g2048`), the localStorage best key (`best:2048`), and the backend
+   slug (`2048`). One table, so a mismatch is a visible gap rather than a silently
+   unattributed transaction. **Flagged for the Builder**: the sequence game is titled
+   ECHO on the site and seeded as `simon` in the backend.
+
+**Graceful degradation is the design rule.** `tokenApi` never throws — every failure
+(outage, CORS rejection, timeout, no backend configured, signed out) resolves to a typed
+result, and the wake gate returns *true* for all of them. Only a confirmed
+`insufficient_balance` blocks a game. `spend`'s `insufficient` and `unavailable` outcomes
+are deliberately distinct: collapsing them would make an outage look like bankruptcy.
+
+**Not submitting scores**: Minesweeper (per-difficulty times) and Water Sort (a level
+number) keep no value the backend's high-score model can compare, and Token Miner is
+`alwaysOn`. They still cost tokens; they just never submit.
+
 ### New Endpoints
 
 ```

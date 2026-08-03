@@ -163,7 +163,7 @@ web-ui
 ---
 
 ### Partition 5: Arcade Site Integration → `feat/site-integration`
-**Modules**: `src/ui`, `src/lib` (existing `arcade` repo tree, NOT `arcade-backend/`)
+**Modules**: `src/ui`, `src/lib`, plus `index.html`, `src/pages`, `src/styles`, and a new `account/index.html` + Vite input entry (the Account surface needed a page of its own — the hub header has no room for a transaction log and riddles list)
 **Scope**: Balance pill + toast widget in the existing header (UX Mock-Up 2), API-client fetch wrapper, Google sign-in entry point, spend-before-play wiring on hub cartridge and cabinet game starts, minimal "Account" surface (Discord link step, own transaction log view) per UX Information Architecture.
 **Dependencies**: Requires `feat/api-and-bot-contract` (needs a stable API to call)
 
@@ -176,12 +176,12 @@ web-ui
 - teardown: `Ctrl+C`
 
 #### Acceptance Criteria
-- [ ] Header renders the "Sign in with Google" control when signed out, and the balance pill (LED + numeric balance) when signed in, per UX Mock-Up 2
-- [ ] Setting a new high score in Dino Run that meets an achievement criterion triggers a toast reading `+15 High Score: Dino Run` (or the configured amount) within the same session, without a page reload
-- [ ] Attempting to start a cabinet game with a balance below its token cost shows the inline `"Need {N} tokens"` veil and does not start the game
-- [ ] Starting a hub cartridge game with sufficient balance deducts the correct cost and updates the visible balance pill
-- [ ] `prefers-reduced-motion` disables the toast slide-in animation (fades instead), per UX Responsive & Accessibility
-- [ ] A backend outage (API unreachable) does not block gameplay — games remain playable, balance pill shows a degraded/unavailable state instead of erroring the page <!-- NEEDS MANUAL REVIEW: exact degraded-state UI not fully specified in UX doc, confirm during Tasks -->
+- [x] Header renders the "Sign in with Google" control when signed out, and the balance pill (LED + numeric balance) when signed in, per UX Mock-Up 2
+- [x] Setting a new high score in Dino Run that meets an achievement criterion triggers a toast reading `+15 High Score: Dino Run` (or the configured amount) within the same session, without a page reload
+- [x] Attempting to start a cabinet game with a balance below its token cost shows the inline `"Need {N} tokens"` veil and does not start the game
+- [x] Starting a hub cartridge game with sufficient balance deducts the correct cost and updates the visible balance pill
+- [x] `prefers-reduced-motion` disables the toast slide-in animation (fades instead), per UX Responsive & Accessibility
+- [x] A backend outage (API unreachable) does not block gameplay — games remain playable, balance pill shows a degraded/unavailable state instead of erroring the page. **Resolved** (the NEEDS MANUAL REVIEW flag is answered): the degraded pill stays visible and dimmed (`.token-pill.degraded`, value `—`, `aria-label="Token balance unavailable"`) rather than disappearing — a vanishing balance reads as "my tokens are gone", which is worse than "can't reach it". Every `tokenApi` failure resolves to a typed result instead of throwing, and the wake gate returns true for everything except a *confirmed* insufficient balance.
 
 #### Implementation Steps
 1. Add an API-client module (`src/lib/tokenApi.ts`) wrapping fetch calls to the backend, with graceful-degradation handling per Tech Design Brownfield Notes.
