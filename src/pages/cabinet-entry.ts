@@ -10,6 +10,7 @@
 import "../styles/main.css";
 import { Hub } from "../lib/hub";
 import { createCabinet } from "../ui/cabinet";
+import { initTokens } from "../lib/tokens";
 import type { CabinetDef } from "../games/types";
 
 const LOADERS: Record<string, () => Promise<{ def: CabinetDef }>> = {
@@ -31,4 +32,10 @@ void load().then(({ def }) => {
   const page = createCabinet(root, def.options);
   const cart = def.mount(page.card);
   Hub.register(def.options.id, cart, page.card.root);
+
+  // Cabinets carry the same token layer as the hub — they are the expensive games, so
+  // spend-before-play matters most here. Mounted after createCabinet(), which is what
+  // builds the header this attaches to, and after register(), which is harmless: the
+  // gate is consulted on wake, not on registration.
+  initTokens(root.querySelector<HTMLElement>(".top-ctrl"));
 });

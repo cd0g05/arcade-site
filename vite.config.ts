@@ -10,6 +10,7 @@ export default defineConfig({
       input: {
         hub: page("index.html"),
         demo: page("demo/index.html"),
+        account: page("account/index.html"),
         "style-guide": page("style-guide/index.html"),
         snake: page("games/snake/index.html"),
         minesweeper: page("games/minesweeper/index.html"),

@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Account — Carter's Arcade</title>
+<meta name="description" content="Your token balance, history, and daily riddles at Carter's Arcade." />
+</head>
+<body>
+
+<header class="top" id="top">
+  <div class="container top-inner">
+    <div class="logo">
+      <div>
+        <h1 class="site">CARTER'S ARCADE</h1>
+        <div class="site-sub">account</div>
+      </div>
+    </div>
+    <div class="top-ctrl">
+      <a class="button button-secondary" href="/">← HUB</a>
+    </div>
+  </div>
+</header>
+
+<main class="container">
+  <section class="panel">
+    <h2 class="panel-heading">Discord</h2>
+    <div id="account-discord"></div>
+  </section>
+
+  <section class="panel">
+    <h2 class="panel-heading">Riddles &amp; Tasks</h2>
+    <div id="account-content"></div>
+  </section>
+
+  <section class="panel">
+    <h2 class="panel-heading">Your Tokens</h2>
+    <div id="account-log"></div>
+  </section>
+</main>
+
+<script type="module" src="/src/pages/account.ts"></script>
+</body>
+</html>

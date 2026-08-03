@@ -13,6 +13,7 @@ import { store } from "../lib/storage";
 import { createCard, type CardOptions, type GameCard } from "../ui/card";
 import { fillTicker } from "../ui/ticker";
 import { createScoreboard } from "../ui/scoreboard";
+import { initTokens } from "../lib/tokens";
 import { pad, fmt } from "../games/format";
 import type { MountedGame } from "../games/types";
 import { mountDino } from "../games/dino/dino";
@@ -40,6 +41,11 @@ sndBtn.addEventListener("click", () => {
   if (on) beep(880, 0.06);
 });
 renderSnd();
+
+/* ---------- token balance (feat/site-integration) ---------- */
+// Mounted before the cartridges register so the wake gate is installed by the time a
+// card can be clicked; with no backend configured this renders nothing.
+initTokens(document.querySelector<HTMLElement>(".top-ctrl"));
 
 /* ---------- credits / insert coin ---------- */
 let credits = store.get<number>("credits", 0, (v): v is number => typeof v === "number");

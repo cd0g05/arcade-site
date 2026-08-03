@@ -189,3 +189,172 @@ a.cab:focus-visible { outline: 2px solid var(--pink); outline-offset: 2px; }
 @media (prefers-reduced-motion: reduce) {
   .ticker-track, .veil-msg, .gcard.active .led, .tile.pop, .flash { animation: none !important; }
 }
+
+/* ============================================================
+   Token layer (feat/site-integration)
+   Balance pill + award toast, per UX Mock-Up 2. Reuses the
+   existing .pill / .button classes and tokens.css variables —
+   no new visual language on player-facing surfaces.
+   ============================================================ */
+
+.token-widget {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.token-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+/* Signed in but the backend is unreachable. Dimmed rather than hidden: a vanishing
+   balance reads as "my tokens are gone", which is worse than "can't reach it". */
+.token-pill.degraded {
+  opacity: 0.55;
+}
+
+.token-led {
+  width: 8px;
+  height: 8px;
+  background: var(--ok, #047857);
+  box-shadow: 0 0 0 1px var(--ink);
+}
+
+.token-led.loading {
+  background: var(--border);
+  animation: token-pulse 1.2s steps(4) infinite;
+}
+
+@keyframes token-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.3;
+  }
+}
+
+.token-toast {
+  position: absolute;
+  top: 115%;
+  right: 0;
+  z-index: 20;
+  background: var(--ink);
+  color: #fff;
+  font-family: var(--font-ui, ui-monospace, monospace);
+  font-size: 0.75rem;
+  padding: 0.4rem 0.7rem;
+  white-space: nowrap;
+  animation: token-toast-in 180ms ease-out;
+}
+
+.token-toast.hidden {
+  display: none;
+}
+
+.token-toast-amt {
+  color: #34d399;
+  font-weight: 700;
+}
+
+.token-toast-amt.neg {
+  color: #fda4af;
+}
+
+@keyframes token-toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* UX Responsive & Accessibility: reduced motion fades instead of sliding. */
+@media (prefers-reduced-motion: reduce) {
+  .token-led.loading {
+    animation: none;
+  }
+  .token-toast {
+    animation: token-toast-fade 180ms ease-out;
+  }
+  @keyframes token-toast-fade {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+}
+
+/* Mobile (UX Mock-Up 2): the pill stacks under the controls and the toast goes inline
+   rather than absolutely positioned, so it cannot overflow a narrow viewport. */
+@media (max-width: 560px) {
+  .token-toast {
+    position: static;
+    display: inline-block;
+    margin-top: 0.3rem;
+    white-space: normal;
+  }
+}
+
+/* Account page: transaction log + riddles/tasks (feat/site-integration). */
+.token-log {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--font-ui, ui-monospace, monospace);
+  font-size: 0.85rem;
+}
+
+.token-log th {
+  text-align: left;
+  color: var(--sub);
+  border-bottom: 2px solid var(--border);
+  padding: 0.4rem 0.3rem;
+}
+
+.token-log td {
+  padding: 0.4rem 0.3rem;
+  border-bottom: 1px solid var(--grid, var(--border));
+}
+
+.amt-pos {
+  color: #047857;
+  font-weight: 700;
+}
+
+.amt-neg {
+  color: var(--accent-dark, #9d174d);
+  font-weight: 700;
+}
+
+.content-item {
+  padding: 0.75rem 0;
+  border-bottom: 1px solid var(--grid, var(--border));
+}
+
+.content-prompt {
+  font-weight: 700;
+  margin-bottom: 0.25rem;
+}
+
+.content-form {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-top: 0.4rem;
+}
+
+.content-form input {
+  font-family: var(--font-ui, ui-monospace, monospace);
+  padding: 0.35rem;
+  border: 1px solid var(--border);
+}
