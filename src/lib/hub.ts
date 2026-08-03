@@ -33,6 +33,7 @@ const games = new Map<string, Entry>();
 let cur: string | null = null;
 let fsId: string | null = null;
 let listenersAttached = false;
+let wakeGate: ((id: string, card: HTMLElement) => boolean | Promise<boolean>) | null = null;
 
 function announce(g: Entry, text: string): void {
   if (g.status) g.status.textContent = text;
@@ -69,6 +70,67 @@ function onDocumentMousedown(e: MouseEvent): void {
   if (!cur) return;
   const g = games.get(cur);
   if (g && e.target instanceof Node && !g.card.contains(e.target)) Hub.sleep();
+}
+
+/** The actual wake, after any gate has approved it. */
+function doWake(id: string): void {
+  const g = games.get(id);
+  if (!g) return;
+  Hub.sleep();
+  cur = id;
+  g.card.classList.add("active");
+  g.veil?.classList.add("hidden");
+  g.api.start();
+  beep(660, 0.05);
+  announce(g, "Playing. Press Escape to pause.");
+  g.card.focus({ preventScroll: true });
+}
+
+/**
+ * Consult the wake gate for `id`, running `onApproved` only if it allows the start.
+ *
+ * The gate may answer synchronously (no token layer, or an already-known verdict) or
+ * asynchronously (a spend request in flight). Once it approves, the start proceeds
+ * unconditionally — the player has already been charged at that point, so backing out
+ * because they clicked elsewhere meanwhile would take tokens and give nothing.
+ *
+ * A declined start changes nothing here; showing the player *why* is the gate's own
+ * job, since only it knows the reason.
+ */
+function runGate(id: string, onApproved: () => void): void {
+  const g = games.get(id);
+  if (!g) return;
+
+  if (!wakeGate) {
+    onApproved();
+    return;
+  }
+
+  const verdict = wakeGate(id, g.card);
+  if (typeof verdict === "boolean") {
+    if (verdict) onApproved();
+    return;
+  }
+  void verdict.then((ok) => {
+    if (ok) onApproved();
+  });
+}
+
+/** Wake `id` if the gate allows. */
+function gatedWake(id: string): void {
+  const g = games.get(id);
+  if (!g || g.api.alwaysOn || cur === id) return;
+  runGate(id, () => doWake(id));
+}
+
+/** Apply the CSS-takeover fullscreen classes. Assumes the game is awake or alwaysOn. */
+function applyFs(id: string): void {
+  const g = games.get(id);
+  if (!g) return;
+  g.card.classList.add("fs");
+  document.body.classList.add("has-fs");
+  fsId = id;
+  announce(g, "Fullscreen. Press Escape to exit.");
 }
 
 function ensureListeners(): void {
@@ -124,18 +186,24 @@ export const Hub = {
     if (api.alwaysOn) api.start();
   },
 
+  /**
+   * Install a gate consulted before any wake (token spend-before-play, FR-4.1).
+   *
+   * Opt-in and unset by default, so with no gate installed the wake path behaves exactly
+   * as it did before tokens existed. A gate returning false — or resolving false —
+   * cancels the wake silently; showing the player *why* is the gate's own job, since only
+   * it knows the reason.
+   *
+   * Deliberately narrow: the gate cannot wake a game, only decline one, so it can never
+   * become a second entry point into the key-routing invariant this module owns.
+   */
+  setWakeGate(gate: ((id: string, card: HTMLElement) => boolean | Promise<boolean>) | null): void {
+    wakeGate = gate;
+  },
+
   /** Wake a game — sleeps the current non-alwaysOn game first. */
   wake(id: string): void {
-    const g = games.get(id);
-    if (!g || g.api.alwaysOn || cur === id) return;
-    Hub.sleep();
-    cur = id;
-    g.card.classList.add("active");
-    g.veil?.classList.add("hidden");
-    g.api.start();
-    beep(660, 0.05);
-    announce(g, "Playing. Press Escape to pause.");
-    g.card.focus({ preventScroll: true });
+    gatedWake(id);
   },
 
   /** Pause the current game; veil back on. State is preserved (Cartridge.stop). */
@@ -161,20 +229,37 @@ export const Hub = {
     }
     const g = games.get(id);
     if (!g) return;
-    void coverScreen().then(() => {
-      if (fsId) {
-        const prev = games.get(fsId);
-        prev?.card.classList.remove("fs");
-        document.body.classList.remove("has-fs");
-        fsId = null;
-      }
-      if (!g.api.alwaysOn) Hub.wake(id);
-      g.card.classList.add("fs");
-      document.body.classList.add("has-fs");
-      fsId = id;
-      announce(g, "Fullscreen. Press Escape to exit.");
-      void revealScreen();
-    });
+
+    // The transition itself, once the start is paid for. Waking inside the wipe keeps
+    // the game's first frame hidden behind the cover, and tearing down a previous
+    // fullscreen here rather than calling exitFs() keeps it to a single wipe.
+    // doWake() rather than Hub.wake(), which would consult the gate a second time and
+    // charge twice.
+    const enterFs = (): void => {
+      void coverScreen().then(() => {
+        if (fsId) {
+          const prev = games.get(fsId);
+          prev?.card.classList.remove("fs");
+          document.body.classList.remove("has-fs");
+          fsId = null;
+        }
+        if (!g.api.alwaysOn && cur !== id) doWake(id);
+        applyFs(id);
+        void revealScreen();
+      });
+    };
+
+    // Already playable — nothing to gate.
+    if (g.api.alwaysOn || cur === id) {
+      enterFs();
+      return;
+    }
+
+    // A veiled game entering fullscreen is still a game start, so it goes through the
+    // same gate as a click, or ⛶ would be a free way to start a paid game. Gating
+    // before the wipe rather than inside it means a declined spend leaves the screen
+    // untouched and never covers the veil explaining why.
+    runGate(id, enterFs);
   },
 
   exitFs(): void {

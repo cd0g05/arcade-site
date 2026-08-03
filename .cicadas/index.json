@@ -1,4 +1,47 @@
 {
   "schema_version": "2.0",
-  "entries": []
+  "entries": [
+    {
+      "timestamp": "2026-07-25T02:36:42.813727+00:00",
+      "branch": "feat/backend-foundation",
+      "summary": "Partition 1 complete: Neon provisioned + migration applied + games seeded; ledger tests and Google OAuth redirect verified live. Pooling spike PASSED (risk retired); surfaced neon-http db.transaction() constraint for economy-engine id:22. Fixed missing .env.example, missing AUTH_SECRET, .gitignore swallowing the env template, and dotenv bundled into app code.",
+      "decisions": "",
+      "modules": []
+    },
+    {
+      "timestamp": "2026-07-25T03:18:07.030808+00:00",
+      "branch": "feat/economy-engine",
+      "summary": "Economy engine complete: achievements (threshold + interval-gap per ADR-5), leaderboard (day bucketing, +5 participation, 2+-submitter gating, bounty/default award), spend with InsufficientBalanceError, rolling-24h login bonus, content once-per-day/unlimited. 45 tests green; 100% stmt/line/func coverage on the 5 lib modules. Added content_completions.once_per_day partial unique index and daily_top_score_settlements to replace two racy read-then-write guards.",
+      "decisions": "",
+      "modules": []
+    },
+    {
+      "timestamp": "2026-07-25T17:51:28.436246+00:00",
+      "branch": "feat/api-and-bot-contract",
+      "summary": "Partition 3: all 9 HTTP routes, zod schemas, bot service-key auth, CORS allow-list, Vercel cron daily settle trigger, published docs/discord-bot-api.md. Migration 0003 (unique bounties game/day). 81 tests green.",
+      "decisions": "",
+      "modules": []
+    },
+    {
+      "timestamp": "2026-07-25T18:03:00.804359+00:00",
+      "branch": "feat/admin-dashboard",
+      "summary": "Partition 4: /admin dashboard \u2014 guard, users list + drill-down, balance-adjust confirm flow, achievement builder, games config, leaderboards edit/delete, bot log, analytics. Server actions with per-action guard re-check. 105 tests green.",
+      "decisions": "",
+      "modules": []
+    },
+    {
+      "timestamp": "2026-07-25T18:12:27.216600+00:00",
+      "branch": "feat/ledger-game-id",
+      "summary": "Cross-cutting: transactions.game_id column (migration 0004 + backfill), threaded through lib/ledger.ts insert sites; admin Analytics joins on it instead of parsing reason strings.",
+      "decisions": "",
+      "modules": []
+    },
+    {
+      "timestamp": "2026-08-03T07:15:34.299949+00:00",
+      "branch": "feat/site-integration",
+      "summary": "Partition 5: token layer over the arcade site \u2014 tokenApi client with graceful degradation, balance pill + award toast, spend-before-play via the new opt-in Hub.setWakeGate(), score submission via the new store.observe(), /account/ page. 105 site tests green. Then merged main: resolved the toggleFs() collision as gate-then-wipe, and reconciled the Setrit -> Tetrisio rename through tokenGames.ts (site names move, backend slugs stay \u2014 games.id is an FK target) and the backend display names.",
+      "decisions": "",
+      "modules": []
+    }
+  ]
 }

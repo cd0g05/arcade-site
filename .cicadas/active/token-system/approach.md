@@ -77,13 +77,13 @@ library
 _(no persistent process — pure library, exercised via unit tests)_
 
 #### Acceptance Criteria
-- [ ] `evaluateScoreSubmission({ score: 1050, ... })` against a seeded `lastAwardedHighScore: 1000, gap: 100` interval-gap achievement returns no award, but updates `currentHighScore`
-- [ ] A subsequent `evaluateScoreSubmission({ score: 1100, ... })` against the same state returns exactly one award and inserts exactly one `achievement_awards` row
-- [ ] Calling `evaluateScoreSubmission` twice with identical input (simulated retry) never produces two `transactions` rows for the same achievement (ADR-3 idempotency)
-- [ ] `computeDailyLeaderboard(gameId, date)` with only one submitter for that game/date returns no top-score award, but the submitter still receives the participation award
-- [ ] `computeDailyLeaderboard(gameId, date)` with two or more submitters correctly identifies the top scorer for bounty/award purposes
-- [ ] `completeContentItem(userId, contentItemId, answerText)` for a `type: 'riddle'` item awards tokens on first completion today, and returns `already_completed_today` (no award) on a second attempt the same day
-- [ ] `completeContentItem` for a `type: 'task'` item awards tokens on every call, with no once-per-day restriction
+- [x] `evaluateScoreSubmission({ score: 1050, ... })` against a seeded `lastAwardedHighScore: 1000, gap: 100` interval-gap achievement returns no award, but updates `currentHighScore`
+- [x] A subsequent `evaluateScoreSubmission({ score: 1100, ... })` against the same state returns exactly one award and inserts exactly one `transactions` row — and, **for threshold achievements only**, exactly one `achievement_awards` row. **Interval-gap achievements deliberately write no `achievement_awards` row** (Builder-confirmed 2026-07-25, criterion amended to match the implementation). Rationale: that table's unique `(user_id, achievement_id)` constraint encodes "once ever", which is correct for threshold achievements and wrong for interval-gap ones that fire repeatedly at every gap multiple — a second gap award would violate it. Interval-gap idempotency comes instead from a compare-and-set on `high_scores.last_awarded_high_score`. The `transactions` ledger still records every gap award with its `reason` string, so the token audit trail is complete; `achievement_awards` simply is not a second copy of it. Relaxing the constraint to log every gap award was considered and **explicitly declined** — no schema change.
+- [x] Calling `evaluateScoreSubmission` twice with identical input (simulated retry) never produces two `transactions` rows for the same achievement (ADR-3 idempotency)
+- [x] `computeDailyLeaderboard(gameId, date)` with only one submitter for that game/date returns no top-score award, but the submitter still receives the participation award
+- [x] `computeDailyLeaderboard(gameId, date)` with two or more submitters correctly identifies the top scorer for bounty/award purposes
+- [x] `completeContentItem(userId, contentItemId, answerText)` for a `type: 'riddle'` item awards tokens on first completion today, and returns `already_completed_today` (no award) on a second attempt the same day
+- [x] `completeContentItem` for a `type: 'task'` item awards tokens on every call, with no once-per-day restriction
 
 #### Implementation Steps
 1. Implement `lib/achievements.ts`: threshold mode, interval-gap mode (reading/writing `high_scores.last_awarded_high_score`), `ON CONFLICT DO NOTHING` idempotency per ADR-3.
@@ -97,6 +97,8 @@ _(no persistent process — pure library, exercised via unit tests)_
 ### Partition 3: API & Bot Contract → `feat/api-and-bot-contract`
 **Modules**: `arcade-backend/app/api`
 **Scope**: All route handlers (`/api/balance`, `/api/spend`, `/api/scores/submit`, `/api/bounty/pending`, `/api/bounty/set`, `/api/users/by-discord-id`, `/api/content`, `/api/content/complete`), `zod` request validation, service-API-key middleware for bot-only routes, CORS allow-listing for the arcade site origin. Ends with the API contract published for Carter's separate Discord bot build (Tech Design Implementation Sequence step 6 — a documentation handoff, not code). No content-authoring routes (create/edit/delete `content_items`) are built here — deliberately deferred per PRD Open Questions.
+
+Also owns the **daily settle trigger** (Builder-decided 2026-07-25): a Vercel cron invokes a service-key-guarded `POST /api/cron/settle-daily` just after the day boundary, which calls `settleDailyTopScore()` for every game for the day that just closed. This was an open question carried out of Partition 2 — `settleDailyTopScore()` is one-shot per game/day by DB constraint, so it must run only after the day closes, and nothing triggered it until now. An admin-dashboard manual button and deferral to Partition 5 were both considered and declined.
 **Dependencies**: Requires `feat/economy-engine`
 
 #### Artifact Type
@@ -108,16 +110,18 @@ rest-api
 - teardown: `Ctrl+C`
 
 #### Acceptance Criteria
-- [ ] `GET /api/balance` with a valid session returns `200` with `{ balance: number, recent: Transaction[] }`
-- [ ] `GET /api/balance` with no session returns `401`
-- [ ] `POST /api/spend` with `{ gameId: "dino-run" }` and sufficient balance returns `200` with `{ ok: true, newBalance }`; with insufficient balance returns `402` with `{ ok: false, error: "insufficient_balance", required, balance }`
-- [ ] `POST /api/scores/submit` with a valid session and a new personal-best score returns `200` with `awards` containing the expected achievement entry when criteria are met
-- [ ] `POST /api/scores/submit` using a valid service API key (no user session) succeeds when `discordId` resolves to a linked account, and returns `404` when it does not
-- [ ] `POST /api/bounty/set` without a valid service API key returns `401`
-- [ ] `GET /api/users/by-discord-id?discordId=X` returns `200` with `{ userId, displayName }` for a linked account and `404` otherwise
-- [ ] `GET /api/content` returns `200` with an empty `items` array when no content is seeded (expected at launch), and correct `completedToday` flags once items exist
-- [ ] `POST /api/content/complete` on a `riddle`/`trivia` item awards tokens once, then returns `{ ok: false, error: "already_completed_today" }` on a same-day retry; on a `task` item it awards tokens every call
-- [ ] A request from a non-allow-listed origin is rejected by CORS <!-- NEEDS MANUAL REVIEW: exact test harness for CORS behavior TBD -->
+- [x] `GET /api/balance` with a valid session returns `200` with `{ balance: number, recent: Transaction[] }`
+- [x] `GET /api/balance` with no session returns `401`
+- [x] `POST /api/spend` with `{ gameId: "dino-run" }` and sufficient balance returns `200` with `{ ok: true, newBalance }`; with insufficient balance returns `402` with `{ ok: false, error: "insufficient_balance", required, balance }`
+- [x] `POST /api/scores/submit` with a valid session and a new personal-best score returns `200` with `awards` containing the expected achievement entry when criteria are met
+- [x] `POST /api/scores/submit` using a valid service API key (no user session) succeeds when `discordId` resolves to a linked account, and returns `404` when it does not
+- [x] `POST /api/bounty/set` without a valid service API key returns `401`
+- [x] `GET /api/users/by-discord-id?discordId=X` returns `200` with `{ userId, displayName }` for a linked account and `404` otherwise
+- [x] `GET /api/content` returns `200` with an empty `items` array when no content is seeded (expected at launch), and correct `completedToday` flags once items exist
+- [x] `POST /api/content/complete` on a `riddle`/`trivia` item awards tokens once, then returns `{ ok: false, error: "already_completed_today" }` on a same-day retry; on a `task` item it awards tokens every call
+- [x] A request from a non-allow-listed origin is rejected by CORS — **resolved**: `lib/cors.ts` is an explicit allow-list, and the harness question is settled by asserting on response headers rather than driving a browser. A disallowed origin gets no `Access-Control-Allow-Origin` header (the browser then blocks the response for the caller); preflight `OPTIONS` returns 204 for an allow-listed origin and 403 otherwise. Covered by three tests, including a `arcade.vercel.app.attacker.com` lookalike against the preview-suffix rule
+- [x] `POST /api/cron/settle-daily` without a valid service API key (or Vercel cron secret) returns `401`
+- [x] `POST /api/cron/settle-daily` settles the previous day for every game, and a second call for the same day is a no-op (returns already-settled rather than re-awarding)
 
 #### Implementation Steps
 1. Implement service-API-key middleware (constant-time comparison against `BOT_API_KEY` env var).
@@ -129,7 +133,7 @@ rest-api
 ---
 
 ### Partition 4: Admin Dashboard → `feat/admin-dashboard`
-**Modules**: `arcade-backend/app/admin`
+**Modules**: `arcade-backend/app/admin`, plus `arcade-backend/lib/admin.ts` and `arcade-backend/lib/admin-guard.ts` (added during implementation — aggregate read queries don't belong in page components, and the guard is shared by the layout and every server action)
 **Scope**: Users list + transaction drill-down (UX Mock-Up 1), achievement builder (CRUD on `achievements` table), game/cabinet config management (cost editing, daily entry edit/delete), bot log view (read-only `bot_log_events`), basic analytics view. Admin-only auth guard (`users.isAdmin`).
 **Dependencies**: Requires `feat/economy-engine` (reads/writes the same `lib/` functions and tables)
 
@@ -142,12 +146,12 @@ web-ui
 - teardown: `Ctrl+C`
 
 #### Acceptance Criteria
-- [ ] Visiting `/admin/users` as a non-admin authenticated user returns `403` or redirects away, per Tech Design Security table
-- [ ] Visiting `/admin/users` as the admin account renders the user list with balance and last-active columns matching UX Mock-Up 1
-- [ ] Clicking a user row renders their transaction log inline without a full page navigation
-- [ ] Using "Adjust balance" to change a value from 40 to 55 creates a transaction with `reason = "Admin adjusted 40 -> 55"`, visible in both the admin drill-down and (on next fetch) the user's own `/api/balance` recent list
-- [ ] Adding an achievement criteria row in the builder for a game persists it and it appears in the list without a page reload
-- [ ] An empty achievement list for a game renders the copy `"No achievements configured for this game yet."` per UX Copy & Tone
+- [x] Visiting `/admin/users` as a non-admin authenticated user returns `403` or redirects away, per Tech Design Security table
+- [x] Visiting `/admin/users` as the admin account renders the user list with balance and last-active columns matching UX Mock-Up 1
+- [x] Clicking a user row renders their transaction log inline without a full page navigation
+- [x] Using "Adjust balance" to change a value from 40 to 55 creates a transaction with `reason = "Admin adjusted 40 -> 55"`, visible in both the admin drill-down and (on next fetch) the user's own `/api/balance` recent list
+- [x] Adding an achievement criteria row in the builder for a game persists it and it appears in the list without a page reload
+- [x] An empty achievement list for a game renders the copy `"No achievements configured for this game yet."` per UX Copy & Tone
 
 #### Implementation Steps
 1. Implement Auth.js session guard + `isAdmin` check as shared admin layout middleware.
@@ -159,7 +163,7 @@ web-ui
 ---
 
 ### Partition 5: Arcade Site Integration → `feat/site-integration`
-**Modules**: `src/ui`, `src/lib` (existing `arcade` repo tree, NOT `arcade-backend/`)
+**Modules**: `src/ui`, `src/lib`, plus `index.html`, `src/pages`, `src/styles`, and a new `account/index.html` + Vite input entry (the Account surface needed a page of its own — the hub header has no room for a transaction log and riddles list)
 **Scope**: Balance pill + toast widget in the existing header (UX Mock-Up 2), API-client fetch wrapper, Google sign-in entry point, spend-before-play wiring on hub cartridge and cabinet game starts, minimal "Account" surface (Discord link step, own transaction log view) per UX Information Architecture.
 **Dependencies**: Requires `feat/api-and-bot-contract` (needs a stable API to call)
 
@@ -172,12 +176,12 @@ web-ui
 - teardown: `Ctrl+C`
 
 #### Acceptance Criteria
-- [ ] Header renders the "Sign in with Google" control when signed out, and the balance pill (LED + numeric balance) when signed in, per UX Mock-Up 2
-- [ ] Setting a new high score in Dino Run that meets an achievement criterion triggers a toast reading `+15 High Score: Dino Run` (or the configured amount) within the same session, without a page reload
-- [ ] Attempting to start a cabinet game with a balance below its token cost shows the inline `"Need {N} tokens"` veil and does not start the game
-- [ ] Starting a hub cartridge game with sufficient balance deducts the correct cost and updates the visible balance pill
-- [ ] `prefers-reduced-motion` disables the toast slide-in animation (fades instead), per UX Responsive & Accessibility
-- [ ] A backend outage (API unreachable) does not block gameplay — games remain playable, balance pill shows a degraded/unavailable state instead of erroring the page <!-- NEEDS MANUAL REVIEW: exact degraded-state UI not fully specified in UX doc, confirm during Tasks -->
+- [x] Header renders the "Sign in with Google" control when signed out, and the balance pill (LED + numeric balance) when signed in, per UX Mock-Up 2
+- [x] Setting a new high score in Dino Run that meets an achievement criterion triggers a toast reading `+15 High Score: Dino Run` (or the configured amount) within the same session, without a page reload
+- [x] Attempting to start a cabinet game with a balance below its token cost shows the inline `"Need {N} tokens"` veil and does not start the game
+- [x] Starting a hub cartridge game with sufficient balance deducts the correct cost and updates the visible balance pill
+- [x] `prefers-reduced-motion` disables the toast slide-in animation (fades instead), per UX Responsive & Accessibility
+- [x] A backend outage (API unreachable) does not block gameplay — games remain playable, balance pill shows a degraded/unavailable state instead of erroring the page. **Resolved** (the NEEDS MANUAL REVIEW flag is answered): the degraded pill stays visible and dimmed (`.token-pill.degraded`, value `—`, `aria-label="Token balance unavailable"`) rather than disappearing — a vanishing balance reads as "my tokens are gone", which is worse than "can't reach it". Every `tokenApi` failure resolves to a typed result instead of throwing, and the wake gate returns true for everything except a *confirmed* insufficient balance.
 
 #### Implementation Steps
 1. Add an API-client module (`src/lib/tokenApi.ts`) wrapping fetch calls to the backend, with graceful-degradation handling per Tech Design Brownfield Notes.
@@ -235,7 +239,7 @@ This is a greenfield schema (Tech Design: no modified models), so there's no exi
 |------|------------|
 | `feat/api-and-bot-contract` and `feat/admin-dashboard` both land changes to `arcade-backend/lib` consumers around the same time, risking silent behavior drift if economy-engine's contract shifts after both branch off it | Freeze `lib/achievements.ts` / `lib/leaderboard.ts` public function signatures at the end of Partition 2; any signature change after that point triggers a Signal to both dependent partitions |
 | `feat/site-integration` is the only partition touching the existing static site — if it lands with a bug, it could regress the click-to-wake/fullscreen game model that's the whole point of the existing site | Acceptance criteria explicitly require gameplay to remain functional during a simulated backend outage; manual regression pass against the existing hub interaction model (click-to-wake, pause-on-click-away, Escape/fullscreen) before this partition is considered done |
-| Neon connection-pooling behavior under Vercel Fluid Compute (flagged as an implementation risk in Tech Design) could block Partition 1 if it surfaces late | Spike this specifically within `feat/backend-foundation` before building on top of the DB client — it's foundational and blocks every other partition |
+| ~~Neon connection-pooling behavior under Vercel Fluid Compute could block Partition 1 if it surfaces late~~ **RETIRED** — spike done (task id:4), no exhaustion risk: `neon-http` is stateless-over-HTTPS and `DATABASE_URL` uses the `-pooler` endpoint; 175 concurrent queries used ≤7 of 112 connections. See Tech Design "Spike result: Neon pooling under Fluid Compute". | **New constraint surfaced in its place:** the driver has no `db.transaction()` support, which affects ADR-3's atomic award+ledger write in Partition 2 (task id:22). Mitigation and verified CTE pattern documented in Tech Design; treat as a Partition 2 precondition, not a Partition 1 blocker. |
 | Two Vercel projects in one repo (ADR-1) is an unusual-enough setup that Root Directory misconfiguration could deploy the wrong project or leak the backend's env vars into the site's build | Verify both Vercel project configs (Root Directory + env var scoping) explicitly as part of `feat/backend-foundation`'s definition of done, before any other partition starts depending on a live deployment |
 
 ## Alternatives Considered

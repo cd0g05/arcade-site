@@ -1,5 +1,5 @@
 ---
-summary: "New Next.js service at arcade-backend/ (same git repo as the static arcade site, but deployed as its own separate Vercel project via Root Directory) hosted at dev.cartercripe.com/arcade, using Auth.js (Google OAuth + Discord account link), Postgres via Vercel Marketplace (Neon) with Drizzle ORM, and Vercel Functions (Fluid Compute) for the API. Ledger-first data model (transactions table is the only source of truth for balance). Achievement checking runs synchronously and idempotently inside the score-submission handler. Discord bot (Carter-owned, separate codebase) authenticates as a service principal via a static API key against a documented REST contract."
+summary: "New Next.js service at arcade-backend/ (same git repo as the static arcade site, but deployed as its own separate Vercel project via Root Directory) hosted at dev.cartercripe.com/arcade, using Auth.js (Google OAuth + Discord account link), Postgres via Vercel Marketplace (Neon) with Drizzle ORM, and Vercel Functions (Fluid Compute) for the API. Ledger-first data model (transactions table is the only source of truth for balance). Achievement checking runs synchronously and idempotently inside the score-submission handler. Discord bot (Carter-owned, separate codebase) authenticates as a service principal via a static API key against a documented REST contract. VERIFIED CONSTRAINT: the DB client uses Drizzle's neon-http driver, which has no db.transaction() support — atomic multi-write paths (notably ADR-3) must use db.batch() or a single-statement data-modifying CTE."
 phase: "tech"
 when_to_load:
   - "When implementing or reviewing architecture, interfaces, data models, conventions, and sequencing."
@@ -21,6 +21,7 @@ index:
   conventions: "## Implementation Patterns & Conventions"
   security_performance: "## Security & Performance"
   implementation_sequence: "## Implementation Sequence"
+  neon_pooling_spike: "### Spike result: Neon pooling under Fluid Compute (task id:4, RESOLVED)"
 next_section: "done"
 ---
 
@@ -81,6 +82,9 @@ This resolves the PRD's open hosting question: rather than bolting a backend ont
 - `next-auth` — Google + Discord OAuth.
 - `zod` — request/response schema validation.
 - `@neondatabase/serverless` (or Neon's Drizzle driver adapter) — Postgres driver compatible with Vercel Functions.
+- `dotenv` — added during Partition 1 so the standalone `tsx` entrypoints (`lib/db/migrate.ts`, `scripts/seed.ts`, `drizzle.config.ts`) load `.env.local`; Next.js loads it automatically, these do not.
+
+**As-built versions** (Partition 1, reflected from `arcade-backend/package.json` — the scaffold drifted upward from the versions originally pencilled in): `next` ^16.2.11 (not 15.x), `drizzle-orm` ^0.45.2, `drizzle-kit` ^0.31.10, `next-auth` ^5.0.0-beta.25, `react`/`react-dom` ^19, `zod` ^3.24, `vitest` ^2.1. `tsconfig.json` uses `jsx: "react-jsx"` and includes `.next/dev/types/**/*.ts` (Next 16 dev-types path).
 
 **Dependencies explicitly rejected:**
 - `@vercel/postgres` / `@vercel/kv` — discontinued Vercel-native offerings; superseded by Marketplace integrations.
@@ -316,9 +320,147 @@ None — this is a new service with no pre-existing schema.
 - Initial migration creates all tables above in one Drizzle migration; no phased rollout needed since this is a greenfield schema.
 - `games` table is seeded with the current hub cartridge + cabinet roster (costs per PRD FR-4.1 defaults: 1 for cartridge, 3 for cabinet) as part of initial setup, not hardcoded in application code.
 
+**As-built migrations** (reflected from `arcade-backend/drizzle/`):
+
+| Migration | Partition | Contents |
+|---|---|---|
+| `0000_wooden_paladin.sql` | backend-foundation | All 11 initial tables. |
+| `0001_large_maestro.sql` | economy-engine | `content_completions.once_per_day` + partial unique index `content_completions_once_per_day_uniq`. |
+| `0002_early_unicorn.sql` | economy-engine | `daily_top_score_settlements` table, PK `(game_id, game_date)`. |
+| `0003_shiny_fat_cobra.sql` | api-and-bot-contract | Unique `bounties_game_id_game_date_uniq` on `bounties (game_id, game_date)`. |
+| `0004_chemical_midnight.sql` | ledger-game-id | Nullable `transactions.game_id` FK + `transactions_game_id_source_idx`, plus a backfill of historical rows from their reason strings. |
+
+Both economy-engine migrations exist to move a one-time guarantee out of application logic and into a DB constraint, extending ADR-3's principle to two cases the original schema handled with read-then-write checks:
+
+- **`content_completions.once_per_day`** — the once-per-day rule for riddles/trivia (FR-3.4) originally relied on `lib/content.ts` checking a lookup index before inserting. That races: two concurrent submissions of the same riddle both see "not completed" and both award. A unique index cannot reference `content_items.type`, so the flag is denormalized onto the completion row at insert time, which makes a *partial* unique index expressible. Tasks store `false`, fall outside the index, and remain unlimited per FR-3.4.
+- **`daily_top_score_settlements`** — the top-score award (FR-3.3) needs "settle at most once per game/day". A guard comparing `transactions.created_at::date` to the game date is wrong whenever settlement runs after the day being settled, because those are different dates; a test caught it paying twice. One row per `(game_id, game_date)` makes the constraint exact and lets the bounty and default-award paths share a single mechanism.
+
+Migration `0003` continues the same pattern into the API layer:
+
+- **`bounties (game_id, game_date)` unique** — `computeDailyLeaderboard()` already read this table as `const [bounty] = await db.select()...`, i.e. assuming at most one row per game/day, but nothing enforced that. The API layer added two writers that both need a conflict target to be idempotent: the pending-row open on an admin daily submission (`ON CONFLICT DO NOTHING`, so a resubmitted score never clears an amount already set) and `POST /api/bounty/set` (`ON CONFLICT DO UPDATE`, so a retried bot call overwrites rather than duplicating). Without the constraint a retry silently creates a second row and which one supplies the award amount becomes arbitrary.
+
+**Interval-gap awards are the one deliberate exception** to constraint-based idempotency: they are *repeatable* by design, so the once-ever `(user_id, achievement_id)` unique constraint on `achievement_awards` cannot apply. They are guarded instead by a compare-and-set on `high_scores.last_awarded_high_score` — the UPDATE only matches while the watermark still holds its expected value, so concurrent duplicate submissions cannot both award. Consequently interval-gap awards write a `transactions` row but no `achievement_awards` row.
+
 ---
 
 ## API & Interface Design
+
+### As-built notes (feat/api-and-bot-contract)
+
+The endpoint list below is the plan; all of it shipped. Three things differ from it, plus
+one route that was added:
+
+1. **`POST /api/bot/log` was added** (tasks.md id:55). FR-5.4 specifies `bot_log_events`
+   is "populated via the same API the bot writes through" and Partition 4 builds a
+   read-only view of it, but no route was ever specified to write to it — the admin page
+   would have shown a permanently empty feed. Service-key auth, opaque jsonb `payload`,
+   free-form `eventType` (a closed enum would discard exactly the information a debugging
+   log exists to capture).
+
+2. **`POST|GET /api/cron/settle-daily` was added** (ids 53-54) as the Builder-chosen
+   trigger for the daily settle. Exposed as **both** verbs: Vercel Cron invokes with a
+   `GET`, while manual backfills are more naturally a `POST` with a body. Defaults to
+   settling **yesterday**, not today, because `settleDailyTopScore()` is one-shot per
+   game/day — running it mid-day would award the day to whoever led at that instant.
+   Auth accepts the Vercel `CRON_SECRET` or the bot service key. Schedule `15 0 * * *`
+   (UTC, matching `dayBucket()`'s server-local basis on Vercel).
+
+3. **`GET /api/bounty/pending` needed a writer that did not exist.** Partition 2 documented
+   a bounty row that "can exist with a null amount — created when Carter posts a score",
+   but nothing created it, so `pending` could never be true. `/api/scores/submit` now opens
+   that row when the submitting user `isAdmin` and the submission is a daily one. This
+   also required **migration `0003`**, a unique `(game_id, game_date)` on `bounties` — see
+   "Schema / Migration Notes".
+
+4. **`isValidBotApiKey` moved from `lib/auth.ts` to `lib/bot-key.ts`.** It shares nothing
+   with Auth.js, and living in that module dragged `next-auth` into any context that only
+   needed to compare a key — including tests, where `next-auth` cannot be imported at all
+   under a plain node env (it fails to resolve `next/server`).
+
+**Auth split as implemented** — `lib/api-auth.ts` holds `requireSession()`,
+`requireBotKey()`, `requireCronAuth()`, plus the single `handle()` error boundary
+(ZodError → 400, typed `HttpError` → its status, anything else → logged opaque 500).
+Domain errors from `lib/` are mapped in their own routes, since their statuses are
+route-specific (`InsufficientBalanceError` → 402, `UnknownContentItemError` → 404).
+
+**On `/api/scores/submit`, a body `userId` is ignored on the session path** — the subject is
+always the session's own user, so a logged-in player cannot submit scores as someone else.
+The bot path must name its subject, since it acts on behalf of Discord users.
+
+**CORS** (`lib/cors.ts`) is an explicit allow-list, never an `Origin` reflector: these
+routes are cookie-authenticated, so reflecting any origin alongside
+`Access-Control-Allow-Credentials` would let any site make authenticated requests as the
+logged-in user. Preview deploys are admitted by configured host suffix, matched on a dot
+boundary so `arcade.vercel.app.attacker.com` cannot pass.
+
+### As-built notes (feat/admin-dashboard)
+
+The dashboard is server-rendered pages plus **server actions**, not a second API surface —
+the admin is same-origin, so routing its writes through `/api/*` would have meant
+duplicating auth and validation for no gain. Three things are worth carrying forward:
+
+1. **Every server action re-checks the admin guard.** The layout guard is not a gate on
+   them: a server action compiles to a directly-reachable POST endpoint with a generated
+   URL, so it can be invoked without ever rendering the page that hosts its form. Relying
+   on the layout alone would have left every admin write open to any authenticated user.
+
+2. **`adjustBalanceAction` re-reads the balance instead of trusting the client's
+   `previousBalance`.** The confirm step shows the value the admin saw, but the user may
+   earn or spend between render and confirm; writing the client's delta would silently
+   reverse that activity. The `"Admin adjusted {old} -> {new}"` reason therefore always
+   describes the adjustment that actually happened.
+
+3. **The Achievement Builder deactivates rather than deletes.** `achievement_awards` has a
+   foreign key to `achievements`, so removing a criteria row that has ever paid out would
+   either fail or erase the record of awards people received. `active: false` stops future
+   awards and `lib/achievements.ts` already filters on it.
+
+**Resolved coupling** — the Analytics "most played" count originally joined
+`transactions.reason` against a reconstructed `"{Tier}: {Display Name}"` string, which
+would silently return zero if that copy convention ever changed. Builder-approved
+2026-07-25: `transactions.game_id` (migration `0004`) replaced it. The column is nullable
+and purely attributive — login, riddle/task, and admin-adjustment rows have no game, and
+this does not reintroduce state into the ledger (ADR-2 is about balance never being
+stored). `lib/ledger.ts` stamps it at all three game-related insert sites; the migration
+backfilled existing rows from their reason strings, which was the last point at which that
+mapping was guaranteed intact.
+
+### As-built notes (feat/site-integration)
+
+The token layer is additive and removable: not calling `initTokens()` leaves the arcade
+byte-for-byte as it was. Three integration points, each deliberately narrow.
+
+1. **`Hub.setWakeGate()` — spend-before-play.** The plan said to wire spend "into the
+   existing `Hub.register(...)` start flow", but `register()` only attaches listeners; the
+   **wake** is what starts a game, and it was synchronous. The gate is opt-in and unset by
+   default, may only *decline* a wake (never trigger one), and `toggleFs()` routes through
+   it too — otherwise the ⛶ button would have been a free way to start a paid game. Once a
+   gate approves, the wake proceeds unconditionally: the player has already been charged,
+   so declining because they clicked elsewhere meanwhile would take tokens and give nothing.
+
+2. **`store.observe()` — score submission.** Task id:86 said to wire submission into each
+   game's score-save path, which would have meant editing twelve game files. All twelve
+   already funnel their personal best through `store.set("best:{game}", n)`, and
+   `storage.ts` is the only module permitted to touch localStorage (ADR-4) — so that is
+   where the score-save paths already converge. Observing there means **zero changes to
+   game logic**, which is what approach.md's Migrations & Compat section actually requires.
+   Observers cannot throw into the caller: a game is mid-frame when it writes.
+
+3. **`src/lib/tokenGames.ts` — the id map.** Three identifiers exist per game and none
+   agree: the Hub id (`g2048`), the localStorage best key (`best:2048`), and the backend
+   slug (`2048`). One table, so a mismatch is a visible gap rather than a silently
+   unattributed transaction. **Flagged for the Builder**: the sequence game is titled
+   ECHO on the site and seeded as `simon` in the backend.
+
+**Graceful degradation is the design rule.** `tokenApi` never throws — every failure
+(outage, CORS rejection, timeout, no backend configured, signed out) resolves to a typed
+result, and the wake gate returns *true* for all of them. Only a confirmed
+`insufficient_balance` blocks a game. `spend`'s `insufficient` and `unavailable` outcomes
+are deliberately distinct: collapsing them would make an outage look like bankruptcy.
+
+**Not submitting scores**: Minesweeper (per-difficulty times) and Water Sort (a level
+number) keep no value the backend's high-score model can compare, and Token Miner is
+`alwaysOn`. They still cost tokens; they just never submit.
 
 ### New Endpoints
 
@@ -488,5 +630,48 @@ describe('evaluateScoreSubmission — interval_gap mode', () => {
 **Parallel work opportunities:** Admin dashboard (4) and arcade site integration (5) can be built concurrently once the API layer (3) contract is stable, since both are pure consumers of it.
 
 **Known implementation risks:**
-- Neon/Vercel Marketplace Postgres provisioning and connection-pooling behavior under Vercel Fluid Compute is worth a quick spike before Foundation is considered done — confirm the serverless driver handles connection reuse correctly rather than exhausting Neon's connection limit under bursty admin-dashboard + API traffic.
+- ~~Neon/Vercel Marketplace Postgres provisioning and connection-pooling behavior under Vercel Fluid Compute is worth a quick spike before Foundation is considered done~~ — **RESOLVED in `feat/backend-foundation` (task id:4).** See "Spike result: Neon pooling under Fluid Compute" below.
+- CORS + cookie-based session auth across two different subdomains (arcade site's domain vs. `dev.cartercripe.com`) needs verification early — cross-subdomain cookie/session handling is a common source of silent auth failures.
+
+### Spike result: Neon pooling under Fluid Compute (task id:4, RESOLVED)
+
+Reproducible via `arcade-backend/scripts/spike-neon-pooling.ts` (`npx tsx scripts/spike-neon-pooling.ts`).
+
+Two independent factors make connection exhaustion a non-risk for this stack:
+
+1. **`lib/db/client.ts` uses the `neon-http` driver, not `neon-serverless`/`Pool`.** Each query is a stateless one-shot HTTPS request to Neon's SQL-over-HTTP endpoint — there is no client-held TCP connection to leak, so a reused warm Fluid Compute instance cannot accumulate connections across invocations.
+2. **`DATABASE_URL` points at the `-pooler` endpoint** (Neon's PgBouncer), which multiplexes many logical queries onto a small pool of real Postgres backends.
+
+Measured against the live Neon instance (`max_connections = 112`), firing concurrent queries off a single module-scope `neon()` client to simulate one warm instance serving concurrent requests:
+
+| Burst | Queries | Failures | Distinct backend PIDs | Wall time |
+|---|---|---|---|---|
+| A | 25 concurrent | 0 | 2 | 642 ms |
+| B | 50 concurrent | 0 | 4 | 611 ms |
+| C | 100 concurrent | 0 | 6 | 7966 ms |
+
+175 concurrent queries total consumed at most **7** backends — ~6% of `max_connections` — with zero failures, and sequential reuse on the same warm client worked normally (20 queries, 2222 ms).
+
+**Caveats carried forward:**
+- Throughput, not connections, is the ceiling: burst C's per-query latency degraded ~13× vs. burst B (each query is its own HTTPS round trip). Admin-dashboard pages should batch/join in SQL rather than issue per-row queries in a loop — relevant to `feat/admin-dashboard` (Users list, Analytics).
+- **`db.transaction()` is unavailable on this driver** — verified, it throws `No transactions support in neon-http driver`. `db.batch([...])` *is* supported and Neon wraps a batch in a single transaction, but batched statements cannot read each other's results.
+
+  This directly constrains **ADR-3** (`feat/economy-engine` task id:22), which requires the idempotent `achievement_awards` insert and the `transactions` ledger write to be atomic. Do **not** implement it as two separately awaited queries — that is not atomic and can award tokens without a matching award row (or vice versa) if the second call fails. Two viable options, in order of preference:
+
+  1. **Single statement with a CTE** — atomic *and* naturally expresses ADR-3's conditionality, since the ledger row is only written when the award insert actually produced a row:
+
+     ```sql
+     WITH award AS (
+       INSERT INTO achievement_awards (user_id, achievement_id, ...)
+       VALUES (...) ON CONFLICT (user_id, achievement_id) DO NOTHING
+       RETURNING user_id, achievement_id
+     )
+     INSERT INTO transactions (user_id, amount, reason, ...)
+     SELECT user_id, $amount, $reason, ... FROM award
+     RETURNING *;
+     ```
+
+     An empty result set means "already awarded, nothing written" — the idempotency signal comes for free. **Verified against the live instance during this spike**: first call wrote the dependent row and returned 1 row; an identical repeat call hit the conflict and wrote nothing, returning 0 rows. Note this means `lib/ledger.ts` (ADR-2, sole writer of `transactions`) needs to expose a form that participates in a caller-supplied CTE/batch rather than only standalone inserts; reconcile this when implementing id:22.
+
+  2. **Switch the achievement path to the `neon-serverless` (WebSocket `Pool`) driver**, which does support interactive transactions. This reintroduces the connection-pooling concern this spike cleared for `neon-http`, so it would need its own re-verification and is the fallback, not the default.
 - CORS + cookie-based session auth across two different subdomains (arcade site's domain vs. `dev.cartercripe.com`) needs verification early — cross-subdomain cookie/session handling is a common source of silent auth failures.

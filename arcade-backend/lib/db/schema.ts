@@ -1,3 +1,4 @@
+import { sql } from 'drizzle-orm';
 import {
   pgTable,
   uuid,
@@ -10,6 +11,7 @@ import {
   primaryKey,
   unique,
   index,
+  uniqueIndex,
 } from 'drizzle-orm/pg-core';
 
 // See .cicadas/active/token-system/tech-design.md "Data Models" for the source of truth
@@ -51,10 +53,20 @@ export const transactions = pgTable(
       ],
     }).notNull(),
     actorUserId: uuid('actor_user_id').references(() => users.id), // set for admin_adjustment
+    // Which game this transaction is about, when it is about one.
+    //
+    // Nullable by design — login bonuses, riddle/task completions, and admin adjustments
+    // have no game. This does NOT reintroduce game state into the ledger (ADR-2 is about
+    // balance never being stored); it is an attribution column, so analytics can group by
+    // game without parsing `reason`. Before it existed, the admin "most played" count
+    // matched `reason` against a reconstructed "{Tier}: {Display Name}" string, which
+    // would silently return zero the moment that copy convention changed.
+    gameId: text('game_id').references(() => games.id),
     createdAt: timestamp('created_at').notNull().defaultNow(),
   },
   (t) => ({
     userTimeIdx: index('transactions_user_id_created_at_idx').on(t.userId, t.createdAt),
+    gameSourceIdx: index('transactions_game_id_source_idx').on(t.gameId, t.source),
   }),
 );
 
@@ -131,16 +143,54 @@ export const dailyLeaderboardEntries = pgTable('daily_leaderboard_entries', {
   createdAt: timestamp('created_at').notNull().defaultNow(),
 });
 
-export const bounties = pgTable('bounties', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  gameId: text('game_id')
-    .notNull()
-    .references(() => games.id),
-  gameDate: date('game_date').notNull(),
-  amount: integer('amount'), // null until Carter sets it
-  claimedByUserId: uuid('claimed_by_user_id').references(() => users.id),
-  createdAt: timestamp('created_at').notNull().defaultNow(),
-});
+export const bounties = pgTable(
+  'bounties',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    gameId: text('game_id')
+      .notNull()
+      .references(() => games.id),
+    gameDate: date('game_date').notNull(),
+    amount: integer('amount'), // null until Carter sets it
+    claimedByUserId: uuid('claimed_by_user_id').references(() => users.id),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+  },
+  (t) => ({
+    // At most one bounty per game/day. `computeDailyLeaderboard()` already reads this
+    // table expecting a single row (`const [bounty] = await db.select()...`), and both
+    // API writers — the pending-row creation on an admin daily submission and
+    // `POST /api/bounty/set` — need a conflict target to be idempotent. Without this,
+    // a retried bot call silently creates a second row and which one wins the award
+    // amount becomes arbitrary. Constraint-first per ADR-3.
+    gameDayUniq: unique('bounties_game_id_game_date_uniq').on(t.gameId, t.gameDate),
+  }),
+);
+
+/**
+ * One row per game/day whose top-score award has been paid (FR-3.3).
+ *
+ * Exists purely as an idempotency guard, following ADR-3's principle of pushing
+ * one-time guarantees into a DB constraint: the composite primary key means a repeated
+ * settle attempt conflicts and writes nothing. A date-comparison guard on
+ * `transactions.created_at` cannot do this job — the day a game was played and the day
+ * its award is settled are different dates whenever settlement runs after midnight.
+ */
+export const dailyTopScoreSettlements = pgTable(
+  'daily_top_score_settlements',
+  {
+    gameId: text('game_id')
+      .notNull()
+      .references(() => games.id),
+    gameDate: date('game_date').notNull(),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id),
+    amount: integer('amount').notNull(),
+    fromBounty: boolean('from_bounty').notNull(),
+    settledAt: timestamp('settled_at').notNull().defaultNow(),
+  },
+  (t) => ({ pk: primaryKey({ columns: [t.gameId, t.gameDate] }) }),
+);
 
 export const botLogEvents = pgTable('bot_log_events', {
   id: uuid('id').primaryKey().defaultRandom(),
@@ -174,14 +224,22 @@ export const contentCompletions = pgTable(
       .references(() => contentItems.id),
     answerText: text('answer_text').notNull(), // accepted at face value, no automated verification
     completedDate: date('completed_date').notNull(), // once-per-day enforcement for riddle/trivia
+    // Denormalized from content_items.type at insert time: true for 'riddle'/'trivia',
+    // false for 'task'. Exists solely so the partial unique index below can enforce
+    // once-per-day in the DATABASE rather than in application logic — a unique index
+    // cannot reference a column on another table, and content_items.type is what
+    // decides whether the restriction applies.
+    oncePerDay: boolean('once_per_day').notNull(),
     createdAt: timestamp('created_at').notNull().defaultNow(),
   },
   (t) => ({
-    // Enforces "riddles/trivia award once per day" (FR-3.4). Tasks are exempt at the
-    // application level (lib/content.ts only checks this index for type in
-    // ('riddle','trivia')) rather than via a DB constraint, since a partial unique
-    // index keyed on type would need conditional logic Drizzle expresses more awkwardly
-    // than a plain lookup index + application-level check.
+    // Enforces "riddles/trivia award once per day" (FR-3.4) as a DB constraint, applying
+    // ADR-3's principle (push one-time guarantees into the constraint system, don't rely
+    // on read-then-write application logic that races under concurrent/retried calls).
+    // Partial, so 'task' rows — unlimited completions per FR-3.4 — are exempt.
+    oncePerDayUniq: uniqueIndex('content_completions_once_per_day_uniq')
+      .on(t.userId, t.contentItemId, t.completedDate)
+      .where(sql`${t.oncePerDay}`),
     lookupIdx: index('content_completions_user_item_date_idx').on(
       t.userId,
       t.contentItemId,

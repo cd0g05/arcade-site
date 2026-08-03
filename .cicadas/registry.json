@@ -1,26 +1,108 @@
 {
-    "schema_version": "2.0",
-    "initiatives": {
-        "token-system": {
-            "intent": "Add a gamified token economy to Carter's Arcade: earn/spend tokens via gameplay, achievements, daily leaderboards, and riddles/tasks; new Next.js backend + admin dashboard at dev.cartercripe.com/arcade; Discord bot integration via a published API contract (bot built separately by Carter).",
-            "owner": "unknown",
-            "signals": [],
-            "created_at": "2026-07-23T04:24:24.080031+00:00"
+  "schema_version": "2.0",
+  "initiatives": {
+    "token-system": {
+      "intent": "Add a gamified token economy to Carter's Arcade: earn/spend tokens via gameplay, achievements, daily leaderboards, and riddles/tasks; new Next.js backend + admin dashboard at dev.cartercripe.com/arcade; Discord bot integration via a published API contract (bot built separately by Carter).",
+      "owner": "unknown",
+      "signals": [
+        {
+          "timestamp": "2026-07-25T02:36:02.919329+00:00",
+          "message": "DRIVER CONSTRAINT from feat/backend-foundation (task id:4 spike): Drizzle's neon-http driver has NO db.transaction() support \u2014 it throws 'No transactions support in neon-http driver'. db.batch([...]) IS supported (Neon wraps a batch in one transaction) but batched statements cannot read each other's results. This directly affects feat/economy-engine task id:22 (ADR-3 atomic achievement-award + ledger write): do NOT implement as two awaited queries. Use a single-statement data-modifying CTE (INSERT ... ON CONFLICT DO NOTHING RETURNING, feeding the ledger INSERT) \u2014 verified working against the live DB, and an empty result set doubles as the 'already awarded' idempotency signal. May require lib/ledger.ts to expose a CTE/batch-participating form alongside its standalone insert. Full pattern + measurements in tech-design.md 'Spike result: Neon pooling under Fluid Compute'. Pooling itself is a NON-issue: 175 concurrent queries used <=7 of 112 connections. Secondary note for feat/admin-dashboard: each neon-http query is its own HTTPS round trip, so batch/join in SQL rather than per-row query loops (100 concurrent queries showed ~13x per-query latency degradation).",
+          "from_branch": "feat/backend-foundation"
+        },
+        {
+          "timestamp": "2026-07-25T03:18:07.131355+00:00",
+          "message": "PARTITION 2 COMPLETE \u2014 lib/ layer is now stable and frozen for consumers. Signatures for feat/api-and-bot-contract and feat/admin-dashboard to build against: evaluateScoreSubmission({userId, gameId, score, isDailySubmission}) -> AwardResult[]; submitDailyScore({userId, gameId, score, submittedVia, gameDate?}) -> AwardResult[]; computeDailyLeaderboard(gameId, gameDate?) -> DailyLeaderboardResult; settleDailyTopScore(gameId, gameDate?) -> AwardResult|null; spendTokens(userId, gameId) -> {newBalance, cost, reason} (throws InsufficientBalanceError with .details {required, balance} -> map to 402, and UnknownGameError); awardDailyLoginBonus(userId) -> {awarded}; completeContentItem(userId, contentItemId, answerText, now?) -> {status:'awarded', award}|{status:'already_completed_today'} (throws UnknownContentItemError/InactiveContentItemError); listContentForUser(userId) -> items with completedToday. TWO NOTES: (1) settleDailyTopScore is one-shot per game/day by constraint \u2014 call it only after the day closes, since whoever leads at first successful call keeps the award. (2) Interval-gap achievement awards intentionally write NO achievement_awards row (that table's unique key means once-ever, wrong for repeatable gap awards); they are guarded by a watermark compare-and-set. This diverges from one approach.md acceptance criterion as literally written \u2014 flagged inline for Builder confirmation. Also: two new migrations (0001, 0002) \u2014 run npm run db:migrate before working.",
+          "from_branch": "feat/economy-engine"
+        },
+        {
+          "timestamp": "2026-07-25T17:51:20.630962+00:00",
+          "message": "PARTITION 3 COMPLETE \u2014 API layer stable for feat/admin-dashboard and feat/site-integration. THREE THINGS PARTITION 4 MUST KNOW: (1) MIGRATION 0003 is new \u2014 run npm run db:migrate. It adds unique bounties(game_id, game_date); computeDailyLeaderboard() always assumed one row per game/day but nothing enforced it. (2) isValidBotApiKey MOVED from lib/auth.ts to lib/bot-key.ts \u2014 lib/auth.ts now exports only Auth.js machinery (handlers, auth, signIn, signOut). Import the key check from lib/bot-key.ts. Note next-auth CANNOT be imported under vitest's node env at all (fails to resolve next/server), so any admin page test must vi.mock('@/lib/auth') wholesale rather than spreading importOriginal \u2014 see app/api/__tests__/routes.test.ts for the working pattern. (3) POST /api/bot/log now EXISTS and is the writer for bot_log_events \u2014 Partition 4 task id:68 (Bot Log page) has real data to read; it is a read-only feed, do not add write UI. ALSO REUSABLE BY PARTITION 4: lib/api-auth.ts exports requireSession() -> {userId, isAdmin} (throws 401) and the handle() error boundary (ZodError->400, HttpError->its status, else logged opaque 500); the /admin guard (id:60) should check isAdmin off that same session shape, which lib/auth.ts's session callback already populates from users.isAdmin. lib/cors.ts is browser-origin allow-listing only and is irrelevant to same-origin admin pages. PERFORMANCE REMINDER STILL LIVE: each neon-http query is its own HTTPS round trip, so batch/join in SQL on the Users list and Analytics pages rather than looping per row.",
+          "from_branch": "feat/api-and-bot-contract"
+        },
+        {
+          "timestamp": "2026-07-25T18:02:51.049724+00:00",
+          "message": "PARTITION 4 COMPLETE \u2014 /admin dashboard done. FOR feat/site-integration (Partition 5): the API contract you consume is unchanged and documented in arcade-backend/docs/discord-bot-api.md (the session-only routes GET /api/balance, POST /api/spend, GET /api/content, POST /api/content/complete are the ones the arcade site calls). CORS: lib/cors.ts allow-lists https://arcade.cartercripe.com plus dev localhost:5173 by default; set CORS_ALLOWED_ORIGINS and CORS_ALLOWED_ORIGIN_SUFFIXES in the Vercel project for the real production/preview origins. Credentials are sent, so the site must fetch with credentials:'include'. NEW DEV DEPS in arcade-backend: @vitejs/plugin-react (PINNED v4 \u2014 v6 needs Vite 8, vitest 2.1.9 ships Vite 5), @testing-library/react, @testing-library/jest-dom, jsdom; vitest.config.ts now has a react() plugin and a second setup file lib/test-setup.ts, and component tests opt into jsdom per-file with an @vitest-environment docblock. NEW SHARED MODULES: lib/admin.ts (aggregate reads), lib/admin-guard.ts (getAdminSession). KNOWN COUPLING worth not breaking: Analytics counts plays by matching transactions.reason against a reconstructed '{Tier}: {Display Name}' string, because transactions has no game_id \u2014 if site-integration changes the spend reason copy, that count silently goes to zero.",
+          "from_branch": "feat/admin-dashboard"
         }
-    },
-    "branches": {
-        "feat/backend-foundation": {
-            "intent": "Scaffold arcade-backend/ Next.js project: Drizzle schema, Neon Postgres, Auth.js (Google), ledger write helper, games seed",
-            "modules": [
-                "arcade-backend/lib/ledger.ts",
-                "arcade-backend/lib/auth.ts",
-                "arcade-backend/lib/db",
-                "arcade-backend/drizzle"
-            ],
-            "owner": "unknown",
-            "created_at": "2026-07-23T04:37:25.360337+00:00",
-            "worktree_path": "/Users/cartercripe/dev/code/projects/personal-site/arcade-feat-backend-foundation",
-            "initiative": "token-system"
-        }
+      ],
+      "created_at": "2026-07-23T04:24:24.080031+00:00"
     }
+  },
+  "branches": {
+    "feat/backend-foundation": {
+      "intent": "Scaffold arcade-backend/ Next.js project: Drizzle schema, Neon Postgres, Auth.js (Google), ledger write helper, games seed",
+      "modules": [
+        "arcade-backend/lib/ledger.ts",
+        "arcade-backend/lib/auth.ts",
+        "arcade-backend/lib/db",
+        "arcade-backend/drizzle"
+      ],
+      "owner": "unknown",
+      "created_at": "2026-07-23T04:37:25.360337+00:00",
+      "worktree_path": "/Users/cartercripe/dev/code/projects/personal-site/arcade-feat-backend-foundation",
+      "initiative": "token-system"
+    },
+    "feat/economy-engine": {
+      "intent": "Economy engine library layer: lib/achievements.ts (threshold + interval-gap evaluation, ADR-3/ADR-5 idempotency), lib/leaderboard.ts (midnight bucketing, +5 participation, 2+-submitter top-score gating, games.default_top_score_award fallback), lib/spend.ts (deduct-before-play, InsufficientBalanceError), daily login bonus, lib/content.ts (riddle/trivia once-per-day, task unlimited). Pure library, no HTTP routes. Adds games.default_top_score_award column + migration (id:33).",
+      "modules": [
+        "arcade-backend/lib/achievements.ts",
+        "arcade-backend/lib/content.ts",
+        "arcade-backend/lib/spend.ts",
+        "arcade-backend/drizzle",
+        "arcade-backend/lib/db/schema.ts",
+        "arcade-backend/lib/leaderboard.ts"
+      ],
+      "owner": "unknown",
+      "created_at": "2026-07-25T03:00:46.027268+00:00",
+      "initiative": "token-system"
+    },
+    "feat/api-and-bot-contract": {
+      "intent": "HTTP route layer + published Discord bot contract: bot service-API-key middleware (constant-time), 8 routes (balance, spend, scores/submit, bounty/pending, bounty/set, users/by-discord-id, content, content/complete), plus Builder-decided POST /api/cron/settle-daily + Vercel cron entry as the trigger for the one-shot daily top-score settle. zod schemas on every route, CORS allow-list, integration tests, docs/discord-bot-api.md. Consumes the frozen lib/ layer read-only.",
+      "modules": [
+        "arcade-backend/app/api",
+        "arcade-backend/docs",
+        "arcade-backend/vercel.json",
+        "arcade-backend/lib/api-auth.ts"
+      ],
+      "owner": "unknown",
+      "created_at": "2026-07-25T17:35:48.005305+00:00",
+      "initiative": "token-system"
+    },
+    "feat/admin-dashboard": {
+      "intent": "Admin dashboard at /admin: session guard + users.isAdmin check as shared layout, Users list with balance/last-active per UX Mock-Up 1, inline per-user transaction drill-down, Adjust-balance confirm flow writing 'Admin adjusted {old} -> {new}', Achievement Builder (per-game criteria CRUD, live-applying), Games cost config, Leaderboards history with entry edit/delete, read-only Bot Log feed, basic Analytics. Server-rendered, batching/joining in SQL per the neon-http round-trip constraint.",
+      "modules": [
+        "arcade-backend/lib/admin.ts",
+        "arcade-backend/app/admin"
+      ],
+      "owner": "unknown",
+      "created_at": "2026-07-25T17:51:59.263408+00:00",
+      "initiative": "token-system"
+    },
+    "feat/ledger-game-id": {
+      "intent": "Add transactions.game_id (nullable FK to games) as the durable fix for the analytics reason-string coupling flagged at Partition 4: admin Analytics counted plays by matching transactions.reason against a reconstructed '{Tier}: {Display Name}' string, which silently zeroes if the copy changes. Threads gameId through lib/ledger.ts's five insert sites and their callers, backfills existing rows, and switches lib/admin.ts to join on the column.",
+      "modules": [
+        "arcade-backend/lib/ledger.ts",
+        "arcade-backend/lib/db/schema.ts",
+        "arcade-backend/lib/admin.ts",
+        "arcade-backend/drizzle"
+      ],
+      "owner": "unknown",
+      "created_at": "2026-07-25T18:08:50.872259+00:00",
+      "initiative": "token-system"
+    },
+    "feat/site-integration": {
+      "intent": "Arcade site integration: src/lib/tokenApi.ts fetch client with graceful degradation, balance pill + sign-in control in the header, award toast (aria-live, reduced-motion aware), spend-before-play gate on the Hub wake path, score submission on new personal bests, Account surface (Discord link + own transaction log), Riddles/Tasks list. Purely additive \u2014 no existing game logic, Hub contract, or localStorage key changes; gameplay must survive a backend outage.",
+      "modules": [
+        "src/ui",
+        "src/styles",
+        "src/pages",
+        "src/lib",
+        "index.html"
+      ],
+      "owner": "unknown",
+      "created_at": "2026-07-25T18:14:30.488055+00:00",
+      "initiative": "token-system"
+    }
+  }
 }

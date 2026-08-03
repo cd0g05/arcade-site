@@ -10,6 +10,7 @@
 import "../styles/main.css";
 import { Hub } from "../lib/hub";
 import { createCabinet } from "../ui/cabinet";
+import { initTokens } from "../lib/tokens";
 import { showInstantCover, revealScreen } from "../lib/wipe";
 import type { CabinetDef } from "../games/types";
 
@@ -34,5 +35,14 @@ void load().then(({ def }) => {
   const page = createCabinet(root, def.options);
   const cart = def.mount(page.card);
   Hub.register(def.options.id, cart, page.card.root);
+
+  // Cabinets carry the same token layer as the hub — they are the expensive games, so
+  // spend-before-play matters most here. Mounted after createCabinet(), which is what
+  // builds the header this attaches to, and after register(), which is harmless: the
+  // gate is consulted on wake, not on registration.
+  initTokens(root.querySelector<HTMLElement>(".top-ctrl"));
+
+  // Reveal last, so the balance pill is in the header before the cover lifts rather
+  // than popping in afterwards.
   requestAnimationFrame(() => void revealScreen());
 });

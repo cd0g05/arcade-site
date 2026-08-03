@@ -10,6 +10,18 @@
 
 const PREFIX = "arcade:";
 
+const observers = new Set<(key: string, value: unknown) => void>();
+
+function notify(key: string, value: unknown): void {
+  for (const fn of observers) {
+    try {
+      fn(key, value);
+    } catch {
+      // A broken observer must not take down the game that wrote the value.
+    }
+  }
+}
+
 export const store = {
   /**
    * Read a JSON value. Returns `fallback` if the key is missing, the JSON is
@@ -38,6 +50,26 @@ export const store = {
     } catch {
       /* best-effort persistence */
     }
+    notify(key, value);
+  },
+
+  /**
+   * Subscribe to writes (token score submission, FR-3.1).
+   *
+   * Every game already funnels its personal best through `set("best:{game}", n)` — this
+   * module is the only one allowed to touch localStorage (ADR-4), so that is the one
+   * place all twelve score-save paths converge. Observing here submits scores without
+   * editing a single game, which is what keeps this partition's promise that no existing
+   * game logic changes (approach.md Migrations & Compat).
+   *
+   * Observers are notified after the write and must never throw — a listener failure
+   * cannot be allowed to break the game that triggered it.
+   *
+   * @returns an unsubscribe function.
+   */
+  observe(fn: (key: string, value: unknown) => void): () => void {
+    observers.add(fn);
+    return () => observers.delete(fn);
   },
 
   /** Remove one arcade key. */
