@@ -2,7 +2,7 @@
   "framework": "nextjs",
   "crons": [
     {
-      "path": "/api/cron/settle-daily",
+      "path": "/arcade/api/cron/settle-daily",
       "schedule": "15 0 * * *"
     }
   ]

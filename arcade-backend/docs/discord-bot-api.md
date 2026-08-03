@@ -5,7 +5,8 @@ document is the only thing keeping the two sides in sync — if a route changes,
 file in the same commit.
 
 **Base URL:** the `arcade-backend` deployment (`https://dev.cartercripe.com/arcade` in
-production; `http://localhost:3001` in local dev).
+production; `http://localhost:3001/arcade` in local dev). Every path below is
+relative to it — the `/arcade` prefix is part of the base, not repeated per route.
 
 ---
 

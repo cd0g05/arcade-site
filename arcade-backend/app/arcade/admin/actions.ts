@@ -67,7 +67,7 @@ export async function adjustBalanceAction(input: {
     newBalance: parsed.data.newBalance,
   });
 
-  revalidatePath('/admin/users');
+  revalidatePath('/arcade/admin/users');
   return { ok: true };
 }
 
@@ -102,7 +102,7 @@ export async function createAchievementAction(input: {
   // Live-applying without a redeploy (id:64) is a property of the design, not this call:
   // lib/achievements.ts reads the `achievements` table on every score submission, so a
   // new row takes effect on the next submission.
-  revalidatePath('/admin/games');
+  revalidatePath('/arcade/admin/games');
   return { ok: true };
 }
 
@@ -134,7 +134,7 @@ export async function updateAchievementAction(input: {
     })
     .where(eq(achievements.id, parsed.data.id));
 
-  revalidatePath('/admin/games');
+  revalidatePath('/arcade/admin/games');
   return { ok: true };
 }
 
@@ -153,7 +153,7 @@ export async function deactivateAchievementAction(id: string): Promise<ActionRes
   }
 
   await db.update(achievements).set({ active: false }).where(eq(achievements.id, id));
-  revalidatePath('/admin/games');
+  revalidatePath('/arcade/admin/games');
   return { ok: true };
 }
 
@@ -186,7 +186,7 @@ export async function updateGameConfigAction(input: {
     })
     .where(eq(games.id, parsed.data.gameId));
 
-  revalidatePath('/admin/games');
+  revalidatePath('/arcade/admin/games');
   return { ok: true };
 }
 
@@ -207,7 +207,7 @@ export async function updateLeaderboardEntryAction(input: {
     .set({ score: parsed.data.score })
     .where(eq(dailyLeaderboardEntries.id, parsed.data.id));
 
-  revalidatePath('/admin/leaderboards');
+  revalidatePath('/arcade/admin/leaderboards');
   return { ok: true };
 }
 
@@ -226,6 +226,6 @@ export async function deleteLeaderboardEntryAction(id: string): Promise<ActionRe
   }
 
   await db.delete(dailyLeaderboardEntries).where(eq(dailyLeaderboardEntries.id, id));
-  revalidatePath('/admin/leaderboards');
+  revalidatePath('/arcade/admin/leaderboards');
   return { ok: true };
 }

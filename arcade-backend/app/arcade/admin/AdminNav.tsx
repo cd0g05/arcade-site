@@ -4,11 +4,11 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
 const ITEMS = [
-  { href: '/admin/users', label: 'Users' },
-  { href: '/admin/games', label: 'Games' },
-  { href: '/admin/leaderboards', label: 'Leaderboards' },
-  { href: '/admin/bot-log', label: 'Bot Log' },
-  { href: '/admin/analytics', label: 'Analytics' },
+  { href: '/arcade/admin/users', label: 'Users' },
+  { href: '/arcade/admin/games', label: 'Games' },
+  { href: '/arcade/admin/leaderboards', label: 'Leaderboards' },
+  { href: '/arcade/admin/bot-log', label: 'Bot Log' },
+  { href: '/arcade/admin/analytics', label: 'Analytics' },
 ] as const;
 
 /** Sidebar nav from UX Mock-Up 1. A client component only so it can mark the active item. */
