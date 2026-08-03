@@ -11,7 +11,10 @@ import "../styles/main.css";
 import { Hub } from "../lib/hub";
 import { createCabinet } from "../ui/cabinet";
 import { initTokens } from "../lib/tokens";
+import { showInstantCover, revealScreen } from "../lib/wipe";
 import type { CabinetDef } from "../games/types";
+
+showInstantCover();
 
 const LOADERS: Record<string, () => Promise<{ def: CabinetDef }>> = {
   snake: () => import("../games/snake/snake"),
@@ -19,7 +22,7 @@ const LOADERS: Record<string, () => Promise<{ def: CabinetDef }>> = {
   aim: () => import("../games/aim/aim"),
   minesweeper: () => import("../games/minesweeper/minesweeper"),
   "water-sort": () => import("../games/watersort/watersort"),
-  setrit: () => import("../games/setrit/setrit"),
+  tetrisio: () => import("../games/tetrisio/tetrisio"),
 };
 
 const root = document.getElementById("app");
@@ -38,4 +41,8 @@ void load().then(({ def }) => {
   // builds the header this attaches to, and after register(), which is harmless: the
   // gate is consulted on wake, not on registration.
   initTokens(root.querySelector<HTMLElement>(".top-ctrl"));
+
+  // Reveal last, so the balance pill is in the header before the cover lifts rather
+  // than popping in afterwards.
+  requestAnimationFrame(() => void revealScreen());
 });

@@ -6,7 +6,7 @@
  * decouples game speed from display refresh (the mockup's per-frame
  * stepping runs 2× too fast on 120 Hz screens).
  *
- * Real-time games (dino, snake, bricks, setrit, aim) opt in; turn-based
+ * Real-time games (dino, snake, bricks, tetrisio, aim) opt in; turn-based
  * games skip the loop entirely and render on input.
  *
  * stop() cancels the pending frame and MUST leave game state intact —

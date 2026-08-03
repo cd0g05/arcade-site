@@ -27,6 +27,16 @@ vi.mock('../lib/tokenApi', () => ({
   completeContent: vi.fn(),
 }));
 
+// The pixel wipe wraps every fullscreen transition in ~340ms of rAF + timers, which
+// this suite has no reason to wait out — what's under test is whether the spend gate
+// let the transition happen at all, not how it looked. Resolving immediately keeps the
+// fullscreen assertions about the gate.
+vi.mock('../lib/wipe', () => ({
+  showInstantCover: vi.fn(),
+  coverScreen: () => Promise.resolve(),
+  revealScreen: () => Promise.resolve(),
+}));
+
 const { Hub } = await import('../lib/hub');
 const { store } = await import('../lib/storage');
 const { initTokens, __resetTokens } = await import('../lib/tokens');
@@ -209,6 +219,10 @@ describe('spend-before-play gate (id:84, id:85)', () => {
 
     expect(cart.start).toHaveBeenCalled();
     expect(Hub.fullscreen).toBe('dino');
+    // Exactly once: the fullscreen path gates, then wakes directly rather than routing
+    // back through Hub.wake(), which would consult the gate a second time and charge
+    // twice for one ⛶ press.
+    expect(spend).toHaveBeenCalledTimes(1);
     Hub.exitFs();
   });
 });

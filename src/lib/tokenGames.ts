@@ -10,9 +10,13 @@
  * Keeping the translation in one table rather than scattering string literals means a
  * mismatch is a visible gap here instead of a silently-unattributed transaction.
  *
- * NOTE — the sequence game is titled "ECHO" on this site and seeded as `simon`
- * ("Simon") in the backend. The mapping is unambiguous (there is only one such game),
- * but the two names should probably be reconciled; flagged for the Builder.
+ * Two slugs deliberately disagree with the site's name, both because the backend was
+ * seeded before a rename landed and `games.id` is an FK target that cannot be changed
+ * without orphaning existing plays:
+ *   - ECHO is seeded as `simon` (renamed off the live Hasbro mark before launch)
+ *   - TETRISIO is seeded as `setrit` (renamed in commit 2010c29)
+ * Both mappings are unambiguous. The backend's *display* names are reconciled in
+ * scripts/seed.ts; only the ids are frozen.
  */
 export interface TokenGame {
   hubId: string;
@@ -38,7 +42,13 @@ export const TOKEN_GAMES: readonly TokenGame[] = [
   // tokens to play; they just never submit.
   { hubId: 'minesweeper', bestKey: null, slug: 'minesweeper' },
   { hubId: 'water-sort', bestKey: null, slug: 'water-sort' },
-  { hubId: 'setrit', bestKey: 'best:setrit', slug: 'setrit' },
+  // The site renamed Setrit -> Tetrisio (commit 2010c29) after the backend was seeded.
+  // hubId and bestKey follow the site; slug deliberately does NOT — `games.id` is the
+  // FK target for live `transactions` and `high_scores` rows, so renaming it would
+  // orphan every Setrit play already recorded. Only the backend's display name moved.
+  // The game itself reads `best:setrit` as a fallback but writes `best:tetrisio`, so
+  // observing the new key is correct.
+  { hubId: 'tetrisio', bestKey: 'best:tetrisio', slug: 'setrit' },
 ];
 
 const BY_HUB_ID = new Map(TOKEN_GAMES.map((g) => [g.hubId, g]));

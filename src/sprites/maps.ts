@@ -116,8 +116,8 @@ export const SPRITE_MAPS = {
     "k.k.....k.k",
     "...kk.kk...",
   ],
-  /** Falling S-piece over a settled stack — Setrit cabinet icon (original). */
-  setrit: [
+  /** Falling S-piece over a settled stack — Tetrisio cabinet icon (original). */
+  tetrisio: [
     "...ppp....",
     ".ppppp....",
     ".ppp......",

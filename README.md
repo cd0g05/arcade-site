@@ -47,7 +47,7 @@ The hub (`/`) is a grid of **cartridges** — games that live in cards and wake 
 
 ## Naming doctrine
 
-Normal names unless a lawyer might recognize them: **Setrit** (not Tetris), **Bricks** (not Breakout), **ECHO** (not Simon — live Hasbro mark, US Reg. 1211692). Snake, Minesweeper, 2048, Memory, Lights Out, Water Sort, and Aim Trainer ship under their common names.
+Normal names unless a lawyer might recognize them: **Bricks** (not Breakout), **ECHO** (not Simon — live Hasbro mark, US Reg. 1211692). Snake, Minesweeper, 2048, Memory, Lights Out, Water Sort, and Aim Trainer ship under their common names. **Tetrisio** is a deliberate exception — recognizability was chosen over disguise, so treat it as a documented risk rather than an oversight.
 
 ## Style system
 

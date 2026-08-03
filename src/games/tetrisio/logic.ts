@@ -1,5 +1,5 @@
 /**
- * setrit/logic.ts — pure Setrit rules (7 pieces, rotation with basic
+ * tetrisio/logic.ts — pure Tetrisio rules (7 pieces, rotation with basic
  * kicks, collision, line clears, scoring/levels, 7-bag randomizer).
  * Timeboxed to "standard-feeling" per tech-design risk — kicks are a
  * simple offset list, not full guideline SRS.

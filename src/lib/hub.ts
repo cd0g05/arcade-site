@@ -16,6 +16,7 @@
 
 import type { Cartridge } from "./cartridge";
 import { beep } from "./audio";
+import { coverScreen, revealScreen } from "./wipe";
 
 const NAV_KEYS = ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", " "];
 
@@ -86,35 +87,40 @@ function doWake(id: string): void {
 }
 
 /**
- * Wake `id` if the gate allows, then run `after`.
+ * Consult the wake gate for `id`, running `onApproved` only if it allows the start.
  *
  * The gate may answer synchronously (no token layer, or an already-known verdict) or
- * asynchronously (a spend request in flight). Once it approves, the wake proceeds
- * unconditionally — the player has already been charged at that point, so declining to
- * wake because they clicked elsewhere meanwhile would take tokens and give nothing.
+ * asynchronously (a spend request in flight). Once it approves, the start proceeds
+ * unconditionally — the player has already been charged at that point, so backing out
+ * because they clicked elsewhere meanwhile would take tokens and give nothing.
+ *
+ * A declined start changes nothing here; showing the player *why* is the gate's own
+ * job, since only it knows the reason.
  */
-function gatedWake(id: string, after?: () => void): void {
+function runGate(id: string, onApproved: () => void): void {
   const g = games.get(id);
-  if (!g || g.api.alwaysOn || cur === id) return;
-
-  const proceed = (): void => {
-    doWake(id);
-    after?.();
-  };
+  if (!g) return;
 
   if (!wakeGate) {
-    proceed();
+    onApproved();
     return;
   }
 
   const verdict = wakeGate(id, g.card);
   if (typeof verdict === "boolean") {
-    if (verdict) proceed();
+    if (verdict) onApproved();
     return;
   }
   void verdict.then((ok) => {
-    if (ok) proceed();
+    if (ok) onApproved();
   });
+}
+
+/** Wake `id` if the gate allows. */
+function gatedWake(id: string): void {
+  const g = games.get(id);
+  if (!g || g.api.alwaysOn || cur === id) return;
+  runGate(id, () => doWake(id));
 }
 
 /** Apply the CSS-takeover fullscreen classes. Assumes the game is awake or alwaysOn. */
@@ -221,31 +227,52 @@ export const Hub = {
       Hub.exitFs();
       return;
     }
-    if (fsId) Hub.exitFs();
     const g = games.get(id);
     if (!g) return;
 
+    // The transition itself, once the start is paid for. Waking inside the wipe keeps
+    // the game's first frame hidden behind the cover, and tearing down a previous
+    // fullscreen here rather than calling exitFs() keeps it to a single wipe.
+    // doWake() rather than Hub.wake(), which would consult the gate a second time and
+    // charge twice.
+    const enterFs = (): void => {
+      void coverScreen().then(() => {
+        if (fsId) {
+          const prev = games.get(fsId);
+          prev?.card.classList.remove("fs");
+          document.body.classList.remove("has-fs");
+          fsId = null;
+        }
+        if (!g.api.alwaysOn && cur !== id) doWake(id);
+        applyFs(id);
+        void revealScreen();
+      });
+    };
+
     // Already playable — nothing to gate.
     if (g.api.alwaysOn || cur === id) {
-      applyFs(id);
+      enterFs();
       return;
     }
 
     // A veiled game entering fullscreen is still a game start, so it goes through the
-    // same gate as a click. Applying the fullscreen classes first would let ⛶ bypass
-    // spend-before-play, and would also show a fullscreen card whose game never started
-    // while the spend was in flight.
-    gatedWake(id, () => applyFs(id));
+    // same gate as a click, or ⛶ would be a free way to start a paid game. Gating
+    // before the wipe rather than inside it means a declined spend leaves the screen
+    // untouched and never covers the veil explaining why.
+    runGate(id, enterFs);
   },
 
   exitFs(): void {
     if (!fsId) return;
     const g = games.get(fsId);
-    fsId = null;
-    if (!g) return;
-    g.card.classList.remove("fs");
-    document.body.classList.remove("has-fs");
-    announce(g, "Left fullscreen.");
+    void coverScreen().then(() => {
+      fsId = null;
+      if (!g) return;
+      g.card.classList.remove("fs");
+      document.body.classList.remove("has-fs");
+      announce(g, "Left fullscreen.");
+      void revealScreen();
+    });
   },
 
   /** Id of the awake game, or null. alwaysOn games are never "current". */
